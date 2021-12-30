@@ -10,7 +10,7 @@ public class ActionButton : MonoBehaviour
   [SerializeField] private TMPro.TMP_Text description;
 
   private static Color selectedColor = new Color(1, 0.8961949f, 0.504717f);
-  private static Color unselectedColor = new Color(0, 0, 0, 6745098f);
+  private static Color unselectedColor = new Color(0, 0, 0, 0.6745098f);
 
   public void SetAction(CampAction action)
   {
