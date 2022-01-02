@@ -26,7 +26,7 @@ public class StatPopup : MonoBehaviour
       prefab = Resources.Load<GameObject>("Stat Popup");
 
     var instance = Instantiate(prefab, PopupController.canvasTransform);
-    instance.transform.position = origin.transform.position + (Vector3.left * -50);
+    instance.transform.position = origin.transform.position + (Vector3.up * 160);
 
     var statPopup = instance.GetComponent<StatPopup>();
     statPopup.image.sprite = statPopup.statSprites[(int) stat];

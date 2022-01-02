@@ -23,7 +23,7 @@ public class SpeechBubble : MonoBehaviour
 
   private void Initialise(string text, Transform origin, Action callback)
   {
-    transform.position = origin.position + (Vector3.up * 90);
+    transform.position = origin.position + (Vector3.up * 160);
     StartCoroutine(Reveal(text, callback));
   }
 
