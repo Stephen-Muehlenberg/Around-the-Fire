@@ -40,6 +40,11 @@ public class ActionList : MonoBehaviour
     singleton.gameObject.SetActive(true);
   }
 
+  public static void Hide()
+  {
+    singleton.gameObject.SetActive(false);
+  }
+
   public void ClickButton(ActionButton button)
   {
     button.SetSelected(true);

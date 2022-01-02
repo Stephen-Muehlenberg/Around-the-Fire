@@ -10,9 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 31005498e0bf0da42937db9d14945b4a, type: 3}
-  m_Name: ActionPlanAhead
+  m_Name: AA_Perform
   m_EditorClassIdentifier: 
-  title: Plan Ahead
-  shortDesc: 
-  fullDesc: 
-  properties: []
+  title: Perform
+  titlePresentProgressive: Performing
+  description: Entertain those around the fire.
+  hours: 1
+  partnersReduceHours: 0
+  requiredPartners: 0
+  completionAnnouncements: []
+  properties:
+  - key: LocationMorale
+    value: 20
+  - key: Morale
+    value: -5
+  - key: Rest
+    value: -10

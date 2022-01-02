@@ -748,10 +748,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   location: {fileID: 0}
-  selectedAction: {fileID: 0}
-  canvas: {fileID: 0}
-  raycaster: {fileID: 0}
   portrait: {fileID: 229460971413075329}
   highlight: {fileID: 4259952702096556767}
   nameText: {fileID: 3659874912962158429}
   actionText: {fileID: 9196629845591379667}
+  cancelButton: {fileID: 2019764865844467715}

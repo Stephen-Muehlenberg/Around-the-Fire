@@ -10,11 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 31005498e0bf0da42937db9d14945b4a, type: 3}
-  m_Name: ActionCarouse
+  m_Name: AP_Forage
   m_EditorClassIdentifier: 
-  title: Carouse
-  shortDesc: 
-  fullDesc: 
+  title: Forage
+  titlePresentProgressive: Foraging
+  description: Gather supplies.
+  hours: 2
+  partnersReduceHours: 1
+  requiredPartners: 0
+  completionAnnouncements:
+  - Look what I found!
+  - I managed to rustle up some grub.
   properties:
-  - key: Morale
-    value: 5
+  - key: Rest
+    value: -15
+  - key: SuppliesMin
+    value: 0
+  - key: SuppliesMax
+    value: 12

@@ -10,17 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 31005498e0bf0da42937db9d14945b4a, type: 3}
-  m_Name: ActionRation
+  m_Name: AT_Study
   m_EditorClassIdentifier: 
-  title: Ration Supplies
-  shortDesc: Stretch supplies to last longer.
-  fullDesc: Costs 3 Supply each.
-  properties:
-  - key: TeamHunger
-    value: 35
-  - key: SuppliesPerPerson
-    value: -3
-  - key: Fatigue
-    value: -3
-  - key: TeamMorale
-    value: -15
+  title: Study
+  titlePresentProgressive: Studying
+  description: Work on your intellectual skills.
+  hours: 1
+  partnersReduceHours: 0
+  requiredPartners: 0
+  completionAnnouncements: []
+  properties: []

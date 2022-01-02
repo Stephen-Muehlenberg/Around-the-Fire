@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31005498e0bf0da42937db9d14945b4a, type: 3}
+  m_Name: AA_Carouse
+  m_EditorClassIdentifier: 
+  title: Carouse
+  titlePresentProgressive: Carousing
+  description: Enjoy your time with friends around the fire.
+  hours: 1
+  partnersReduceHours: 0
+  requiredPartners: 0
+  completionAnnouncements:
+  - Did I ever tell you the one about the three legged cleric??.
+  - Hahaha!
+  - A toast! To the greatest heroes in the land!
+  properties:
+  - key: Morale
+    value: 10
+  - key: LocationMorale
+    value: 10

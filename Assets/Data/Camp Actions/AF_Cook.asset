@@ -10,11 +10,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 31005498e0bf0da42937db9d14945b4a, type: 3}
-  m_Name: ActionPerform
+  m_Name: AF_Cook
   m_EditorClassIdentifier: 
-  title: Perform
-  shortDesc: 
-  fullDesc: 
+  title: Cook a Meal
+  titlePresentProgressive: Cooking a meal
+  description: Feed the whole party.
+  hours: 2
+  partnersReduceHours: 1
+  requiredPartners: 0
+  completionAnnouncements:
+  - Soup's on, everyone!
+  - Get it while it's hot!
+  - Dinner is served.
   properties:
-  - key: Morale
-    value: 5
+  - key: TeamHunger
+    value: 50
+  - key: SuppliesPerPerson
+    value: -6
+  - key: Rest
+    value: -20

@@ -10,15 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 31005498e0bf0da42937db9d14945b4a, type: 3}
-  m_Name: ActionForage
+  m_Name: AF_CookFeast
   m_EditorClassIdentifier: 
-  title: Forage
-  shortDesc: Search for edible plants.
-  fullDesc: 
+  title: Prepare a Feast
+  titlePresentProgressive: Preparing a feast
+  description: Delicious and filling!
+  hours: 4
+  partnersReduceHours: 1
+  requiredPartners: 0
+  completionAnnouncements: []
   properties:
-  - key: Fatigue
-    value: -8
-  - key: SuppliesMin
-    value: 0
-  - key: SuppliesMax
-    value: 12
+  - key: TeamHunger
+    value: 60
+  - key: TeamMorale
+    value: 20
+  - key: SuppliesPerPerson
+    value: -10
+  - key: Rest
+    value: -40

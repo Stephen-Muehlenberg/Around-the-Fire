@@ -10,9 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 31005498e0bf0da42937db9d14945b4a, type: 3}
-  m_Name: ActionBrewPotion
+  m_Name: AC_Spar
   m_EditorClassIdentifier: 
-  title: Brew Potion
-  shortDesc: 
-  fullDesc: 
-  properties: []
+  title: Spar
+  titlePresentProgressive: Sparring
+  description: Mock combat with a partner.
+  hours: 1
+  partnersReduceHours: 0
+  requiredPartners: 1
+  completionAnnouncements: []
+  properties:
+  - key: Rest
+    value: -30

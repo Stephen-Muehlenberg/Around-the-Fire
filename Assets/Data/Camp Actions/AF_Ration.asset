@@ -10,19 +10,24 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 31005498e0bf0da42937db9d14945b4a, type: 3}
-  m_Name: ActionCook
+  m_Name: AF_Ration
   m_EditorClassIdentifier: 
-  title: Cook a Meal
-  shortDesc: +30-40 Hunger (Party) -4 Supplies
-  fullDesc: Costs 6 Supply each.
+  title: Distribute Rations
+  titlePresentProgressive: Distributing rations
+  description: Feed the party just enough to keep them going.
+  hours: 1
+  partnersReduceHours: 0
+  requiredPartners: 0
   completionAnnouncements:
-  - Soup's on, everyone!
-  - Get it while it's hot!
-  - Dinner is served.
+  - Alright everyone, rations are ready.
+  - One at a time, get your rations.
+  - Get your rations. No shoving.
   properties:
   - key: TeamHunger
-    value: 50
+    value: 35
   - key: SuppliesPerPerson
-    value: -6
-  - key: Fatigue
-    value: -5
+    value: -3
+  - key: Rest
+    value: -8
+  - key: TeamMorale
+    value: -10

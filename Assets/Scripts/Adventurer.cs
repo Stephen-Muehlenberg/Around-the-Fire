@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Adventurer
@@ -14,4 +12,9 @@ public class Adventurer
 
   public CampAction action;
   public AdventurerPortrait portrait;
+
+  public enum Stat
+  {
+    HEALTH, HUNGER, REST, MORALE
+  }
 }

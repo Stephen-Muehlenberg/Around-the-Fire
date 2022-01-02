@@ -10,9 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 31005498e0bf0da42937db9d14945b4a, type: 3}
-  m_Name: ActionPlay
+  m_Name: AC_Train
   m_EditorClassIdentifier: 
-  title: Play
-  shortDesc: 
-  fullDesc: 
-  properties: []
+  title: Train
+  titlePresentProgressive: Training
+  description: Hone your combat skills.
+  hours: 1
+  partnersReduceHours: 0
+  requiredPartners: 0
+  completionAnnouncements: []
+  properties:
+  - key: Rest
+    value: -25

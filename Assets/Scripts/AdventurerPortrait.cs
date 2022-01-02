@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -8,9 +7,6 @@ public class AdventurerPortrait : MonoBehaviour,
   IBeginDragHandler, IDragHandler, IEndDragHandler,
   IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
-  private static Color HIGHLIGHT_NORMAL = new Color(1, 0.9227282f, 0, 0.2784314f);
-  private static Color HIGHLIGHT_READY = new Color(0.09919679f, 1, 0, 0.2784314f);
-
   public Adventurer adventurer { get; private set; }
   public CampLocation location;
 
@@ -20,6 +16,7 @@ public class AdventurerPortrait : MonoBehaviour,
   [SerializeField] private Image highlight;
   [SerializeField] private TMPro.TMP_Text nameText;
   [SerializeField] private TMPro.TMP_Text actionText;
+  [SerializeField] private Button cancelButton;
 
   public static AdventurerPortrait selected;
   public static bool dragInProgress; // Don't highlight adventurers while dragging.
@@ -30,6 +27,7 @@ public class AdventurerPortrait : MonoBehaviour,
     nameText.text = adventurer.name;
     portrait.sprite = adventurer.icon;
     this.location = location;
+    location.Add(this);
     canvas = GetComponentInParent<Canvas>();
     raycaster = GetComponentInParent<GraphicRaycaster>();
     SelectAction(null);
@@ -129,7 +127,6 @@ public class AdventurerPortrait : MonoBehaviour,
 
   public void SelectAction(CampAction action)
   {
-    UnityEngine.Debug.Log(this.name + ".AdventurerPortrait.SelectAction()");
     bool actionSelected = action != null;
 
     adventurer.action = action;
@@ -139,16 +136,22 @@ public class AdventurerPortrait : MonoBehaviour,
     actionText.raycastTarget = !actionSelected;
     actionText.gameObject.SetActive(actionSelected);
     if (actionSelected)
-      actionText.text = action.title;
-    highlight.color = actionSelected ? HIGHLIGHT_READY : HIGHLIGHT_NORMAL;
-    highlight.enabled = actionSelected;
+      actionText.text = action.titlePresentProgressive;
+    cancelButton.gameObject.SetActive(true);
 
-    UnityEngine.Debug.Log("- Action selected ? " + actionSelected);
-    if (actionSelected)
-      SpeechBubble.Show(this, "Ok, I'll " + action.title + ".");
-
-    CampController.OnActionSelected();
+    CampController.OnActionSelected(adventurer);
   }
 
   public void CancelAction() => SelectAction(null);
+
+  public void AllowCancel(bool allowed)
+  {
+    UnityEngine.Debug.Log("ALLOW CANCEL " + allowed);
+    cancelButton.gameObject.SetActive(allowed);
+  }
+
+  public void ClearActionText()
+  {
+    actionText.gameObject.SetActive(false);
+  }
 }

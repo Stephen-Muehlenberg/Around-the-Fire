@@ -12,8 +12,11 @@ public class CampAction : ScriptableObject
   }
 
   public string title;
-  public string shortDesc;
-  public string fullDesc;
+  public string titlePresentProgressive;
+  public string description;
+  public int hours;
+  public bool partnersReduceHours;
+  public int requiredPartners;
   public string[] completionAnnouncements;
   public Property[] properties;
 }

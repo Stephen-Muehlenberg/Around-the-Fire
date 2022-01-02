@@ -6,6 +6,7 @@ public class SpeechBubble : MonoBehaviour
 {
   private static float REVEAL_DELAY_PER_CHAR = 0.03f;
   private static float REVEAL_END_DELAY = 1.4f;
+  private static int MAX_CHARS_PER_LINE = 30;
   private static GameObject prefab;
 
   [SerializeField] private TMPro.TMP_Text text;
@@ -30,10 +31,18 @@ public class SpeechBubble : MonoBehaviour
   {
     string revealed = "";
     int nextChar = 0;
+    int charsThisLine = 0;
 
     while (revealed.Length < text.Length)
     {
       revealed += text[nextChar];
+      charsThisLine++;
+      if (charsThisLine > MAX_CHARS_PER_LINE
+        && text[nextChar] == ' ')
+      {
+        revealed += '\n';
+        charsThisLine = 0;
+      }
       this.text.text = revealed;
       nextChar++;
       yield return new WaitForSeconds(REVEAL_DELAY_PER_CHAR);

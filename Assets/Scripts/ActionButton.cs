@@ -16,7 +16,7 @@ public class ActionButton : MonoBehaviour
   {
     this.action = action;
     title.text = action.title;
-    description.text = action.shortDesc;
+    description.text = action.description;
   }
 
   public void SetSelected(bool selected)

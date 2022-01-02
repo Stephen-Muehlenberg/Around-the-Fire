@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,7 +8,7 @@ public class CampController : MonoBehaviour
   private static CampController singleton;
 
   /// <summary>24-hour time.</summary>
-  public int hour { get; private set; }
+  public int currentHour { get; private set; }
   public List<Adventurer> adventurers;
   public Adventurer selectedAdventurer;
   private List<ActionResult> pendingResults;
@@ -26,6 +27,11 @@ public class CampController : MonoBehaviour
 
     TEMP_GenerateRandomAdventurers();
 
+    currentHour = 17;
+  }
+
+  private void Start()
+  {
     foreach (Adventurer adventurer in adventurers)
     {
       var portrait = Instantiate(portraitPrefab, characterPanel.transform)
@@ -34,7 +40,8 @@ public class CampController : MonoBehaviour
       portrait.Initialise(adventurer, characterPanel);
     }
 
-    hour = 17;
+    TimeOfDayController.SetTime(currentHour);
+    CampStatsPanel.SetStats(currentHour);
   }
 
   private void TEMP_GenerateRandomAdventurers()
@@ -61,8 +68,14 @@ public class CampController : MonoBehaviour
     }
   }
 
-  public static void OnActionSelected()
+  public static void OnActionSelected(Adventurer adventurer)
   {
+    if (adventurer.action != null)
+    {
+      string message = GetActionAffirmMessage(adventurer);
+      SpeechBubble.Show(adventurer.portrait, message);
+    }
+
     singleton.confirmActionsButton.SetActive(AllAdventurersReady());
   }
 
@@ -76,6 +89,20 @@ public class CampController : MonoBehaviour
 
   public void ConfirmActions()
   {
+    // Disable action UI.
+    confirmActionsButton.SetActive(false);
+    ActionList.Hide();
+    adventurers.ForEach(it => it.portrait.AllowCancel(false));
+
+    // Animate time advancing.
+    TimeOfDayController.AdvanceTime(currentHour, 1, null, OnAdvanceTimeFinished);
+  }
+
+  private void OnAdvanceTimeFinished(int newHour)
+  {
+    currentHour = newHour;
+    CampStatsPanel.SetStats(currentHour);
+
     pendingResults = adventurers
       // Calculate results.
       .Select(adventurer => ProcessAction(adventurer))
@@ -86,7 +113,11 @@ public class CampController : MonoBehaviour
       .OrderBy(result => result.adventurer.portrait.transform.position.x) // as a fallback for left to right.
       .ToList();
 
-    ShowResult(pendingResults[0]);
+    int hours = adventurers
+      .Select(it => it.action.hours)
+      .Min();
+
+    ShowActionFinishMessage(pendingResults[0]);
   }
 
   private ActionResult ProcessAction(Adventurer adventurer)
@@ -110,78 +141,165 @@ public class CampController : MonoBehaviour
 
   private void ProcessProperty(CampAction.Property property, ActionResult result)
   {
+    // "Team" affects the whole team equally.
     if (property.key.StartsWith("Team"))
     {
-      if (property.key.Substring(4).Equals("Hunger"))
-        AdjustTeamStat(AdventurerStat.HUNGER, property.value, result);
+      if (property.key.Substring(4).Equals("Health"))
+        AdjustTeamStat(Adventurer.Stat.HEALTH, property.value, result);
+      else if (property.key.Substring(4).Equals("Hunger"))
+        AdjustTeamStat(Adventurer.Stat.HUNGER, property.value, result);
       else if (property.key.Substring(4).Equals("Morale"))
-        AdjustTeamStat(AdventurerStat.MORALE, property.value, result);
-      else if (property.key.Substring(4).Equals("Fatigue"))
-        AdjustTeamStat(AdventurerStat.ENERGY, property.value, result);
-      else if (property.key.Substring(4).Equals("Health"))
-        AdjustTeamStat(AdventurerStat.HEALTH, property.value, result);
+        AdjustTeamStat(Adventurer.Stat.MORALE, property.value, result);
+      else if (property.key.Substring(4).Equals("Rest"))
+        AdjustTeamStat(Adventurer.Stat.REST, property.value, result);
+    }
+    else
+    {
+      if (property.key.Equals("Health"))
+        result.deltas.Find(it => it.adventurer == result.adventurer).health += property.value;
+      else if (property.key.Equals("Hunger"))
+        result.deltas.Find(it => it.adventurer == result.adventurer).hunger += property.value;
+      if (property.key.Equals("Morale"))
+        result.deltas.Find(it => it.adventurer == result.adventurer).mood += property.value;
+      if (property.key.Equals("Rest"))
+        result.deltas.Find(it => it.adventurer == result.adventurer).rest += property.value;
     }
   }
 
-  private void AdjustTeamStat(AdventurerStat stat, int amount, ActionResult result)
+  private void AdjustTeamStat(Adventurer.Stat stat, int amount, ActionResult result)
   {
     foreach (AdventurerStatDelta delta in result.deltas)
       switch (stat)
       {
-        case AdventurerStat.HEALTH: delta.health += amount; break;
-        case AdventurerStat.HUNGER: delta.hunger += amount; break;
-        case AdventurerStat.ENERGY: delta.energy += amount; break;
-        case AdventurerStat.MORALE: delta.mood += amount; break;
+        case Adventurer.Stat.HEALTH: delta.health += amount; break;
+        case Adventurer.Stat.HUNGER: delta.hunger += amount; break;
+        case Adventurer.Stat.MORALE: delta.mood += amount; break;
+        case Adventurer.Stat.REST: delta.rest += amount; break;
       }
   }
 
-  private void ShowResult(ActionResult result)
+  private void ShowActionFinishMessage(ActionResult result)
   {
-    ApplyResult(result);
-    pendingResults.RemoveAt(0);
+    // Remove "action in progress" message.
+    result.adventurer.portrait.ClearActionText();
 
+    // TODO Either have some set of default fallback messages,
+    // or ensure there's always an action-specific message.
     string message = "Finished.";
     var announcements = result.action.completionAnnouncements;
     if (announcements.Length > 0)
       message = announcements[Random.Range(0, announcements.Length - 1)];
 
-    SpeechBubble.Show(result.adventurer.portrait, message, ShowNextResult);
+    SpeechBubble.Show(result.adventurer.portrait, message, ApplyCurrentActionResults);
   }
 
-  private void ApplyResult(ActionResult result)
+  private void ApplyCurrentActionResults()
   {
-    result.deltas.ForEach(delta => {
-      Mathf.Clamp(delta.adventurer.health + delta.health, 0, 100);
-      Mathf.Clamp(delta.adventurer.hunger + delta.hunger, 0, 100);
-      Mathf.Clamp(delta.adventurer.rest + delta.energy, 0, 100);
-      Mathf.Clamp(delta.adventurer.mood + delta.mood, 0, 100);
-    });
+    // Pop current action.
+    var currentActionResult = pendingResults[0];
+    pendingResults.RemoveAt(0);
+
+    // Apply results, using UI popups to indicate changes.
+    StartCoroutine(ApplyResult(currentActionResult));
+  }
+
+  private IEnumerator ApplyResult(ActionResult result)
+  {
+    UnityEngine.Debug.Log("ApplyResult(" + result.adventurer.name + " - " + result.action.title + ")");
+    UnityEngine.Debug.Log("- deltas = " + result.deltas.Count);
+    if (result.deltas.Any(delta => delta.health != 0))
+    {
+      UnityEngine.Debug.Log("- has health deltas");
+      result.deltas.ForEach(delta => {
+        StatPopup.Show(delta.adventurer.portrait, Adventurer.Stat.HEALTH, delta.health);
+        delta.adventurer.health = Mathf.Clamp(delta.adventurer.health + delta.health, 0, 100);
+      });
+      StatsPanel.ShowStatsFor(AdventurerPortrait.selected.adventurer);
+      yield return new WaitForSeconds(1.5f);
+    }
+
+    if (result.deltas.Any(delta => delta.hunger != 0))
+    {
+      UnityEngine.Debug.Log("- has hunger deltas");
+      result.deltas.ForEach(delta => {
+        StatPopup.Show(delta.adventurer.portrait, Adventurer.Stat.HUNGER, delta.hunger);
+        delta.adventurer.hunger = Mathf.Clamp(delta.adventurer.hunger + delta.hunger, 0, 100);
+      });
+      StatsPanel.ShowStatsFor(AdventurerPortrait.selected.adventurer);
+      yield return new WaitForSeconds(1.5f);
+    }
+
+    if (result.deltas.Any(delta => delta.mood != 0))
+    {
+      UnityEngine.Debug.Log("- has mood deltas");
+      result.deltas.ForEach(delta => {
+        StatPopup.Show(delta.adventurer.portrait, Adventurer.Stat.MORALE, delta.mood);
+        delta.adventurer.mood = Mathf.Clamp(delta.adventurer.mood + delta.mood, 0, 100);
+      });
+      StatsPanel.ShowStatsFor(AdventurerPortrait.selected.adventurer);
+      yield return new WaitForSeconds(1.5f);
+    }
+
+    if (result.deltas.Any(delta => delta.rest != 0))
+    {
+      UnityEngine.Debug.Log("- has rest deltas");
+      result.deltas.ForEach(delta => {
+        StatPopup.Show(delta.adventurer.portrait, Adventurer.Stat.REST, delta.rest);
+        delta.adventurer.rest = Mathf.Clamp(delta.adventurer.rest + delta.rest, 0, 100);
+      });
+      StatsPanel.ShowStatsFor(AdventurerPortrait.selected.adventurer);
+      yield return new WaitForSeconds(1.5f);
+    }
+
+    // TODO Apply non-stat results.
+
+    ShowNextResult();
   }
 
   private void ShowNextResult()
   {
+    UnityEngine.Debug.Log("ShowNextResult (pending = " + pendingResults.Count + ")");
     if (pendingResults.Count > 0)
-      ShowResult(pendingResults[0]);
+      ShowActionFinishMessage(pendingResults[0]);
     else
       FinishActions();
   }
 
   private void FinishActions()
   {
+    UnityEngine.Debug.Log("FinishActions()");
     // Clear adventurer's actions.
     adventurers.ForEach(it => it.portrait.SelectAction(null));
 
-    // Advance time.
-    hour++;
     // TODO show new time, and make everyone more tired.
 
     // Update UI.
     StatsPanel.ShowStatsFor(AdventurerPortrait.selected.adventurer);
   }
 
-  private enum AdventurerStat
+  /// <summary>
+  /// Returns an appropriate confirmation message when the
+  /// adventurer selects an action.
+  /// </summary>
+  private static string GetActionAffirmMessage(Adventurer adventurer)
   {
-    HUNGER, ENERGY, HEALTH, MORALE
+    // TODO This should query the adventurer's list of responses, 
+    // when that gets implemented.
+    string[] messages = new string[] {
+      "Alright.",
+      "Fine.",
+      "Got it.",
+      "If you say so.",
+      "Ok.",
+      "Okey dokey.",
+      "On it!",
+      "Roger.",
+      "Sure.",
+      "Will do.",
+      "With pleasure!",
+      "Why not?",
+    };
+    return messages[Random.Range(0, messages.Length - 1)];
   }
 
   private class ActionResult
@@ -196,7 +314,7 @@ public class CampController : MonoBehaviour
   {
     public Adventurer adventurer;
     public int hunger;
-    public int energy;
+    public int rest;
     public int mood;
     public int health;
   }

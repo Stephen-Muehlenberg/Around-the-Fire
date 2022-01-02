@@ -10,11 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 31005498e0bf0da42937db9d14945b4a, type: 3}
-  m_Name: ActionRest
+  m_Name: AP_GatherWood
   m_EditorClassIdentifier: 
-  title: Rest
-  shortDesc: Pass the time idly.
-  fullDesc: 
+  title: Gather Firewood
+  titlePresentProgressive: Gathering firewood
+  description: 
+  hours: 1
+  partnersReduceHours: 0
+  requiredPartners: 0
+  completionAnnouncements:
+  - Alright I've got the firewood.
+  - Let's get a fire started.
   properties:
-  - key: Morale
+  - key: Rest
+    value: -20
+  - key: WoodMin
+    value: 2
+  - key: WoodMax
     value: 5

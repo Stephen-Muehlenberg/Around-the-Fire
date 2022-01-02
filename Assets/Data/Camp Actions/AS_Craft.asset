@@ -10,15 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 31005498e0bf0da42937db9d14945b4a, type: 3}
-  m_Name: ActionGatherWood
+  m_Name: AS_Craft
   m_EditorClassIdentifier: 
-  title: Gather Firewood
-  shortDesc: 
-  fullDesc: 
-  properties:
-  - key: Fatigue
-    value: -12
-  - key: WoodMin
-    value: 2
-  - key: WoodMax
-    value: 5
+  title: Craft Equipment
+  titlePresentProgressive: Crafting equipment
+  description: 
+  hours: 1
+  partnersReduceHours: 0
+  requiredPartners: 0
+  completionAnnouncements: []
+  properties: []
