@@ -44,6 +44,17 @@ public class CampController : MonoBehaviour
     CampStatsPanel.SetStats(currentHour);
   }
 
+  private void Update()
+  {
+    if (Input.GetKeyDown(KeyCode.Escape))
+    {
+      if (Application.isEditor)
+        UnityEditor.EditorApplication.isPlaying = false;
+      else
+        Application.Quit();
+    }
+  }
+
   private void TEMP_GenerateRandomAdventurers()
   {
     int adventurerCount = TEMP_adventurerSprites.Count < TEMP_adventurerCount
