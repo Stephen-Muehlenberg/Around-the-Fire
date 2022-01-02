@@ -68,10 +68,7 @@ public class CampLocation : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
 
   public void ShowActions()
   {
-    if (AdventurerPortrait.selected?.adventurer.action != null)
-      ActionList.Show(new List<CampAction>() { AdventurerPortrait.selected.adventurer.action }, null, AdventurerPortrait.selected.adventurer.action );
-    else
-      ActionList.Show(actions, OnActionSelected);
+    ActionList.Show(actions, OnActionSelected);
   }
 
   private void OnActionSelected(CampAction action)

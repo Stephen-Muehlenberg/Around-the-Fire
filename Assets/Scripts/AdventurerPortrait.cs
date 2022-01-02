@@ -104,18 +104,20 @@ public class AdventurerPortrait : MonoBehaviour,
 
   public void Select()
   {
-    if (selected != null) selected.Deselect();
+    if (selected != null)
+      selected.Deselect();
     selected = this;
     highlight.enabled = true;
-    location.ShowActions();
+    if (adventurer.action == null)
+      location.ShowActions();
     StatsPanel.ShowStatsFor(adventurer);
   }
 
   public void Deselect()
   {
-    if (adventurer.action == null)
-      highlight.enabled = false;
-    selected = null;
+    highlight.enabled = false;
+    if (selected == this)
+      selected = null;
   }
 
   private void MoveTo(CampLocation newLocation)

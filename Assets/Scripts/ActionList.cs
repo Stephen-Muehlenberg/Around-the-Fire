@@ -17,7 +17,7 @@ public class ActionList : MonoBehaviour
     gameObject.SetActive(false);
   }
 
-  public static void Show(List<CampAction> actions, Action<CampAction> callback, CampAction selected = null)
+  public static void Show(List<CampAction> actions, Action<CampAction> callback)
   {
     if (actions.Count > singleton.buttons.Count)
       throw new Exception("Too many actions - can't display " + actions.Count + " in " + singleton.buttons.Count + " buttons.");
@@ -30,7 +30,6 @@ public class ActionList : MonoBehaviour
       {
         button.gameObject.SetActive(true);
         button.SetAction(actions[i]);
-        button.SetSelected(actions[i] == selected);
       } 
       else
         button.gameObject.SetActive(false);
@@ -47,7 +46,6 @@ public class ActionList : MonoBehaviour
 
   public void ClickButton(ActionButton button)
   {
-    button.SetSelected(true);
     gameObject.SetActive(false);
     actionSelectedCallback?.Invoke(button.action);
   }

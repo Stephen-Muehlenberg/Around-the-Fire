@@ -48,10 +48,11 @@ public class CampController : MonoBehaviour
   {
     if (Input.GetKeyDown(KeyCode.Escape))
     {
-      if (Application.isEditor)
+#if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
-      else
-        Application.Quit();
+#else
+      Application.Quit();
+#endif
     }
   }
 
@@ -103,7 +104,10 @@ public class CampController : MonoBehaviour
     // Disable action UI.
     confirmActionsButton.SetActive(false);
     ActionList.Hide();
-    adventurers.ForEach(it => it.portrait.AllowCancel(false));
+    adventurers.ForEach(it => {
+      it.portrait.AllowCancel(false);
+      it.portrait.Deselect();
+    });
 
     // Animate time advancing.
     TimeOfDayController.AdvanceTime(currentHour, 1, null, OnAdvanceTimeFinished);
@@ -191,7 +195,8 @@ public class CampController : MonoBehaviour
 
   private void ShowActionFinishMessage(ActionResult result)
   {
-    // Remove "action in progress" message.
+    // Select character; remove "action in progress" message.
+    result.adventurer.portrait.Select();
     result.adventurer.portrait.ClearActionText();
 
     // TODO Either have some set of default fallback messages,
