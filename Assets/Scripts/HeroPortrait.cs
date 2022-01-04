@@ -3,11 +3,11 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class AdventurerPortrait : MonoBehaviour,
+public class HeroPortrait : MonoBehaviour,
   IBeginDragHandler, IDragHandler, IEndDragHandler,
   IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
-  public Adventurer adventurer { get; private set; }
+  public Hero hero { get; private set; }
   public CampLocation location;
 
   private Canvas canvas;
@@ -18,14 +18,14 @@ public class AdventurerPortrait : MonoBehaviour,
   [SerializeField] private TMPro.TMP_Text actionText;
   [SerializeField] private Button cancelButton;
 
-  public static AdventurerPortrait selected;
-  public static bool dragInProgress; // Don't highlight adventurers while dragging.
+  public static HeroPortrait selected;
+  public static bool dragInProgress; // Don't highlight heroes while dragging.
 
-  public void Initialise(Adventurer adventurer, CampLocation location)
+  public void Initialise(Hero hero, CampLocation location)
   {
-    this.adventurer = adventurer;
-    nameText.text = adventurer.name;
-    portrait.sprite = adventurer.icon;
+    this.hero = hero;
+    nameText.text = hero.name;
+    portrait.sprite = hero.icon;
     this.location = location;
     location.Add(this);
     canvas = GetComponentInParent<Canvas>();
@@ -108,9 +108,9 @@ public class AdventurerPortrait : MonoBehaviour,
       selected.Deselect();
     selected = this;
     highlight.enabled = true;
-    if (adventurer.action == null)
+    if (hero.action == null)
       location.ShowActions();
-    StatsPanel.ShowStatsFor(adventurer);
+    StatsPanel.ShowStatsFor(hero);
   }
 
   public void Deselect()
@@ -131,7 +131,7 @@ public class AdventurerPortrait : MonoBehaviour,
   {
     bool actionSelected = action != null;
 
-    adventurer.action = action;
+    hero.action = action;
     portrait.raycastTarget = !actionSelected;
     highlight.raycastTarget = !actionSelected;
     nameText.raycastTarget = !actionSelected;
@@ -141,7 +141,7 @@ public class AdventurerPortrait : MonoBehaviour,
       actionText.text = action.titlePresentProgressive;
     cancelButton.gameObject.SetActive(true);
 
-    CampController.OnActionSelected(adventurer);
+    CampController.OnActionSelected(hero);
   }
 
   public void CancelAction() => SelectAction(null);

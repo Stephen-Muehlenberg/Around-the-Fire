@@ -26,18 +26,18 @@ public class StatsPanel : MonoBehaviour
     ShowStatsFor(null);
   }
 
-  public static void ShowStatsFor(Adventurer adventurer)
+  public static void ShowStatsFor(Hero hero)
   {
-    singleton.gameObject.SetActive(adventurer != null);
-    if (adventurer == null) return;
+    singleton.gameObject.SetActive(hero != null);
+    if (hero == null) return;
 
-    singleton.health.value = adventurer.health;
-    singleton.healthFill.color = singleton.fillColour.Evaluate(adventurer.health / 100f);
-    singleton.hunger.value = adventurer.hunger;
-    singleton.hungerFill.color = singleton.fillColour.Evaluate(adventurer.hunger / 100f);
-    singleton.rest.value = adventurer.rest;
-    singleton.restFill.color = singleton.fillColour.Evaluate(adventurer.rest / 100f);
-    singleton.mood.value = adventurer.mood;
-    singleton.moodFill.color = singleton.fillColour.Evaluate(adventurer.mood / 100f);
+    singleton.health.value = hero.health;
+    singleton.healthFill.color = singleton.fillColour.Evaluate(hero.health / 100f);
+    singleton.hunger.value = hero.hunger;
+    singleton.hungerFill.color = singleton.fillColour.Evaluate(hero.hunger / 100f);
+    singleton.rest.value = hero.rest;
+    singleton.restFill.color = singleton.fillColour.Evaluate(hero.rest / 100f);
+    singleton.mood.value = hero.mood;
+    singleton.moodFill.color = singleton.fillColour.Evaluate(hero.mood / 100f);
   }
 }

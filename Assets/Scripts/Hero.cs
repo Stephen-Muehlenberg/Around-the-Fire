@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Adventurer
+public class Hero
 {
   public string name;
   public Sprite icon;
@@ -16,13 +16,13 @@ public class Adventurer
   public float health;
 
   public CampAction action;
-  public AdventurerPortrait portrait;
+  public HeroPortrait portrait;
 
   public enum Stat
   {
     HEALTH, HUNGER, REST, MORALE
   }
 
-  public ActionResult PerformAction(List<Adventurer> party) =>
+  public ActionResult PerformAction(List<Hero> party) =>
     ActionResult.GetFor(action, this, party);
 }

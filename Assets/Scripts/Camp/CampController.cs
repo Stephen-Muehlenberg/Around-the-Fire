@@ -9,35 +9,35 @@ public class CampController : MonoBehaviour
 
   /// <summary>24-hour time.</summary>
   public int currentHour { get; private set; }
-  public List<Adventurer> adventurers;
-  public Adventurer selectedAdventurer;
+  public List<Hero> heroes;
+  public Hero selectedHero;
   private List<ActionResult> pendingResults;
 
   [SerializeField] private GameObject portraitPrefab;
   [SerializeField] private CampLocation characterPanel;
   [SerializeField] private GameObject confirmActionsButton;
 
-  [SerializeField] private List<Sprite> TEMP_adventurerSprites;
-  [SerializeField] private int TEMP_adventurerCount;
+  [SerializeField] private List<Sprite> TEMP_heroSprites;
+  [SerializeField] private int TEMP_heroCount;
 
   private void Awake()
   {
     if (singleton != null) throw new System.Exception("CampController singleton already created.");
     singleton = this;
 
-    TEMP_GenerateRandomAdventurers();
+    TEMP_GenerateRandomHeroes();
 
     currentHour = 17;
   }
 
   private void Start()
   {
-    foreach (Adventurer adventurer in adventurers)
+    foreach (Hero hero in heroes)
     {
       var portrait = Instantiate(portraitPrefab, characterPanel.transform)
-        .GetComponent<AdventurerPortrait>();
-      adventurer.portrait = portrait;
-      portrait.Initialise(adventurer, characterPanel);
+        .GetComponent<HeroPortrait>();
+      hero.portrait = portrait;
+      portrait.Initialise(hero, characterPanel);
     }
 
     TimeOfDayController.SetTime(currentHour);
@@ -56,22 +56,22 @@ public class CampController : MonoBehaviour
     }
   }
 
-  private void TEMP_GenerateRandomAdventurers()
+  private void TEMP_GenerateRandomHeroes()
   {
-    int adventurerCount = TEMP_adventurerSprites.Count < TEMP_adventurerCount
-      ? TEMP_adventurerSprites.Count
-      : TEMP_adventurerCount;
+    int heroCount = TEMP_heroSprites.Count < TEMP_heroCount
+      ? TEMP_heroSprites.Count
+      : TEMP_heroCount;
     string[] names = new string[] { "Alice", "Betty", "Clair", "Diana" };
-    if (adventurerCount > names.Length)
-      adventurerCount = names.Length;
+    if (heroCount > names.Length)
+      heroCount = names.Length;
 
-    adventurers = new List<Adventurer>(adventurerCount);
-    for (int i = 0; i < adventurerCount; i++)
+    heroes = new List<Hero>(heroCount);
+    for (int i = 0; i < heroCount; i++)
     {
-      adventurers.Add(new Adventurer()
+      heroes.Add(new Hero()
       {
         name = names[i],
-        icon = TEMP_adventurerSprites[i],
+        icon = TEMP_heroSprites[i],
         hunger = Random.Range(15, 80),
         rest = Random.Range(15, 90),
         health = Mathf.Clamp(Random.Range(30, 170), 0, 100),
@@ -80,20 +80,20 @@ public class CampController : MonoBehaviour
     }
   }
 
-  public static void OnActionSelected(Adventurer adventurer)
+  public static void OnActionSelected(Hero hero)
   {
-    if (adventurer.action != null)
+    if (hero.action != null)
     {
-      string message = GetActionAffirmMessage(adventurer);
-      SpeechBubble.Show(adventurer.portrait, message);
+      string message = GetActionAffirmMessage(hero);
+      SpeechBubble.Show(hero.portrait, message);
     }
 
-    singleton.confirmActionsButton.SetActive(AllAdventurersReady());
+    singleton.confirmActionsButton.SetActive(AllHeroesReady());
   }
 
-  private static bool AllAdventurersReady()
+  private static bool AllHeroesReady()
   {
-    foreach (Adventurer a in singleton.adventurers)
+    foreach (Hero a in singleton.heroes)
       if (a.action == null)
         return false;
     return true;
@@ -104,7 +104,7 @@ public class CampController : MonoBehaviour
     // Disable action UI.
     confirmActionsButton.SetActive(false);
     ActionList.Hide();
-    adventurers.ForEach(it => {
+    heroes.ForEach(it => {
       it.portrait.AllowCancel(false);
       it.portrait.Deselect();
     });
@@ -119,23 +119,23 @@ public class CampController : MonoBehaviour
     CampStatsPanel.SetStats(currentHour);
 
     // Calculate action results before any other changes apply.
-    pendingResults = adventurers
+    pendingResults = heroes
       // Calculate results.
-      .Select(adventurer => adventurer.PerformAction(adventurers))
+      .Select(hero => hero.PerformAction(heroes))
       // Sort results left to right, top to bottom.
       // TODO probably have folk who have gone foraging, etc, return
       // first so it makes sense that they're affected by other actions.
-      .OrderBy(result => result.adventurer.portrait.transform.position.y) // Top to bottom first, so it acts
-      .OrderBy(result => result.adventurer.portrait.transform.position.x) // as a fallback for left to right.
+      .OrderBy(result => result.hero.portrait.transform.position.y) // Top to bottom first, so it acts
+      .OrderBy(result => result.hero.portrait.transform.position.x) // as a fallback for left to right.
       .ToList();
 
-    // Time advances until one of the adventurers finishes an activity.
-    int hours = adventurers
+    // Time advances until one of the heroes finishes an activity.
+    int hours = heroes
       .Select(it => it.action.hours)
       .Min();
 
-    // Adventurer stats slowly deteriorate over time.
-    adventurers.ForEach(it => {
+    // Hero stats slowly deteriorate over time.
+    heroes.ForEach(it => {
       for (int i = 0; i < hours; i++) {
         it.hunger -= Random.Range(3.5f, 4.5f);
         it.rest -= Random.Range(4.5f, 5.5f);
@@ -149,8 +149,8 @@ public class CampController : MonoBehaviour
   private void ShowActionFinishMessage(ActionResult result)
   {
     // Select character; remove "action in progress" message.
-    result.adventurer.portrait.Select();
-    result.adventurer.portrait.ClearActionText();
+    result.hero.portrait.Select();
+    result.hero.portrait.ClearActionText();
 
     // TODO Either have some set of default fallback messages,
     // or ensure there's always an action-specific message.
@@ -159,7 +159,7 @@ public class CampController : MonoBehaviour
     if (announcements.Length > 0)
       message = announcements[Random.Range(0, announcements.Length)];
 
-    SpeechBubble.Show(result.adventurer.portrait, message, ApplyCurrentActionResults);
+    SpeechBubble.Show(result.hero.portrait, message, ApplyCurrentActionResults);
   }
 
   private void ApplyCurrentActionResults()
@@ -174,16 +174,16 @@ public class CampController : MonoBehaviour
 
   private IEnumerator ApplyResult(ActionResult result)
   {
-    UnityEngine.Debug.Log("ApplyResult(" + result.adventurer.name + " - " + result.action.title + ")");
+    UnityEngine.Debug.Log("ApplyResult(" + result.hero.name + " - " + result.action.title + ")");
     UnityEngine.Debug.Log("- deltas = " + result.partyResults.Count);
     if (result.partyResults.Any(delta => delta.health != 0))
     {
       UnityEngine.Debug.Log("- has health deltas");
       result.partyResults.ForEach(delta => {
-        StatPopup.Show(delta.adventurer.portrait, Adventurer.Stat.HEALTH, delta.health);
-        delta.adventurer.health = Mathf.Clamp(delta.adventurer.health + delta.health, 0, 100);
+        StatPopup.Show(delta.hero.portrait, Hero.Stat.HEALTH, delta.health);
+        delta.hero.health = Mathf.Clamp(delta.hero.health + delta.health, 0, 100);
       });
-      StatsPanel.ShowStatsFor(AdventurerPortrait.selected.adventurer);
+      StatsPanel.ShowStatsFor(HeroPortrait.selected.hero);
       yield return new WaitForSeconds(1.5f);
     }
 
@@ -191,10 +191,10 @@ public class CampController : MonoBehaviour
     {
       UnityEngine.Debug.Log("- has hunger deltas");
       result.partyResults.ForEach(delta => {
-        StatPopup.Show(delta.adventurer.portrait, Adventurer.Stat.HUNGER, delta.hunger);
-        delta.adventurer.hunger = Mathf.Clamp(delta.adventurer.hunger + delta.hunger, 0, 100);
+        StatPopup.Show(delta.hero.portrait, Hero.Stat.HUNGER, delta.hunger);
+        delta.hero.hunger = Mathf.Clamp(delta.hero.hunger + delta.hunger, 0, 100);
       });
-      StatsPanel.ShowStatsFor(AdventurerPortrait.selected.adventurer);
+      StatsPanel.ShowStatsFor(HeroPortrait.selected.hero);
       yield return new WaitForSeconds(1.5f);
     }
 
@@ -202,10 +202,10 @@ public class CampController : MonoBehaviour
     {
       UnityEngine.Debug.Log("- has mood deltas");
       result.partyResults.ForEach(delta => {
-        StatPopup.Show(delta.adventurer.portrait, Adventurer.Stat.MORALE, delta.mood);
-        delta.adventurer.mood = Mathf.Clamp(delta.adventurer.mood + delta.mood, 0, 100);
+        StatPopup.Show(delta.hero.portrait, Hero.Stat.MORALE, delta.mood);
+        delta.hero.mood = Mathf.Clamp(delta.hero.mood + delta.mood, 0, 100);
       });
-      StatsPanel.ShowStatsFor(AdventurerPortrait.selected.adventurer);
+      StatsPanel.ShowStatsFor(HeroPortrait.selected.hero);
       yield return new WaitForSeconds(1.5f);
     }
 
@@ -213,10 +213,10 @@ public class CampController : MonoBehaviour
     {
       UnityEngine.Debug.Log("- has rest deltas");
       result.partyResults.ForEach(delta => {
-        StatPopup.Show(delta.adventurer.portrait, Adventurer.Stat.REST, delta.rest);
-        delta.adventurer.rest = Mathf.Clamp(delta.adventurer.rest + delta.rest, 0, 100);
+        StatPopup.Show(delta.hero.portrait, Hero.Stat.REST, delta.rest);
+        delta.hero.rest = Mathf.Clamp(delta.hero.rest + delta.rest, 0, 100);
       });
-      StatsPanel.ShowStatsFor(AdventurerPortrait.selected.adventurer);
+      StatsPanel.ShowStatsFor(HeroPortrait.selected.hero);
       yield return new WaitForSeconds(1.5f);
     }
 
@@ -237,22 +237,22 @@ public class CampController : MonoBehaviour
   private void FinishActions()
   {
     UnityEngine.Debug.Log("FinishActions()");
-    // Clear adventurer's actions.
-    adventurers.ForEach(it => it.portrait.SelectAction(null));
+    // Clear hero's actions.
+    heroes.ForEach(it => it.portrait.SelectAction(null));
 
     // TODO show new time, and make everyone more tired.
 
     // Update UI.
-    StatsPanel.ShowStatsFor(AdventurerPortrait.selected.adventurer);
+    StatsPanel.ShowStatsFor(HeroPortrait.selected.hero);
   }
 
   /// <summary>
   /// Returns an appropriate confirmation message when the
-  /// adventurer selects an action.
+  /// heroes selects an action.
   /// </summary>
-  private static string GetActionAffirmMessage(Adventurer adventurer)
+  private static string GetActionAffirmMessage(Hero hero)
   {
-    // TODO This should query the adventurer's list of responses, 
+    // TODO This should query the hero's list of responses, 
     // when that gets implemented.
     string[] messages = new string[] {
       "Alright.",

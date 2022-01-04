@@ -17,7 +17,7 @@ public class StatPopup : MonoBehaviour
 
   private int directionMultiplier;
 
-  public static void Show(AdventurerPortrait origin, Adventurer.Stat stat, int delta)
+  public static void Show(HeroPortrait origin, Hero.Stat stat, int delta)
   {
     if (delta == 0) return;
 
