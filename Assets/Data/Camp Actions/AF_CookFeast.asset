@@ -20,11 +20,11 @@ MonoBehaviour:
   requiredPartners: 0
   completionAnnouncements: []
   properties:
-  - key: TeamHunger
+  - key: Party Hunger
     value: 60
-  - key: TeamMorale
+  - key: Party Morale
     value: 20
   - key: SuppliesPerPerson
     value: -10
-  - key: Rest
+  - key: Self Rest
     value: -40

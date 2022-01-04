@@ -6,6 +6,14 @@ using UnityEngine.UI;
 
 public class CampLocation : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
+  public static CampLocation Fire;
+  public static CampLocation Around;
+  public static CampLocation Clearing;
+  public static CampLocation Tent;
+  public static CampLocation Forest;
+  public static CampLocation Supplies;
+  public static CampLocation CharacterPanel;
+
   public List<CampAction> actions;
   public Image[] imagesToHighlight;
   public Transform portraitParent;
@@ -15,6 +23,20 @@ public class CampLocation : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
 
   [SerializeField]
   private List<AdventurerPortrait> adventurers = new List<AdventurerPortrait>();
+
+  private void Awake()
+  {
+    switch (name)
+    {
+      case "Fire": Fire = this; break;
+      case "Around": Around = this; break;
+      case "Tent": Tent = this; break;
+      case "Supplies": Supplies = this; break;
+      case "Clearing": Clearing = this; break;
+      case "Forest": Forest = this; break;
+      case "Character Panel": CharacterPanel = this; break;
+    }
+  }
 
   public void Start()
   {

@@ -20,9 +20,9 @@ MonoBehaviour:
   requiredPartners: 1
   completionAnnouncements: []
   properties:
-  - key: Morale
+  - key: Self Morale
     value: 5
-  - key: LocationMorale
+  - key: Location Morale
     value: 5
-  - key: Rest
+  - key: Self Rest
     value: -20

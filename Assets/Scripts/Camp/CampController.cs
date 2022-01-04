@@ -118,9 +118,10 @@ public class CampController : MonoBehaviour
     currentHour = newHour;
     CampStatsPanel.SetStats(currentHour);
 
+    // Calculate action results before any other changes apply.
     pendingResults = adventurers
       // Calculate results.
-      .Select(adventurer => ProcessAction(adventurer))
+      .Select(adventurer => adventurer.PerformAction(adventurers))
       // Sort results left to right, top to bottom.
       // TODO probably have folk who have gone foraging, etc, return
       // first so it makes sense that they're affected by other actions.
@@ -128,69 +129,21 @@ public class CampController : MonoBehaviour
       .OrderBy(result => result.adventurer.portrait.transform.position.x) // as a fallback for left to right.
       .ToList();
 
+    // Time advances until one of the adventurers finishes an activity.
     int hours = adventurers
       .Select(it => it.action.hours)
       .Min();
 
-    ShowActionFinishMessage(pendingResults[0]);
-  }
-
-  private ActionResult ProcessAction(Adventurer adventurer)
-  {
-    // Initialise result.
-    var result = new ActionResult()
-    {
-      adventurer = adventurer,
-      action = adventurer.action,
-      deltas = new List<AdventurerStatDelta>(adventurers.Count),
-    };
-    adventurers.ForEach(adventurer
-      => result.deltas.Add(new AdventurerStatDelta() { adventurer = adventurer }));
-
-    // Update result based on the action's properties.
-    foreach (CampAction.Property property in adventurer.action.properties)
-      ProcessProperty(property, result);
-
-    return result;
-  }
-
-  private void ProcessProperty(CampAction.Property property, ActionResult result)
-  {
-    // "Team" affects the whole team equally.
-    if (property.key.StartsWith("Team"))
-    {
-      if (property.key.Substring(4).Equals("Health"))
-        AdjustTeamStat(Adventurer.Stat.HEALTH, property.value, result);
-      else if (property.key.Substring(4).Equals("Hunger"))
-        AdjustTeamStat(Adventurer.Stat.HUNGER, property.value, result);
-      else if (property.key.Substring(4).Equals("Morale"))
-        AdjustTeamStat(Adventurer.Stat.MORALE, property.value, result);
-      else if (property.key.Substring(4).Equals("Rest"))
-        AdjustTeamStat(Adventurer.Stat.REST, property.value, result);
-    }
-    else
-    {
-      if (property.key.Equals("Health"))
-        result.deltas.Find(it => it.adventurer == result.adventurer).health += property.value;
-      else if (property.key.Equals("Hunger"))
-        result.deltas.Find(it => it.adventurer == result.adventurer).hunger += property.value;
-      if (property.key.Equals("Morale"))
-        result.deltas.Find(it => it.adventurer == result.adventurer).mood += property.value;
-      if (property.key.Equals("Rest"))
-        result.deltas.Find(it => it.adventurer == result.adventurer).rest += property.value;
-    }
-  }
-
-  private void AdjustTeamStat(Adventurer.Stat stat, int amount, ActionResult result)
-  {
-    foreach (AdventurerStatDelta delta in result.deltas)
-      switch (stat)
-      {
-        case Adventurer.Stat.HEALTH: delta.health += amount; break;
-        case Adventurer.Stat.HUNGER: delta.hunger += amount; break;
-        case Adventurer.Stat.MORALE: delta.mood += amount; break;
-        case Adventurer.Stat.REST: delta.rest += amount; break;
+    // Adventurer stats slowly deteriorate over time.
+    adventurers.ForEach(it => {
+      for (int i = 0; i < hours; i++) {
+        it.hunger -= Random.Range(3.5f, 4.5f);
+        it.rest -= Random.Range(4.5f, 5.5f);
+        it.mood -= (it.mood > 40 ? -1f : 1f) + Random.Range(-0.5f, 0.5f);
       }
+    });
+
+    ShowActionFinishMessage(pendingResults[0]);
   }
 
   private void ShowActionFinishMessage(ActionResult result)
@@ -204,7 +157,7 @@ public class CampController : MonoBehaviour
     string message = "Finished.";
     var announcements = result.action.completionAnnouncements;
     if (announcements.Length > 0)
-      message = announcements[Random.Range(0, announcements.Length - 1)];
+      message = announcements[Random.Range(0, announcements.Length)];
 
     SpeechBubble.Show(result.adventurer.portrait, message, ApplyCurrentActionResults);
   }
@@ -222,11 +175,11 @@ public class CampController : MonoBehaviour
   private IEnumerator ApplyResult(ActionResult result)
   {
     UnityEngine.Debug.Log("ApplyResult(" + result.adventurer.name + " - " + result.action.title + ")");
-    UnityEngine.Debug.Log("- deltas = " + result.deltas.Count);
-    if (result.deltas.Any(delta => delta.health != 0))
+    UnityEngine.Debug.Log("- deltas = " + result.partyResults.Count);
+    if (result.partyResults.Any(delta => delta.health != 0))
     {
       UnityEngine.Debug.Log("- has health deltas");
-      result.deltas.ForEach(delta => {
+      result.partyResults.ForEach(delta => {
         StatPopup.Show(delta.adventurer.portrait, Adventurer.Stat.HEALTH, delta.health);
         delta.adventurer.health = Mathf.Clamp(delta.adventurer.health + delta.health, 0, 100);
       });
@@ -234,10 +187,10 @@ public class CampController : MonoBehaviour
       yield return new WaitForSeconds(1.5f);
     }
 
-    if (result.deltas.Any(delta => delta.hunger != 0))
+    if (result.partyResults.Any(delta => delta.hunger != 0))
     {
       UnityEngine.Debug.Log("- has hunger deltas");
-      result.deltas.ForEach(delta => {
+      result.partyResults.ForEach(delta => {
         StatPopup.Show(delta.adventurer.portrait, Adventurer.Stat.HUNGER, delta.hunger);
         delta.adventurer.hunger = Mathf.Clamp(delta.adventurer.hunger + delta.hunger, 0, 100);
       });
@@ -245,10 +198,10 @@ public class CampController : MonoBehaviour
       yield return new WaitForSeconds(1.5f);
     }
 
-    if (result.deltas.Any(delta => delta.mood != 0))
+    if (result.partyResults.Any(delta => delta.mood != 0))
     {
       UnityEngine.Debug.Log("- has mood deltas");
-      result.deltas.ForEach(delta => {
+      result.partyResults.ForEach(delta => {
         StatPopup.Show(delta.adventurer.portrait, Adventurer.Stat.MORALE, delta.mood);
         delta.adventurer.mood = Mathf.Clamp(delta.adventurer.mood + delta.mood, 0, 100);
       });
@@ -256,10 +209,10 @@ public class CampController : MonoBehaviour
       yield return new WaitForSeconds(1.5f);
     }
 
-    if (result.deltas.Any(delta => delta.rest != 0))
+    if (result.partyResults.Any(delta => delta.rest != 0))
     {
       UnityEngine.Debug.Log("- has rest deltas");
-      result.deltas.ForEach(delta => {
+      result.partyResults.ForEach(delta => {
         StatPopup.Show(delta.adventurer.portrait, Adventurer.Stat.REST, delta.rest);
         delta.adventurer.rest = Mathf.Clamp(delta.adventurer.rest + delta.rest, 0, 100);
       });
@@ -316,22 +269,5 @@ public class CampController : MonoBehaviour
       "Why not?",
     };
     return messages[Random.Range(0, messages.Length - 1)];
-  }
-
-  private class ActionResult
-  {
-    public Adventurer adventurer;
-    public CampAction action;
-    public List<AdventurerStatDelta> deltas;
-    // TODO handle camp stats like firewood, supplies, etc.
-  }
-
-  private class AdventurerStatDelta
-  {
-    public Adventurer adventurer;
-    public int hunger;
-    public int rest;
-    public int mood;
-    public int health;
   }
 }

@@ -23,9 +23,9 @@ MonoBehaviour:
   - Get it while it's hot!
   - Dinner is served.
   properties:
-  - key: TeamHunger
+  - key: Party Hunger
     value: 50
   - key: SuppliesPerPerson
     value: -6
-  - key: Rest
+  - key: Self Rest
     value: -20

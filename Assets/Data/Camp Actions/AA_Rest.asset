@@ -23,7 +23,7 @@ MonoBehaviour:
   - Zzz... Zzz...
   - Maybe a quick nap...
   properties:
-  - key: Morale
+  - key: Self Morale
     value: 5
-  - key: Rest
+  - key: Self Rest
     value: 25

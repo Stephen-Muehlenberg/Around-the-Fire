@@ -20,5 +20,5 @@ MonoBehaviour:
   requiredPartners: 0
   completionAnnouncements: []
   properties:
-  - key: Rest
+  - key: Self Rest
     value: -10

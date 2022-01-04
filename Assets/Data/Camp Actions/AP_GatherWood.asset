@@ -22,7 +22,7 @@ MonoBehaviour:
   - Alright I've got the firewood.
   - Let's get a fire started.
   properties:
-  - key: Rest
+  - key: Self Rest
     value: -20
   - key: WoodMin
     value: 2

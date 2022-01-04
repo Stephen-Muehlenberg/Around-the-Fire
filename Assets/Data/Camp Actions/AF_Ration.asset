@@ -23,11 +23,11 @@ MonoBehaviour:
   - One at a time, get your rations.
   - Get your rations. No shoving.
   properties:
-  - key: TeamHunger
+  - key: Party Hunger
     value: 35
   - key: SuppliesPerPerson
     value: -3
-  - key: Rest
+  - key: Self Rest
     value: -8
-  - key: TeamMorale
+  - key: Party Morale
     value: -10
