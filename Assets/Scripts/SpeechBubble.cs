@@ -23,7 +23,7 @@ public class SpeechBubble : MonoBehaviour
 
   private void Initialise(string text, Transform origin, Action callback)
   {
-    transform.position = origin.position + (Vector3.up * 160);
+    transform.position = origin.position + (Vector3.up * 140);
     StartCoroutine(Reveal(text, callback));
   }
 
@@ -35,14 +35,16 @@ public class SpeechBubble : MonoBehaviour
 
     while (revealed.Length < text.Length)
     {
-      revealed += text[nextChar];
-      charsThisLine++;
-      if (charsThisLine > MAX_CHARS_PER_LINE
-        && text[nextChar] == ' ')
+      if (charsThisLine > MAX_CHARS_PER_LINE && text[nextChar] == ' ')
       {
-        revealed += '\n';
+        revealed += '\n'; // Replace space with newline.
         charsThisLine = 0;
+      } else
+      {
+        revealed += text[nextChar];
+        charsThisLine++;
       }
+
       this.text.text = revealed;
       nextChar++;
       yield return new WaitForSeconds(REVEAL_DELAY_PER_CHAR);
