@@ -3,12 +3,16 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
+/// <summary>
+/// UI representation of a <see cref="Hero"/>. Can be dragged
+/// around to different <see cref="HeroLocation"/>s.
+/// </summary>
 public class HeroPortrait : MonoBehaviour,
   IBeginDragHandler, IDragHandler, IEndDragHandler,
   IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
   public Hero hero { get; private set; }
-  public CampLocation location;
+  public HeroLocation location;
 
   private Canvas canvas;
   private GraphicRaycaster raycaster;
@@ -21,13 +25,13 @@ public class HeroPortrait : MonoBehaviour,
   public static HeroPortrait selected;
   public static bool dragInProgress; // Don't highlight heroes while dragging.
 
-  public void Initialise(Hero hero, CampLocation location)
+  public void Initialise(Hero hero, HeroLocation location)
   {
     this.hero = hero;
     nameText.text = hero.name;
     portrait.sprite = hero.icon;
     this.location = location;
-    location.Add(this);
+    location.zones[0].Add(this);
     canvas = GetComponentInParent<Canvas>();
     raycaster = GetComponentInParent<GraphicRaycaster>();
     SelectAction(null);
@@ -79,20 +83,16 @@ public class HeroPortrait : MonoBehaviour,
     raycaster.Raycast(eventData, results);
 
     // Get drag destination.
-    CampLocation newLocation = null;
+    LocationZone newZone = null;
     foreach (RaycastResult result in results)
     {
-      newLocation = result.gameObject.GetComponent<CampLocation>();
-      if (newLocation != null) break;
+      newZone = result.gameObject.GetComponentInParent<LocationZone>();
+      if (newZone != null) break;
     }
 
     // If destination can accept this, move there.
-    if (newLocation != null && newLocation.CanAccept(this))
-      MoveTo(newLocation);
-    // If destination has a fallback which can accept this, move there.
-    else if (newLocation?.fallbackLocation != null && newLocation.fallbackLocation.CanAccept(this))
-      MoveTo(newLocation.fallbackLocation);
-    // Otherwise, cancel move.
+    if (newZone != null && newZone.CanAccept(this))
+      MoveTo(newZone);
     else
       location.CancelMove(this);
 
@@ -109,7 +109,7 @@ public class HeroPortrait : MonoBehaviour,
     selected = this;
     highlight.enabled = true;
     if (hero.action == null)
-      location.ShowActions();
+      location.ShowActions(this);
     StatsPanel.ShowStatsFor(hero);
   }
 
@@ -120,14 +120,14 @@ public class HeroPortrait : MonoBehaviour,
       selected = null;
   }
 
-  private void MoveTo(CampLocation newLocation)
+  private void MoveTo(LocationZone newZone)
   {
     location.Remove(this);
-    newLocation.Add(this);
-    location = newLocation;
+    newZone.Add(this);
+    location = newZone.location;
   }
 
-  public void SelectAction(CampAction action)
+  public void SelectAction(HeroAction action)
   {
     bool actionSelected = action != null;
 

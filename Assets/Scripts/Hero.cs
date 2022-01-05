@@ -15,7 +15,7 @@ public class Hero
   /// <summary>0 - 100 inclusive.</summary>
   public float health;
 
-  public CampAction action;
+  public HeroAction action;
   public HeroPortrait portrait;
 
   public enum Stat

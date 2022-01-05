@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class CampController : MonoBehaviour
 {
-  private static CampController singleton;
+  public static CampController singleton;
 
   /// <summary>24-hour time.</summary>
   public int currentHour { get; private set; }
@@ -14,12 +14,13 @@ public class CampController : MonoBehaviour
   private List<ActionResult> pendingResults;
 
   [SerializeField] private GameObject portraitPrefab;
-  [SerializeField] private CampLocation characterPanel;
+  [SerializeField] private HeroLocation characterPanel;
   [SerializeField] private GameObject confirmActionsButton;
 
   [SerializeField] private List<Sprite> TEMP_heroSprites;
   [SerializeField] private int TEMP_heroCount;
 
+  
   private void Awake()
   {
     if (singleton != null) throw new System.Exception("CampController singleton already created.");
@@ -152,13 +153,7 @@ public class CampController : MonoBehaviour
     result.hero.portrait.Select();
     result.hero.portrait.ClearActionText();
 
-    // TODO Either have some set of default fallback messages,
-    // or ensure there's always an action-specific message.
-    string message = "Finished.";
-    var announcements = result.action.completionAnnouncements;
-    if (announcements.Length > 0)
-      message = announcements[Random.Range(0, announcements.Length)];
-
+    string message = result.action.GetCompletionAnnouncement(result.hero, this);    
     SpeechBubble.Show(result.hero.portrait, message, ApplyCurrentActionResults);
   }
 

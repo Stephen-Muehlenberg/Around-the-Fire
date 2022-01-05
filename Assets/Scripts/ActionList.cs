@@ -8,7 +8,7 @@ public class ActionList : MonoBehaviour
 
   public Transform listParent;
   [SerializeField] private List<ActionButton> buttons;
-  private Action<CampAction> actionSelectedCallback;
+  private Action<HeroAction> actionSelectedCallback;
 
   private void Awake()
   {
@@ -17,7 +17,7 @@ public class ActionList : MonoBehaviour
     gameObject.SetActive(false);
   }
 
-  public static void Show(List<CampAction> actions, Action<CampAction> callback)
+  public static void Show(List<HeroAction> actions, Action<HeroAction> callback)
   {
     if (actions.Count > singleton.buttons.Count)
       throw new Exception("Too many actions - can't display " + actions.Count + " in " + singleton.buttons.Count + " buttons.");

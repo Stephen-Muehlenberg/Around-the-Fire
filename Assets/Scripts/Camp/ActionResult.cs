@@ -8,7 +8,7 @@ using UnityEngine;
 /// </summary>
 public class ActionResult
 {
-  public CampAction action;
+  public HeroAction action;
   public Hero hero;
   public List<HeroResults> partyResults;
   public int supplies;
@@ -24,7 +24,7 @@ public class ActionResult
     public int health;
   }
 
-  public static ActionResult GetFor(CampAction action, Hero hero, List<Hero> party)
+  public static ActionResult GetFor(HeroAction action, Hero hero, List<Hero> party)
   {
     // Initialise result.
     var result = new ActionResult()
@@ -37,8 +37,9 @@ public class ActionResult
       => result.partyResults.Add(new HeroResults() { hero = hero }));
 
     // Update result based on the action's properties.
-    foreach (CampAction.Property property in action.properties)
-      ProcessProperty(property, hero, result);
+    // TODO Let each Action process itself and callback here.
+//    foreach (CampAction.Property property in action.properties)
+  //    ProcessProperty(property, hero, result);
 
     return result;
   }
@@ -54,12 +55,12 @@ public class ActionResult
       case "self": ApplyToSelf(args, property.value, hero, result); break;
       case "party": ApplyToAll(args, property.value, result); break;
       case "location": ApplyToLocation(args, property.value, hero.portrait.location, result); break;
-      case "fire": ApplyToLocation(args, property.value, CampLocation.Fire, result); break;
-      case "around": ApplyToLocation(args, property.value, CampLocation.Around, result); break;
-      case "supplies": ApplyToLocation(args, property.value, CampLocation.Supplies, result); break;
-      case "tent": ApplyToLocation(args, property.value, CampLocation.Tent, result); break;
-      case "clearing": ApplyToLocation(args, property.value, CampLocation.Clearing, result); break;
-      case "forest": ApplyToLocation(args, property.value, CampLocation.Forest, result); break;
+      case "fire": ApplyToLocation(args, property.value, HeroLocation.Fire, result); break;
+      case "around": ApplyToLocation(args, property.value, HeroLocation.Around, result); break;
+      case "supplies": ApplyToLocation(args, property.value, HeroLocation.Supplies, result); break;
+      case "tent": ApplyToLocation(args, property.value, HeroLocation.Tent, result); break;
+      case "clearing": ApplyToLocation(args, property.value, HeroLocation.Clearing, result); break;
+      case "forest": ApplyToLocation(args, property.value, HeroLocation.Forest, result); break;
     }
   }
 
@@ -75,7 +76,7 @@ public class ActionResult
     result.partyResults.ForEach(it => AdjustStat(it, args[1], value));
   }
 
-  private static void ApplyToLocation(string[] args, int value, CampLocation location, ActionResult result)
+  private static void ApplyToLocation(string[] args, int value, HeroLocation location, ActionResult result)
   {
     result.partyResults
       .Where(it => it.hero.portrait.location == location)

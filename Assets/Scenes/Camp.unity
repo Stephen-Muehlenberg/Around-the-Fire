@@ -154,7 +154,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   portraitPrefab: {fileID: 9102505041924870482, guid: 8861aa0d34b29bf469647425d0b62790, type: 3}
-  characterPanel: {fileID: 585213366}
+  characterPanel: {fileID: 585213364}
   confirmActionsButton: {fileID: 171311392}
   TEMP_heroSprites:
   - {fileID: 21300000, guid: e52f471fea1259e4c8d0d8233438efc3, type: 3}
@@ -930,6 +930,7 @@ GameObject:
   - component: {fileID: 151477338}
   - component: {fileID: 151477340}
   - component: {fileID: 151477339}
+  - component: {fileID: 151477342}
   - component: {fileID: 151477341}
   m_Layer: 5
   m_Name: Fire
@@ -1005,18 +1006,28 @@ MonoBehaviour:
   m_GameObject: {fileID: 151477337}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d09c2e2fd02c1dd43b423995f80465ae, type: 3}
+  m_Script: {fileID: 11500000, guid: 842b6f5934f997f49b6b4ae68096b334, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  actions:
-  - {fileID: 11400000, guid: 626eb7f6cce5c6e4ea4713d3565863bd, type: 2}
-  - {fileID: 11400000, guid: d8430a3690189dc4d834ad241fc2448b, type: 2}
-  - {fileID: 11400000, guid: 7b304c88b3580a245ac56f05fe8a3279, type: 2}
-  imagesToHighlight:
-  - {fileID: 151477339}
-  portraitParent: {fileID: 298739322}
+  location: {fileID: 151477342}
   maxHeroes: 2
-  fallbackLocation: {fileID: 0}
+  heroes: []
+  highlight: {fileID: 151477339}
+  portraitParent: {fileID: 298739322}
+--- !u!114 &151477342
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 151477337}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efdf783e9c81ee94d81c198291698ba4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  zones:
+  - {fileID: 151477341}
   heroes: []
 --- !u!1 &171311392
 GameObject:
@@ -1872,7 +1883,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 0.2}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -2349,7 +2360,8 @@ GameObject:
   - component: {fileID: 585213363}
   - component: {fileID: 585213362}
   - component: {fileID: 585213361}
-  - component: {fileID: 585213366}
+  - component: {fileID: 585213364}
+  - component: {fileID: 585213365}
   m_Layer: 5
   m_Name: Character Panel
   m_TagString: Untagged
@@ -2440,7 +2452,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 585213359}
   m_CullTransparentMesh: 1
---- !u!114 &585213366
+--- !u!114 &585213364
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2449,16 +2461,29 @@ MonoBehaviour:
   m_GameObject: {fileID: 585213359}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d09c2e2fd02c1dd43b423995f80465ae, type: 3}
+  m_Script: {fileID: 11500000, guid: efdf783e9c81ee94d81c198291698ba4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  actions: []
-  imagesToHighlight:
-  - {fileID: 585213362}
-  portraitParent: {fileID: 585213360}
-  maxHeroes: 8
-  fallbackLocation: {fileID: 0}
+  zones:
+  - {fileID: 585213365}
   heroes: []
+--- !u!114 &585213365
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 585213359}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 842b6f5934f997f49b6b4ae68096b334, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  location: {fileID: 0}
+  maxHeroes: 10
+  heroes: []
+  highlight: {fileID: 585213362}
+  portraitParent: {fileID: 585213360}
 --- !u!1 &586971142
 GameObject:
   m_ObjectHideFlags: 0
@@ -2678,8 +2703,7 @@ RectTransform:
   m_Children:
   - {fileID: 585213360}
   - {fileID: 151477338}
-  - {fileID: 1871158203}
-  - {fileID: 1920740592}
+  - {fileID: 1821577292}
   - {fileID: 1926764220}
   - {fileID: 1515161583}
   - {fileID: 970086647}
@@ -2877,6 +2901,7 @@ GameObject:
   - component: {fileID: 673789819}
   - component: {fileID: 673789821}
   - component: {fileID: 673789820}
+  - component: {fileID: 673789823}
   - component: {fileID: 673789822}
   m_Layer: 5
   m_Name: Clearing
@@ -2898,7 +2923,7 @@ RectTransform:
   m_Children:
   - {fileID: 52515921}
   m_Father: {fileID: 633319166}
-  m_RootOrder: 7
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.725, y: 0.3}
   m_AnchorMax: {x: 1, y: 0.55}
@@ -2952,19 +2977,28 @@ MonoBehaviour:
   m_GameObject: {fileID: 673789818}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d09c2e2fd02c1dd43b423995f80465ae, type: 3}
+  m_Script: {fileID: 11500000, guid: 842b6f5934f997f49b6b4ae68096b334, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  actions:
-  - {fileID: 11400000, guid: 5ce5c518426f7ea4d8f54607484c42ac, type: 2}
-  - {fileID: 11400000, guid: 19ed5bc2c78ee434c9a1ac9107f08ca8, type: 2}
-  - {fileID: 11400000, guid: 5e6f403cad89d6e49a1357bd11f2f7e8, type: 2}
-  - {fileID: 11400000, guid: d52e6fc3a6f02f244977a3cfc763fcdd, type: 2}
-  imagesToHighlight:
-  - {fileID: 673789820}
+  location: {fileID: 0}
+  maxHeroes: 10
+  heroes: []
+  highlight: {fileID: 673789820}
   portraitParent: {fileID: 52515921}
-  maxHeroes: 4
-  fallbackLocation: {fileID: 0}
+--- !u!114 &673789823
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 673789818}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efdf783e9c81ee94d81c198291698ba4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  zones:
+  - {fileID: 673789822}
   heroes: []
 --- !u!1 &724869708
 GameObject:
@@ -9003,6 +9037,7 @@ GameObject:
   - component: {fileID: 970086647}
   - component: {fileID: 970086649}
   - component: {fileID: 970086648}
+  - component: {fileID: 970086651}
   - component: {fileID: 970086650}
   m_Layer: 5
   m_Name: Forest
@@ -9024,7 +9059,7 @@ RectTransform:
   m_Children:
   - {fileID: 1395390390}
   m_Father: {fileID: 633319166}
-  m_RootOrder: 6
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.725, y: 0.55}
   m_AnchorMax: {x: 1, y: 0.8}
@@ -9078,19 +9113,28 @@ MonoBehaviour:
   m_GameObject: {fileID: 970086646}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d09c2e2fd02c1dd43b423995f80465ae, type: 3}
+  m_Script: {fileID: 11500000, guid: 842b6f5934f997f49b6b4ae68096b334, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  actions:
-  - {fileID: 11400000, guid: 45e37f36eaaadd740ad33ce615d48b54, type: 2}
-  - {fileID: 11400000, guid: d7dd029f4cb9d18468e17a8447919389, type: 2}
-  - {fileID: 11400000, guid: 409249cf710ea1846b52141c77e0bfc6, type: 2}
-  - {fileID: 11400000, guid: 49864692a4bba7a4aa02dcbeac60cec7, type: 2}
-  imagesToHighlight:
-  - {fileID: 970086648}
+  location: {fileID: 0}
+  maxHeroes: 10
+  heroes: []
+  highlight: {fileID: 970086648}
   portraitParent: {fileID: 1395390390}
-  maxHeroes: 4
-  fallbackLocation: {fileID: 0}
+--- !u!114 &970086651
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 970086646}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efdf783e9c81ee94d81c198291698ba4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  zones:
+  - {fileID: 970086650}
   heroes: []
 --- !u!1 &970797775
 GameObject:
@@ -12314,6 +12358,7 @@ GameObject:
   - component: {fileID: 1515161583}
   - component: {fileID: 1515161585}
   - component: {fileID: 1515161584}
+  - component: {fileID: 1515161587}
   - component: {fileID: 1515161586}
   m_Layer: 5
   m_Name: Supplies
@@ -12335,7 +12380,7 @@ RectTransform:
   m_Children:
   - {fileID: 1391565894}
   m_Father: {fileID: 633319166}
-  m_RootOrder: 5
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.3}
   m_AnchorMax: {x: 0.275, y: 0.55}
@@ -12389,19 +12434,28 @@ MonoBehaviour:
   m_GameObject: {fileID: 1515161582}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d09c2e2fd02c1dd43b423995f80465ae, type: 3}
+  m_Script: {fileID: 11500000, guid: 842b6f5934f997f49b6b4ae68096b334, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  actions:
-  - {fileID: 11400000, guid: 09932af4a487f8e4bbcd163af3323ef9, type: 2}
-  - {fileID: 11400000, guid: ebfcd02447078eb4b87063d1d14c4c56, type: 2}
-  - {fileID: 11400000, guid: d1a7fda5c3463044888209903a724bbc, type: 2}
-  - {fileID: 11400000, guid: be4f51d105247974bb19b4c90ab0ae15, type: 2}
-  imagesToHighlight:
-  - {fileID: 1515161584}
-  portraitParent: {fileID: 1391565894}
+  location: {fileID: 0}
   maxHeroes: 4
-  fallbackLocation: {fileID: 0}
+  heroes: []
+  highlight: {fileID: 1515161584}
+  portraitParent: {fileID: 1391565894}
+--- !u!114 &1515161587
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1515161582}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efdf783e9c81ee94d81c198291698ba4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  zones:
+  - {fileID: 1515161586}
   heroes: []
 --- !u!1001 &1530265296
 PrefabInstance:
@@ -13374,6 +13428,60 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 653836250620784003, guid: dcbc5acfd5f593b41b58875a1c29f059, type: 3}
   m_PrefabInstance: {fileID: 1809215407}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1821577291
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1821577292}
+  - component: {fileID: 1821577294}
+  m_Layer: 5
+  m_Name: Around
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1821577292
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1821577291}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 1871158203}
+  - {fileID: 1920740592}
+  m_Father: {fileID: 633319166}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1821577294
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1821577291}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efdf783e9c81ee94d81c198291698ba4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  zones:
+  - {fileID: 1871158206}
+  - {fileID: 1920740595}
+  heroes: []
 --- !u!1001 &1853205012
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -13462,17 +13570,17 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1871158202}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 940641327}
-  m_Father: {fileID: 633319166}
-  m_RootOrder: 2
+  m_Father: {fileID: 1821577292}
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.275, y: 0.3}
   m_AnchorMax: {x: 0.425, y: 0.7}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: -0.0000076293945}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1871158204
@@ -13522,20 +13630,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1871158202}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d09c2e2fd02c1dd43b423995f80465ae, type: 3}
+  m_Script: {fileID: 11500000, guid: 842b6f5934f997f49b6b4ae68096b334, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  actions:
-  - {fileID: 11400000, guid: 1be66a248dd1cb346b80ef36002e19b0, type: 2}
-  - {fileID: 11400000, guid: b322ffd1f926de74fbbffc5c8d8102e1, type: 2}
-  - {fileID: 11400000, guid: bce53075cd248854aa28d01195fad6ac, type: 2}
-  imagesToHighlight:
-  - {fileID: 1920740593}
-  - {fileID: 1871158204}
-  portraitParent: {fileID: 940641327}
+  location: {fileID: 0}
   maxHeroes: 2
-  fallbackLocation: {fileID: 1920740595}
   heroes: []
+  highlight: {fileID: 1871158204}
+  portraitParent: {fileID: 940641327}
 --- !u!1 &1885127753
 GameObject:
   m_ObjectHideFlags: 0
@@ -13947,13 +14049,13 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1909293260}
-  m_Father: {fileID: 633319166}
-  m_RootOrder: 3
+  m_Father: {fileID: 1821577292}
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.575, y: 0.3}
   m_AnchorMax: {x: 0.725, y: 0.7}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: -0.0000076293945}
+  m_SizeDelta: {x: 0.0000038146973, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1920740593
 MonoBehaviour:
@@ -14002,20 +14104,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1920740591}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d09c2e2fd02c1dd43b423995f80465ae, type: 3}
+  m_Script: {fileID: 11500000, guid: 842b6f5934f997f49b6b4ae68096b334, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  actions:
-  - {fileID: 11400000, guid: 1be66a248dd1cb346b80ef36002e19b0, type: 2}
-  - {fileID: 11400000, guid: b322ffd1f926de74fbbffc5c8d8102e1, type: 2}
-  - {fileID: 11400000, guid: bce53075cd248854aa28d01195fad6ac, type: 2}
-  imagesToHighlight:
-  - {fileID: 1920740593}
-  - {fileID: 1871158204}
-  portraitParent: {fileID: 1909293260}
+  location: {fileID: 0}
   maxHeroes: 2
-  fallbackLocation: {fileID: 1871158206}
   heroes: []
+  highlight: {fileID: 1920740593}
+  portraitParent: {fileID: 1909293260}
 --- !u!1001 &1921293674
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -14233,6 +14329,7 @@ GameObject:
   - component: {fileID: 1926764220}
   - component: {fileID: 1926764222}
   - component: {fileID: 1926764221}
+  - component: {fileID: 1926764224}
   - component: {fileID: 1926764223}
   m_Layer: 5
   m_Name: Tent
@@ -14254,7 +14351,7 @@ RectTransform:
   m_Children:
   - {fileID: 1914569616}
   m_Father: {fileID: 633319166}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.55}
   m_AnchorMax: {x: 0.275, y: 0.8}
@@ -14308,19 +14405,28 @@ MonoBehaviour:
   m_GameObject: {fileID: 1926764219}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d09c2e2fd02c1dd43b423995f80465ae, type: 3}
+  m_Script: {fileID: 11500000, guid: 842b6f5934f997f49b6b4ae68096b334, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  actions:
-  - {fileID: 11400000, guid: 88f216c21a54a0941be75db8e295f1ea, type: 2}
-  - {fileID: 11400000, guid: 384344574bcd71f4891476b0f9951225, type: 2}
-  - {fileID: 11400000, guid: 5afdcdba6b8117249af9d745e969be10, type: 2}
-  - {fileID: 11400000, guid: c64b5cd2b264f9843a9793ddf5998276, type: 2}
-  imagesToHighlight:
-  - {fileID: 1926764221}
-  portraitParent: {fileID: 1914569616}
+  location: {fileID: 0}
   maxHeroes: 4
-  fallbackLocation: {fileID: 0}
+  heroes: []
+  highlight: {fileID: 1926764221}
+  portraitParent: {fileID: 1914569616}
+--- !u!114 &1926764224
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1926764219}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efdf783e9c81ee94d81c198291698ba4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  zones:
+  - {fileID: 1926764223}
   heroes: []
 --- !u!1001 &1927108635
 PrefabInstance:
