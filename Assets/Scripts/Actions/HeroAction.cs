@@ -1,5 +1,5 @@
+using System.Collections;
 using System;
-using UnityEngine;
 
 /// <summary>
 /// An action a hero can perform. Each instance must be added to the <see cref="ActionManager"/>
@@ -12,6 +12,10 @@ public abstract class HeroAction
   public abstract string titlePresentProgressive { get; }
   public abstract string description { get; }
   public virtual int hours => 1; // TODO This might need to be a method, if e.g. a hero's competency can lower the time an action takes.
+  /// <summary>
+  /// Should this Action end before others (negative), after (positive), or in no particular order (0).
+  /// </summary>
+  public virtual int completionOrder => 0;
 
   // TODO Handle logic around whether an action requires a partner (e.g. talk) or
   // target (e.g. heal).
@@ -19,11 +23,17 @@ public abstract class HeroAction
   /// <summary>
   /// True if this Action is selectable by the Hero in the current context.
   /// </summary>
-  public virtual bool AvailableFor(Hero hero, CampController camp) => true;
+  public virtual bool AvailableFor(Hero hero, CampState context) => true;
+
+  /// <summary>
+  /// True if the <paramref name="hero"/> will allow themselves to be assigned to this
+  /// Action.
+  /// </summary>
+  public virtual bool AcceptedBy(Hero hero, CampState context) => true;
 
   public virtual string GetAssignmentAnnouncement(Hero hero, CampController camp)
   {
-    string[] messages = new string[] {
+    return new string[] {
       "Alright.",
       "Fine.",
       "Got it.",
@@ -36,24 +46,41 @@ public abstract class HeroAction
       "Will do.",
       "With pleasure!",
       "Why not?",
-    };
-    return messages[UnityEngine.Random.Range(0, messages.Length)];
+    }.Random();
   }
 
-  public virtual string GetCompletionAnnouncement(Hero hero, CampController camp)
+  public virtual string GetCompletionAnnouncement(Hero hero, CampState context)
   {
-    string[] messages = new string[] {
+    return new string[] {
       "Finished.",
       "All done.",
       "Done here.",
       "Job's done.",
       "What's next?",
-    };
-    return messages[UnityEngine.Random.Range(0, messages.Length)];
+    }.Random();
   }
 
-  public virtual void Process(Hero hero, CampController camp, Action callback)
+  public virtual IEnumerator Process(Hero hero, CampState previousState, CampState currentState, Action callback)
   {
     callback.Invoke();
+    return null;
+  }
+
+  protected void RaiseStatsAndShowPopups(Hero hero, params (Hero.Stat, int)[] statDeltas)
+  {
+    Hero.Stat stat;
+    int amount;
+    for (int i = 0; i < statDeltas.Length; i++)
+    {
+      (stat, amount) = statDeltas[i];
+      switch (stat)
+      {
+        case Hero.Stat.HEALTH: hero.health += amount; break;
+        case Hero.Stat.HUNGER: hero.hunger += amount; break;
+        case Hero.Stat.MORALE: hero.mood += amount; break;
+        case Hero.Stat.REST: hero.rest += amount; break;
+      }
+      StatPopup.Show(hero.portrait, stat, amount, statDeltas.Length - i - 1);
+    }
   }
 }

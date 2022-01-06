@@ -12,7 +12,7 @@ public class HeroPortrait : MonoBehaviour,
   IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
   public Hero hero { get; private set; }
-  public HeroLocation location;
+  public HeroLocation location { get => hero.location; set { hero.location = value; } }
 
   private Canvas canvas;
   private GraphicRaycaster raycaster;

@@ -17,12 +17,10 @@ public class Hero
 
   public HeroAction action;
   public HeroPortrait portrait;
+  public HeroLocation location;
 
   public enum Stat
   {
     HEALTH, HUNGER, REST, MORALE
   }
-
-  public ActionResult PerformAction(List<Hero> party) =>
-    ActionResult.GetFor(action, this, party);
 }

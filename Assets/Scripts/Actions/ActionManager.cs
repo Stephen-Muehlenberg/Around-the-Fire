@@ -12,23 +12,28 @@ public class ActionManager
   public static List<HeroAction> GetActionsFor(HeroLocation location)
   {
     if (location == HeroLocation.Fire) return new List<HeroAction>() {
-      
+      new ACF_CookingFire(),
+      new ACF_Campfire(),
+      new ACF_Bonfire(),
+      new ACF_Meal(),
+      new ACF_Feast(),
     };
     if (location == HeroLocation.Around) return new List<HeroAction>() {
       new ACA_Rest(),
-
+      new ACA_Talk(),
+      new ACA_Carouse(),
+      new ACA_Perform(),
     };
     if (location == HeroLocation.Tent) return new List<HeroAction>() {
-    
+      new ACT_Sleep(),
     };
     if (location == HeroLocation.Supplies) return new List<HeroAction>() {
-    
+      new ACS_Ration(),
     };
     if (location == HeroLocation.Clearing) return new List<HeroAction>() {
-    
+      new ACC_Train(),
     };
-    if (location == HeroLocation.Forest) return new List<HeroAction>() {
-    
+    if (location == HeroLocation.Perimeter) return new List<HeroAction>() {
     };
 
     return new List<HeroAction>();
