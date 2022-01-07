@@ -7,7 +7,6 @@ public class CampController : MonoBehaviour
   public static CampController singleton;
 
   /// <summary>24-hour time.</summary>
-  public int currentHour { get; private set; }
   public List<Hero> heroes;
   public CampState campState;
 
@@ -27,8 +26,6 @@ public class CampController : MonoBehaviour
     singleton = this;
 
     TEMP_GenerateRandomHeroes();
-
-    currentHour = 17;
   }
 
   private void Start()
@@ -40,11 +37,16 @@ public class CampController : MonoBehaviour
       hero.portrait = portrait;
       portrait.Initialise(hero, characterPanel);
     }
-    campState = new CampState() { heroes = heroes };
-    FireEffects.SetState(campState.fire);
+    campState = new CampState() {
+      hour = 17,
+      heroes = heroes,
+      firewood = Random.Range(0, 20),
+      supplies = Random.Range(0, 20)
+    };
 
-    TimeOfDayController.SetTime(currentHour);
-    CampStatsPanel.SetStats(currentHour);
+    CampStatsPanel.Display(campState);
+    TimeOfDayController.SetTime(campState.hour);
+    FireEffects.SetState(campState.fire);
   }
 
   private void Update()
@@ -113,7 +115,7 @@ public class CampController : MonoBehaviour
     });
 
     // Animate time advancing.
-    TimeOfDayController.AdvanceTime(currentHour, 1, null, OnAdvanceTimeFinished);
+    TimeOfDayController.AdvanceTime(campState.hour, 1, null, OnAdvanceTimeFinished);
   }
 
   private CampState DeepCopyCurrentState()
@@ -137,8 +139,8 @@ public class CampController : MonoBehaviour
   private void OnAdvanceTimeFinished(int newHour)
   {
     // Update UI.
-    currentHour = newHour;
-    CampStatsPanel.SetStats(currentHour);
+    campState.hour = newHour;
+    CampStatsPanel.Display(campState);
 
     // Copy current camp & party state, so that any changes made as a
     // result of one Action don't affect calculations of subsequent Actions.
@@ -196,6 +198,6 @@ public class CampController : MonoBehaviour
     // TODO show new time, and make everyone more tired.
 
     // Update UI.
-    StatsPanel.ShowStatsFor(HeroPortrait.selected.hero);
+    HeroStatsPanel.ShowStatsFor(HeroPortrait.selected.hero);
   }
 }

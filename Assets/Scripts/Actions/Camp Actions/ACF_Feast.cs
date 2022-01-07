@@ -10,9 +10,11 @@ public class ACF_Feast : HeroAction
   public override string description => "Treat your party to a delicious, filling banquet!";
   public override int hours => 3;
 
-  public override bool AvailableFor(Hero hero, CampState campState)
+  public override Availability AvailableFor(Hero hero, CampState campState)
   {
-    return campState.fire > 0;
+    if (campState.fire == CampState.FireState.NONE)
+      return Availability.HIDDEN;
+    return Availability.AVAILABLE;
   }
 
   public override string GetCompletionAnnouncement(Hero hero, CampState context)

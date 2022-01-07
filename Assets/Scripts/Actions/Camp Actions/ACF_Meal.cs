@@ -5,14 +5,18 @@ using UnityEngine;
 
 public class ACF_Meal : HeroAction
 {
+  private static float MEAL_SUPPLY_COST = 2;
+
   public override string title => "Cook a Meal";
   public override string titlePresentProgressive => "Cooking a meal";
   public override string description => "Feed the whole party.";
   public override int hours => 2;
 
-  public override bool AvailableFor(Hero hero, CampState campState)
+  public override Availability AvailableFor(Hero hero, CampState campState)
   {
-    return campState.fire > 0;
+    if (campState.fire == CampState.FireState.NONE)
+      return Availability.HIDDEN;
+    return Availability.AVAILABLE;
   }
 
   public override string GetCompletionAnnouncement(Hero hero, CampState context)
@@ -32,7 +36,11 @@ public class ACF_Meal : HeroAction
       .Where(it => it != hero)
       .ToList()
       .ForEach(it => RaiseStatsAndShowPopups(it, (Hero.Stat.HUNGER, 45)));
-    // TODO Lower supplies.
+    hero.portrait.Select();
+
+    currentState.supplies -= MEAL_SUPPLY_COST * currentState.heroes.Count;
+    CampStatsPanel.Display(currentState);
+
     yield return new WaitForSeconds(1.5f);
     callback.Invoke();
   }

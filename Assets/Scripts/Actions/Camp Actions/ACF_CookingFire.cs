@@ -10,10 +10,13 @@ public class ACF_CookingFire : HeroAction
   public override string description => "Make a cozy little fire for cooking.";
   public override int hours => 1;
 
-  public override bool AvailableFor(Hero hero, CampState campState)
+  public override Availability AvailableFor(Hero hero, CampState campState)
   {
-    return campState.fire == CampState.FireState.NONE
-      && campState.firewood >= 4;
+    if (campState.fire >= CampState.FireState.SMALL)
+      return Availability.HIDDEN; // Already have a fire.
+    if (campState.firewood < 4)
+      return Availability.NOT_ENOUGH_WOOD;
+    return Availability.AVAILABLE;
   }
 
   public override string GetCompletionAnnouncement(Hero hero, CampState context)

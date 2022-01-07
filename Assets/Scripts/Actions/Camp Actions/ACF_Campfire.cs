@@ -10,12 +10,13 @@ public class ACF_Campfire : HeroAction
   public override string description => "Make a larger, more comfortable fire.";
   public override int hours => 1;
 
-  public override bool AvailableFor(Hero hero, CampState campState)
+  public override Availability AvailableFor(Hero hero, CampState campState)
   {
-    return (campState.fire == CampState.FireState.NONE
-      && campState.firewood >= 8)
-      || (campState.fire == CampState.FireState.SMALL
-      && campState.firewood >= 4);
+    if (campState.fire >= CampState.FireState.MEDIUM)
+      return Availability.HIDDEN; // Fire already as big or bigger.
+    if (campState.firewood < (2 - campState.firewood) * 4)
+      return Availability.NOT_ENOUGH_WOOD;
+    return Availability.AVAILABLE;
   }
 
   public override string GetCompletionAnnouncement(Hero hero, CampState context)

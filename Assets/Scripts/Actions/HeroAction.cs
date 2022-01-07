@@ -7,6 +7,15 @@ using System;
 /// </summary>
 public abstract class HeroAction
 {
+  public enum Availability
+  {
+    AVAILABLE, 
+    NOT_ENOUGH_WOOD, 
+    NOT_ENOUGH_SUPPLIES,
+    NEEDS_A_FIRE,
+    HIDDEN
+  }
+
   public abstract string title { get; }
   /// <summary>Message displayed while performing action, e.g. title "Cook" becomes "Cooking".</summary>
   public abstract string titlePresentProgressive { get; }
@@ -21,9 +30,11 @@ public abstract class HeroAction
   // target (e.g. heal).
 
   /// <summary>
-  /// True if this Action is selectable by the Hero in the current context.
+  /// Is this Action is selectable by the Hero in the current context?
+  /// If not, what's the reason. "Subjective" things look Mood and Rest shouldn't affect
+  /// this - this is just about strict limitations, e.g. not enough firewood for a fire.
   /// </summary>
-  public virtual bool AvailableFor(Hero hero, CampState context) => true;
+  public virtual Availability AvailableFor(Hero hero, CampState context) => Availability.AVAILABLE;
 
   /// <summary>
   /// True if the <paramref name="hero"/> will allow themselves to be assigned to this

@@ -12,8 +12,10 @@ public class CampStatsPanel : MonoBehaviour
     singleton = this;
   }
 
-  public static void SetStats(int time)
+  public static void Display(CampState state)
   {
-    singleton.time.text = (time - 12).ToString() + "pm";
+    singleton.time.text = "Time: " + (state.hour - 12).ToString() + "pm"
+      + "\nSupplies: " + state.supplies + " (" + Mathf.FloorToInt(state.supplies / 4f / state.heroes.Count) + " days)"
+      + "\nWood: " + state.firewood + " (" + Mathf.FloorToInt(state.firewood / 8) + " days)";
   }
 }

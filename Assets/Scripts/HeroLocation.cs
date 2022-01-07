@@ -74,7 +74,8 @@ public class HeroLocation : MonoBehaviour
   public void ShowActions(HeroPortrait hero)
   {
     var actions = ActionManager.GetActionsFor(this)
-      .Where(it => it.AvailableFor(hero.hero, CampController.singleton.campState))
+      // TODO Show unavailable but not hidden actions differently.
+      .Where(it => it.AvailableFor(hero.hero, CampController.singleton.campState) == HeroAction.Availability.AVAILABLE)
       .ToList();
     ActionList.Show(actions, OnActionSelected);
   }

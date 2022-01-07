@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class StatsPanel : MonoBehaviour
+public class HeroStatsPanel : MonoBehaviour
 {
   public Slider health;
   public Image healthFill;
@@ -13,7 +13,7 @@ public class StatsPanel : MonoBehaviour
   public Image moodFill;
   public Gradient fillColour;
 
-  private static StatsPanel singleton;
+  private static HeroStatsPanel singleton;
 
   void Awake()
   {

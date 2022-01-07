@@ -110,7 +110,7 @@ public class HeroPortrait : MonoBehaviour,
     highlight.enabled = true;
     if (hero.action == null)
       location.ShowActions(this);
-    StatsPanel.ShowStatsFor(hero);
+    HeroStatsPanel.ShowStatsFor(hero);
   }
 
   public void Deselect()

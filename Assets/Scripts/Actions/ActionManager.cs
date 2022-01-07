@@ -25,15 +25,26 @@ public class ActionManager
       new ACA_Perform(),
     };
     if (location == HeroLocation.Tent) return new List<HeroAction>() {
+      new ACT_Heal(),
+      new ACT_ReceiveHealing(),
       new ACT_Sleep(),
     };
     if (location == HeroLocation.Supplies) return new List<HeroAction>() {
       new ACS_Ration(),
+      new ACS_Repair(),
+      new ACS_Brew(),
     };
     if (location == HeroLocation.Clearing) return new List<HeroAction>() {
+      new ACC_Exercise(),
       new ACC_Train(),
+      new ACC_Spar(),
+      new ACC_Drill(),
     };
     if (location == HeroLocation.Perimeter) return new List<HeroAction>() {
+      new ACP_Wood(),
+      new ACP_Forage(),
+      new ACP_Explore(),
+      new ACP_Guard(),
     };
 
     return new List<HeroAction>();

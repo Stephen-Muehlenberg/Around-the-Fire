@@ -10,14 +10,13 @@ public class ACF_Bonfire : HeroAction
   public override string description => "A roaring fire to raise your spirits.";
   public override int hours => 1;
 
-  public override bool AvailableFor(Hero hero, CampState campState)
+  public override Availability AvailableFor(Hero hero, CampState campState)
   {
-    return (campState.fire == CampState.FireState.NONE
-      && campState.firewood >= 12)
-      || (campState.fire == CampState.FireState.SMALL
-      && campState.firewood >= 8)
-      || (campState.fire == CampState.FireState.MEDIUM
-      && campState.firewood >= 4);
+    if (campState.fire == CampState.FireState.LARGE)
+      return Availability.HIDDEN;
+    if (campState.firewood < (3 - (int) campState.fire) * 4)
+      return Availability.NOT_ENOUGH_WOOD;
+    return Availability.AVAILABLE;
   }
 
   public override string GetCompletionAnnouncement(Hero hero, CampState context)
