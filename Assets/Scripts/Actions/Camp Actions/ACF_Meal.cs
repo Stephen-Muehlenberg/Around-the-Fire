@@ -36,7 +36,7 @@ public class ACF_Meal : HeroAction
       .Where(it => it != hero)
       .ToList()
       .ForEach(it => RaiseStatsAndShowPopups(it, (Hero.Stat.HUNGER, 45)));
-    hero.portrait.Select();
+    HeroStatsPanel.ShowStatsFor(hero);
 
     currentState.supplies -= MEAL_SUPPLY_COST * currentState.heroes.Count;
     CampStatsPanel.Display(currentState);

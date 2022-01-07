@@ -24,7 +24,7 @@ public class ACA_Rest : HeroAction
     RaiseStatsAndShowPopups(hero,
       (Hero.Stat.MORALE, 5),
       (Hero.Stat.REST, 15));
-    hero.portrait.Select();
+    HeroStatsPanel.ShowStatsFor(hero);
     yield return new WaitForSeconds(1.5f);
     callback.Invoke();
   }

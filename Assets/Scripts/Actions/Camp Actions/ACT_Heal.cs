@@ -29,7 +29,7 @@ public class ACT_Heal : HeroAction
   public override IEnumerator Process(Hero hero, CampState previousState, CampState currentState, Action callback)
   {
     // TODO
-    hero.portrait.Select();
+    HeroStatsPanel.ShowStatsFor(hero);
 
     yield return new WaitForSeconds(1.5f);
     callback.Invoke();

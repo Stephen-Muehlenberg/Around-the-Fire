@@ -20,9 +20,11 @@ public class ACP_Wood : HeroAction
   public override IEnumerator Process(Hero hero, CampState previousState, CampState currentState, Action callback)
   {
     RaiseStatsAndShowPopups(hero, (Hero.Stat.REST, -15));
-    hero.portrait.Select();
+    HeroStatsPanel.ShowStatsFor(hero);
+
     currentState.firewood += UnityEngine.Random.Range(4, 12);
     CampStatsPanel.Display(currentState);
+
     yield return new WaitForSeconds(1.5f);
     callback.Invoke();
   }

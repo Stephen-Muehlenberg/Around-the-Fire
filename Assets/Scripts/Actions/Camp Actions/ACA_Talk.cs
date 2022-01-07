@@ -21,7 +21,7 @@ public class ACA_Talk : HeroAction
   public override IEnumerator Process(Hero hero, CampState previousState, CampState currentState, Action callback)
   {
     // TODO imrpove friendship?
+    yield return new WaitForSeconds(1.5f);
     callback.Invoke();
-    return null;
   }
 }

@@ -33,8 +33,10 @@ public class ACF_Bonfire : HeroAction
     currentState.firewood += ((int) previousState.fire -3) * 4;
     currentState.fire = CampState.FireState.LARGE;
     FireEffects.SetState(CampState.FireState.LARGE);
-    hero.portrait.Select();
+    HeroStatsPanel.ShowStatsFor(hero);
+
     // TODO Lower supplies
+
     yield return new WaitForSeconds(1.5f);
     callback.Invoke();
   }

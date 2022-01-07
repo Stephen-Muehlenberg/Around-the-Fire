@@ -4,7 +4,10 @@ using UnityEngine;
 
 public class CampController : MonoBehaviour
 {
+  public enum UIState { INTERACTIVE, DRAG_IN_PROCESS, UNINTERACTIVE }
+
   public static CampController singleton;
+  public static UIState uiState = UIState.UNINTERACTIVE;
 
   /// <summary>24-hour time.</summary>
   public List<Hero> heroes;
@@ -47,6 +50,7 @@ public class CampController : MonoBehaviour
     CampStatsPanel.Display(campState);
     TimeOfDayController.SetTime(campState.hour);
     FireEffects.SetState(campState.fire);
+    uiState = UIState.INTERACTIVE;
   }
 
   private void Update()
@@ -107,6 +111,7 @@ public class CampController : MonoBehaviour
   public void ConfirmActions()
   {
     // Disable action UI.
+    uiState = UIState.UNINTERACTIVE;
     confirmActionsButton.SetActive(false);
     ActionList.Hide();
     heroes.ForEach(it => {
@@ -169,10 +174,12 @@ public class CampController : MonoBehaviour
   }
 
   /// <summary>
-  /// Recursive method; keeps invoking itself until all actions processed.
+  /// Recursive method; keeps invoking itself until all <see cref="heroesWithPendingActions"/>
+  /// are processed and the list emptied.
   /// </summary>
   private void ProcessNextAction()
   {
+    heroes.ForEach(it => it.portrait.Unhighlight());
     if (heroesWithPendingActions.Count == 0)
     {
       FinishActions();
@@ -182,7 +189,7 @@ public class CampController : MonoBehaviour
     var hero = heroesWithPendingActions[0];
     heroesWithPendingActions.RemoveAt(0);
 
-    hero.portrait.Select();
+    hero.portrait.Highlight();
     hero.portrait.ClearActionText();
     string message = hero.action.GetCompletionAnnouncement(hero, campState);
     SpeechBubble.Show(hero.portrait, message, () => {
@@ -198,6 +205,7 @@ public class CampController : MonoBehaviour
     // TODO show new time, and make everyone more tired.
 
     // Update UI.
-    HeroStatsPanel.ShowStatsFor(HeroPortrait.selected.hero);
+    HeroStatsPanel.ShowStatsFor(null);
+    uiState = UIState.INTERACTIVE;
   }
 }

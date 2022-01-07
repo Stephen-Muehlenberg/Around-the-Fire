@@ -11,6 +11,9 @@ public class HeroPortrait : MonoBehaviour,
   IBeginDragHandler, IDragHandler, IEndDragHandler,
   IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
+  private static Color COLOR_HIGHLIGHTED = new Color(1, 0.9227282f, 0, 0.2784314f);
+  private static Color COLOR_SELECTED = new Color(0.2293994f, 1, 0, 0.2784314f);
+
   public Hero hero { get; private set; }
   public HeroLocation location { get => hero.location; set { hero.location = value; } }
 
@@ -23,7 +26,6 @@ public class HeroPortrait : MonoBehaviour,
   [SerializeField] private Button cancelButton;
 
   public static HeroPortrait selected;
-  public static bool dragInProgress; // Don't highlight heroes while dragging.
 
   public void Initialise(Hero hero, HeroLocation location)
   {
@@ -39,21 +41,27 @@ public class HeroPortrait : MonoBehaviour,
 
   public void OnPointerEnter(PointerEventData eventData)
   {
-    if (dragInProgress) return;
-    Select();
+    if (CampController.uiState != CampController.UIState.INTERACTIVE) return;
+    Highlight();
   }
 
   public void OnPointerExit(PointerEventData eventData)
   {
+    if (CampController.uiState != CampController.UIState.INTERACTIVE) return;
+    Unhighlight();
   }
 
   public void OnPointerClick(PointerEventData eventData)
   {
+    if (CampController.uiState != CampController.UIState.INTERACTIVE) return;
+    Select();
   }
 
   public void OnBeginDrag(PointerEventData eventData)
   {
-    dragInProgress = true;
+    if (CampController.uiState != CampController.UIState.INTERACTIVE) return;
+
+    CampController.uiState = CampController.UIState.DRAG_IN_PROCESS;
     portrait.raycastTarget = false;
     highlight.raycastTarget = false;
     nameText.raycastTarget = false;
@@ -96,10 +104,23 @@ public class HeroPortrait : MonoBehaviour,
     else
       location.CancelMove(this);
 
-    dragInProgress = false;
     portrait.raycastTarget = true;
     highlight.raycastTarget = true;
     nameText.raycastTarget = true;
+    CampController.uiState = CampController.UIState.INTERACTIVE;
+  }
+
+  public void Highlight()
+  {
+    highlight.enabled = true;
+    highlight.color = (this == selected) ? COLOR_SELECTED : COLOR_HIGHLIGHTED;
+    HeroStatsPanel.ShowStatsFor(hero);
+  }
+
+  public void Unhighlight()
+  {
+    highlight.enabled = this == selected;
+    HeroStatsPanel.ShowStatsFor((selected == null) ? null : selected.hero);
   }
 
   public void Select()
@@ -108,8 +129,11 @@ public class HeroPortrait : MonoBehaviour,
       selected.Deselect();
     selected = this;
     highlight.enabled = true;
+    highlight.color = COLOR_SELECTED;
     if (hero.action == null)
       location.ShowActions(this);
+    else
+      location.ShowActions(null);
     HeroStatsPanel.ShowStatsFor(hero);
   }
 
@@ -132,23 +156,23 @@ public class HeroPortrait : MonoBehaviour,
     bool actionSelected = action != null;
 
     hero.action = action;
-    portrait.raycastTarget = !actionSelected;
-    highlight.raycastTarget = !actionSelected;
-    nameText.raycastTarget = !actionSelected;
-    actionText.raycastTarget = !actionSelected;
     actionText.gameObject.SetActive(actionSelected);
     if (actionSelected)
       actionText.text = action.titlePresentProgressive;
-    cancelButton.gameObject.SetActive(true);
+    cancelButton.gameObject.SetActive(actionSelected);
 
     CampController.OnActionSelected(hero);
   }
 
-  public void CancelAction() => SelectAction(null);
+  public void CancelAction()
+  {
+    SelectAction(null);
+    if (this == selected)
+      location.ShowActions(this);
+  }
 
   public void AllowCancel(bool allowed)
   {
-    UnityEngine.Debug.Log("ALLOW CANCEL " + allowed);
     cancelButton.gameObject.SetActive(allowed);
   }
 

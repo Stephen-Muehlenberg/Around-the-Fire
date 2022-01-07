@@ -23,7 +23,8 @@ public class ACC_Spar : HeroAction
     RaiseStatsAndShowPopups(hero,
       (Hero.Stat.HEALTH, -5),
       (Hero.Stat.REST, -25));
-    hero.portrait.Select();
+    HeroStatsPanel.ShowStatsFor(hero);
+
     yield return new WaitForSeconds(1.5f);
     callback.Invoke();
   }

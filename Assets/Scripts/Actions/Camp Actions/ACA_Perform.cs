@@ -20,7 +20,8 @@ public class ACA_Perform : HeroAction
       .Where(it => it.location == HeroLocation.Fire)
       .ToList()
       .ForEach(it => RaiseStatsAndShowPopups(it, (Hero.Stat.MORALE, 10)));
-    hero.portrait.Select();
+    HeroStatsPanel.ShowStatsFor(hero);
+
     yield return new WaitForSeconds(1.5f);
     callback.Invoke();
   }

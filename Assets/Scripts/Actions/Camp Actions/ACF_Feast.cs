@@ -36,7 +36,7 @@ public class ACF_Feast : HeroAction
       .ForEach(it => RaiseStatsAndShowPopups(it,
       (Hero.Stat.HUNGER, 55),
       (Hero.Stat.MORALE, 20)));
-    hero.portrait.Select();
+    HeroStatsPanel.ShowStatsFor(hero);
     // TODO Lower supplies
     yield return new WaitForSeconds(1.5f);
     callback.Invoke();

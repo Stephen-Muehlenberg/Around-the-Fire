@@ -29,7 +29,8 @@ public class ACA_Carouse : HeroAction
       .Where(it => it.location == HeroLocation.Fire)
       .ToList()
       .ForEach(it => RaiseStatsAndShowPopups(it, (Hero.Stat.MORALE, 5)));
-    hero.portrait.Select();
+    HeroStatsPanel.ShowStatsFor(hero);
+
     yield return new WaitForSeconds(1.5f);
     callback.Invoke();
   }

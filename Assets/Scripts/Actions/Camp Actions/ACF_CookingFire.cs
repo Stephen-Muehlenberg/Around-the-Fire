@@ -32,7 +32,7 @@ public class ACF_CookingFire : HeroAction
     currentState.firewood -= 4;
     currentState.fire = CampState.FireState.SMALL;
     FireEffects.SetState(CampState.FireState.SMALL);
-    hero.portrait.Select();
+    HeroStatsPanel.ShowStatsFor(hero);
     // TODO Lower supplies
     yield return new WaitForSeconds(1.5f);
     callback.Invoke();

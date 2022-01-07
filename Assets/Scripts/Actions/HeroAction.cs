@@ -71,11 +71,7 @@ public abstract class HeroAction
     }.Random();
   }
 
-  public virtual IEnumerator Process(Hero hero, CampState previousState, CampState currentState, Action callback)
-  {
-    callback.Invoke();
-    return null;
-  }
+  public abstract IEnumerator Process(Hero hero, CampState previousState, CampState currentState, Action callback);
 
   protected void RaiseStatsAndShowPopups(Hero hero, params (Hero.Stat, int)[] statDeltas)
   {

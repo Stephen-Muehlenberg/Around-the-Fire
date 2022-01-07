@@ -31,7 +31,7 @@ public class ACS_Ration : HeroAction
     currentState.heroes.ForEach(it => RaiseStatsAndShowPopups(it,
       (Hero.Stat.HUNGER, 35),
       (Hero.Stat.MORALE, -10)));
-    hero.portrait.Select();
+    HeroStatsPanel.ShowStatsFor(hero);
 
     currentState.supplies -= RATION_SUPPLY_COST * currentState.heroes.Count;
     CampStatsPanel.Display(currentState);

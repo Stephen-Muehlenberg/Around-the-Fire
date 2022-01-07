@@ -20,7 +20,7 @@ public class ACP_Forage : HeroAction
   public override IEnumerator Process(Hero hero, CampState previousState, CampState currentState, Action callback)
   {
     RaiseStatsAndShowPopups(hero, (Hero.Stat.REST, -13));
-    hero.portrait.Select();
+    HeroStatsPanel.ShowStatsFor(hero);
 
     currentState.supplies += UnityEngine.Random.Range(0, 10);
     CampStatsPanel.Display(currentState);

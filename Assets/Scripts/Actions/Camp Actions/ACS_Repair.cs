@@ -10,7 +10,7 @@ public class ACS_Repair : HeroAction
 
   public override IEnumerator Process(Hero hero, CampState previousState, CampState currentState, Action callback)
   {
-    hero.portrait.Select();
+    HeroStatsPanel.ShowStatsFor(hero);
 
     yield return new WaitForSeconds(1.5f);
     callback.Invoke();

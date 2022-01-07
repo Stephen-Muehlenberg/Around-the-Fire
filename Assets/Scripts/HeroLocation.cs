@@ -43,7 +43,7 @@ public class HeroLocation : MonoBehaviour
 
   public void OnPointerEnter()
   {
-    if (!HeroPortrait.dragInProgress) return;
+    if (CampController.uiState != CampController.UIState.DRAG_IN_PROCESS) return;
     zones.ForEach(it => it.SetHighlighted(true));
   }
 
@@ -73,6 +73,12 @@ public class HeroLocation : MonoBehaviour
 
   public void ShowActions(HeroPortrait hero)
   {
+    if (hero == null)
+    {
+      ActionList.Hide();
+      return;
+    }
+
     var actions = ActionManager.GetActionsFor(this)
       // TODO Show unavailable but not hidden actions differently.
       .Where(it => it.AvailableFor(hero.hero, CampController.singleton.campState) == HeroAction.Availability.AVAILABLE)

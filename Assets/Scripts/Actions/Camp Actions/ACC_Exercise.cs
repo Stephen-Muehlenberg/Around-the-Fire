@@ -27,7 +27,8 @@ public class ACC_Exercise : HeroAction
     RaiseStatsAndShowPopups(hero,
       (Hero.Stat.HUNGER, -10),
       (Hero.Stat.REST, -20));
-    hero.portrait.Select();
+    HeroStatsPanel.ShowStatsFor(hero);
+
     yield return new WaitForSeconds(1.5f);
     callback.Invoke();
   }

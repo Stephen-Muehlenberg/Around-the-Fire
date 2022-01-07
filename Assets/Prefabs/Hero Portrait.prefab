@@ -698,7 +698,7 @@ GameObject:
   - component: {fileID: 9102505041924870509}
   - component: {fileID: 9102505041924870511}
   m_Layer: 5
-  m_Name: Adventurer Portrait
+  m_Name: Hero Portrait
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -747,7 +747,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 152836e7b675dfd43b3181d21e266934, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  location: {fileID: 0}
   portrait: {fileID: 229460971413075329}
   highlight: {fileID: 4259952702096556767}
   nameText: {fileID: 3659874912962158429}
