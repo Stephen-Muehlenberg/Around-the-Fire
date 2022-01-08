@@ -16,7 +16,7 @@ public class ACT_ReceiveHealing : HeroAction
     return Availability.HIDDEN;
   }
 
-  public override string GetAssignmentAnnouncement(Hero hero, CampController camp)
+  public override string GetAssignmentAnnouncement(Hero hero, CampState campState)
   {
     return new string[] {
       "I don't feel so good...",

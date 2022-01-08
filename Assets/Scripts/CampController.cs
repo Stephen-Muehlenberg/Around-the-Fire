@@ -94,7 +94,7 @@ public class CampController : MonoBehaviour
   {
     if (hero.action != null)
     {
-      string message = hero.action.GetAssignmentAnnouncement(hero, singleton);
+      string message = hero.action.GetAssignmentAnnouncement(hero, campState);
       SpeechBubble.Show(hero.portrait, message);
     }
 

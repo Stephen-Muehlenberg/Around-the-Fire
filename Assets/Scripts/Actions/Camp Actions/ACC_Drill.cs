@@ -13,7 +13,7 @@ public class ACC_Drill : HeroAction
     return hero.rest > 10;
   }
 
-  public override string GetAssignmentAnnouncement(Hero hero, CampController camp)
+  public override string GetAssignmentAnnouncement(Hero hero, CampState camp)
   {
     return new string[] {
       "Show me what you're made of!",

@@ -42,7 +42,7 @@ public abstract class HeroAction
   /// </summary>
   public virtual bool AcceptedBy(Hero hero, CampState context) => true;
 
-  public virtual string GetAssignmentAnnouncement(Hero hero, CampController camp)
+  public virtual string GetAssignmentAnnouncement(Hero hero, CampState campState)
   {
     return new string[] {
       "Alright.",
