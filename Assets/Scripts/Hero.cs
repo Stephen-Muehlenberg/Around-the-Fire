@@ -23,4 +23,11 @@ public class Hero
   {
     HEALTH, HUNGER, REST, MORALE
   }
+
+  public void SelectAction(HeroAction action)
+  {
+    this.action = action;
+    portrait.ShowSelectedAction(action);
+    CampController.OnActionSelected(this);
+  }
 }

@@ -81,16 +81,16 @@ public class HeroLocation : MonoBehaviour
 
     var actions = ActionManager.GetActionsFor(this)
       // TODO Show unavailable but not hidden actions differently.
-      .Where(it => it.AvailableFor(hero.hero, CampController.singleton.campState) == HeroAction.Availability.AVAILABLE)
+      .Where(it => it.AvailableFor(hero.hero, CampController.campState) == HeroAction.Availability.AVAILABLE)
       .ToList();
     ActionList.Show(actions, OnActionSelected);
   }
 
   private void OnActionSelected(HeroAction action)
   {
-    if (HeroPortrait.selected == null)
+    if (CampController.selectedHero == null)
       throw new System.Exception("Cannot select an action when no heroes selected!");
 
-    HeroPortrait.selected.SelectAction(action);
+    CampController.selectedHero.SelectAction(action);
   }
 }

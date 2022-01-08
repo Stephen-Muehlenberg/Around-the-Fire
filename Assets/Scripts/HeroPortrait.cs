@@ -25,8 +25,6 @@ public class HeroPortrait : MonoBehaviour,
   [SerializeField] private TMPro.TMP_Text actionText;
   [SerializeField] private Button cancelButton;
 
-  public static HeroPortrait selected;
-
   public void Initialise(Hero hero, HeroLocation location)
   {
     this.hero = hero;
@@ -36,7 +34,7 @@ public class HeroPortrait : MonoBehaviour,
     location.zones[0].Add(this);
     canvas = GetComponentInParent<Canvas>();
     raycaster = GetComponentInParent<GraphicRaycaster>();
-    SelectAction(null);
+    ShowSelectedAction(null);
   }
 
   public void OnPointerEnter(PointerEventData eventData)
@@ -113,21 +111,22 @@ public class HeroPortrait : MonoBehaviour,
   public void Highlight()
   {
     highlight.enabled = true;
-    highlight.color = (this == selected) ? COLOR_SELECTED : COLOR_HIGHLIGHTED;
+    highlight.color = (hero == CampController.selectedHero) ? COLOR_SELECTED : COLOR_HIGHLIGHTED;
     HeroStatsPanel.ShowStatsFor(hero);
   }
 
   public void Unhighlight()
   {
-    highlight.enabled = this == selected;
-    HeroStatsPanel.ShowStatsFor((selected == null) ? null : selected.hero);
+    var selected = CampController.selectedHero;
+    highlight.enabled = (hero == selected);
+    HeroStatsPanel.ShowStatsFor((selected == null) ? null : selected);
   }
 
   public void Select()
   {
-    if (selected != null)
-      selected.Deselect();
-    selected = this;
+    if (CampController.selectedHero != null)
+      CampController.selectedHero.portrait.Deselect();
+    CampController.selectedHero = hero;
     highlight.enabled = true;
     highlight.color = COLOR_SELECTED;
     if (hero.action == null)
@@ -140,8 +139,8 @@ public class HeroPortrait : MonoBehaviour,
   public void Deselect()
   {
     highlight.enabled = false;
-    if (selected == this)
-      selected = null;
+    if (CampController.selectedHero == hero)
+      CampController.selectedHero = null;
   }
 
   private void MoveTo(LocationZone newZone)
@@ -151,23 +150,19 @@ public class HeroPortrait : MonoBehaviour,
     location = newZone.location;
   }
 
-  public void SelectAction(HeroAction action)
+  public void ShowSelectedAction(HeroAction action)
   {
     bool actionSelected = action != null;
-
-    hero.action = action;
     actionText.gameObject.SetActive(actionSelected);
     if (actionSelected)
       actionText.text = action.titlePresentProgressive;
     cancelButton.gameObject.SetActive(actionSelected);
-
-    CampController.OnActionSelected(hero);
   }
 
   public void CancelAction()
   {
-    SelectAction(null);
-    if (this == selected)
+    hero.SelectAction(null);
+    if (CampController.selectedHero == hero)
       location.ShowActions(this);
   }
 

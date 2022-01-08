@@ -6,12 +6,12 @@ public class CampController : MonoBehaviour
 {
   public enum UIState { INTERACTIVE, DRAG_IN_PROCESS, UNINTERACTIVE }
 
-  public static CampController singleton;
+  private static CampController singleton;
   public static UIState uiState = UIState.UNINTERACTIVE;
 
-  /// <summary>24-hour time.</summary>
-  public List<Hero> heroes;
-  public CampState campState;
+  public static List<Hero> heroes { get => campState.heroes; }
+  public static Hero selectedHero;
+  public static CampState campState;
 
   [SerializeField] private GameObject portraitPrefab;
   [SerializeField] private HeroLocation characterPanel;
@@ -31,6 +31,37 @@ public class CampController : MonoBehaviour
     TEMP_GenerateRandomHeroes();
   }
 
+  private void TEMP_GenerateRandomHeroes()
+  {
+    int heroCount = TEMP_heroSprites.Count < TEMP_heroCount
+      ? TEMP_heroSprites.Count
+      : TEMP_heroCount;
+    string[] names = new string[] { "Alice", "Betty", "Clair", "Diana" };
+    if (heroCount > names.Length)
+      heroCount = names.Length;
+
+    campState = new CampState()
+    {
+      hour = 17,
+      heroes = new List<Hero>(heroCount),
+      firewood = Random.Range(0, 20),
+      supplies = Random.Range(0, 20)
+    };
+
+    for (int i = 0; i < heroCount; i++)
+    {
+      campState.heroes.Add(new Hero()
+      {
+        name = names[i],
+        icon = TEMP_heroSprites[i],
+        hunger = Random.Range(15, 80),
+        rest = Random.Range(15, 90),
+        health = Mathf.Clamp(Random.Range(30, 170), 0, 100),
+        mood = Random.Range(8, 95),
+      });
+    }
+  }
+
   private void Start()
   {
     foreach (Hero hero in heroes)
@@ -40,12 +71,6 @@ public class CampController : MonoBehaviour
       hero.portrait = portrait;
       portrait.Initialise(hero, characterPanel);
     }
-    campState = new CampState() {
-      hour = 17,
-      heroes = heroes,
-      firewood = Random.Range(0, 20),
-      supplies = Random.Range(0, 20)
-    };
 
     CampStatsPanel.Display(campState);
     TimeOfDayController.SetTime(campState.hour);
@@ -65,30 +90,6 @@ public class CampController : MonoBehaviour
     }
   }
 
-  private void TEMP_GenerateRandomHeroes()
-  {
-    int heroCount = TEMP_heroSprites.Count < TEMP_heroCount
-      ? TEMP_heroSprites.Count
-      : TEMP_heroCount;
-    string[] names = new string[] { "Alice", "Betty", "Clair", "Diana" };
-    if (heroCount > names.Length)
-      heroCount = names.Length;
-
-    heroes = new List<Hero>(heroCount);
-    for (int i = 0; i < heroCount; i++)
-    {
-      heroes.Add(new Hero()
-      {
-        name = names[i],
-        icon = TEMP_heroSprites[i],
-        hunger = Random.Range(15, 80),
-        rest = Random.Range(15, 90),
-        health = Mathf.Clamp(Random.Range(30, 170), 0, 100),
-        mood = Random.Range(8, 95),
-      });
-    }
-  }
-
   public static void OnActionSelected(Hero hero)
   {
     if (hero.action != null)
@@ -101,12 +102,7 @@ public class CampController : MonoBehaviour
   }
 
   private static bool AllHeroesReady()
-  {
-    foreach (Hero a in singleton.heroes)
-      if (a.action == null)
-        return false;
-    return true;
-  }
+    => heroes.All(it => it.action != null);
 
   public void ConfirmActions()
   {
@@ -200,7 +196,7 @@ public class CampController : MonoBehaviour
   private void FinishActions()
   {
     // Clear hero's actions.
-    heroes.ForEach(it => it.portrait.SelectAction(null));
+    heroes.ForEach(it => it.SelectAction(null));
 
     // TODO show new time, and make everyone more tired.
 
