@@ -151,13 +151,7 @@ public class CampController : MonoBehaviour
     int hours = heroes
       .Select(it => it.action.hours)
       .Min();
-    heroes.ForEach(it => {
-      for (int i = 0; i < hours; i++) {
-        it.hunger -= Random.Range(3.5f, 4.5f);
-        it.rest -= Random.Range(4.5f, 5.5f);
-        it.mood -= (it.mood > 40 ? -1f : 1f) + Random.Range(-0.5f, 0.5f);
-      }
-    });
+    DegradeStatsOverTime(hours);
 
     // Sort Heroes by their Action priority, then left-to-right, then top-to-bottom.
     heroesWithPendingActions = heroes
@@ -167,6 +161,33 @@ public class CampController : MonoBehaviour
       .ToList();
 
     ProcessNextAction();
+  }
+
+  private void DegradeStatsOverTime(int hours)
+  {
+    heroes.ForEach(it => {
+      for (int i = 0; i < hours; i++)
+      {
+        it.hunger -= Random.Range(3.5f, 4.5f);
+        it.rest -= Random.Range(4.5f, 5.5f);
+
+        // Mood tends towards the average of the other three stats.
+        float statAverage = (it.health + it.hunger + it.rest) / 3f;
+        float moodOffset = statAverage - it.mood;
+        // Rough output: 0: 0,  5: 1.8,  20: 3.5,  50: 4.7,  100: 5.7
+        float moodDelta = Mathf.Log((Mathf.Abs(moodOffset) / 2) + 1, 2);
+        if (moodOffset < 0) moodDelta = -moodDelta;
+
+        // Other stats can only improve mood so much.
+        else if (moodOffset > 0)
+        {
+          if (it.mood + moodDelta > 65) moodDelta = 0;
+          if (it.mood + moodDelta > 55) moodDelta /= 2;
+        }
+
+        it.mood += moodDelta + Random.Range(-0.5f, 0.5f);
+      }
+    });
   }
 
   /// <summary>
