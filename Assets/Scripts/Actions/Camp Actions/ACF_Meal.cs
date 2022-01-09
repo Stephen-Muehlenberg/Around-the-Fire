@@ -10,6 +10,7 @@ public class ACF_Meal : HeroAction
   public override string title => "Cook a Meal";
   public override string titlePresentProgressive => "Cooking a meal";
   public override string description => "Feed the whole party.";
+  public override HeroLocation location => HeroLocation.Fire;
   public override int hours => 2;
 
   public override Availability AvailableFor(Hero hero, CampState campState)
@@ -18,6 +19,9 @@ public class ACF_Meal : HeroAction
       return Availability.HIDDEN;
     return Availability.AVAILABLE;
   }
+
+  public override float GetAutoAssignWeight(Hero hero, CampState campState)
+    => StandardAutoAssignWeight(hero, hunger: 45, rest: -20);
 
   public override string GetCompletionAnnouncement(Hero hero, CampState context)
   {

@@ -48,7 +48,7 @@ public class LocationZone : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     }
   }
 
-  public void Add(HeroPortrait hero)
+  public void Add(HeroPortrait hero, bool showActions = true)
   {
     if (!CanAccept(hero))
       throw new System.Exception("Can't accept hero '" + hero.hero.name + "' at " + location.name + "." + this.name + ".");
@@ -64,7 +64,7 @@ public class LocationZone : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
 
     heroes.Add(hero);
     hero.transform.SetParent(portraitParent);
-    location.Add(hero);
+    location.Add(hero, showActions);
   }
 
   public void ReturnToPreviousPosition(HeroPortrait hero)

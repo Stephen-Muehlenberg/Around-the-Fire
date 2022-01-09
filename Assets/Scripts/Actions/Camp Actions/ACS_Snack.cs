@@ -1,26 +1,26 @@
 using System;
-using System.Linq;
 using System.Collections;
 using UnityEngine;
 
-public class ACS_Ration : HeroAction
+public class ACS_Snack : HeroAction
 {
-  private static float RATION_SUPPLY_COST = 1;
+  private static float SNACK_SUPPLY_COST = 7;
 
-  public override string title => "Distribute Rations";
-  public override string titlePresentProgressive => "Distributing rations";
-  public override string description => "Feed the party just enough to keep them going.";
+  public override string title => "Eat a Snack";
+  public override string titlePresentProgressive => "Snacking";
+  public override string description => "Take the edge off your hunger.";
   public override HeroLocation location => HeroLocation.Supplies;
 
   public override Availability AvailableFor(Hero hero, CampState context)
   {
-    if (context.supplies < RATION_SUPPLY_COST * context.heroes.Count)
+    if (context.supplies < SNACK_SUPPLY_COST)
       return Availability.NOT_ENOUGH_SUPPLIES;
     return Availability.AVAILABLE;
   }
 
   public override float GetAutoAssignWeight(Hero hero, CampState campState)
-    => StandardAutoAssignWeight(hero, hunger: 35, rest: -5, mood: -10);
+    => StandardAutoAssignWeight(hero, hunger: 20, mood: 5);
+
 
   public override string GetCompletionAnnouncement(Hero hero, CampState context)
   {
@@ -34,18 +34,11 @@ public class ACS_Ration : HeroAction
   public override IEnumerator Process(Hero hero, CampState previousState, CampState currentState, Action callback)
   {
     RaiseStatsAndShowPopups(hero,
-      (Hero.Stat.HUNGER, 35),
-      (Hero.Stat.MORALE, -10),
-      (Hero.Stat.REST, -5));
-    currentState.heroes
-      .Where(it => it != hero)
-      .ToList()
-      .ForEach(it => RaiseStatsAndShowPopups(it,
-      (Hero.Stat.HUNGER, 35),
-      (Hero.Stat.MORALE, -10)));
+      (Hero.Stat.HUNGER, 20),
+      (Hero.Stat.MORALE, 5));
     HeroStatsPanel.ShowStatsFor(hero);
 
-    currentState.supplies -= RATION_SUPPLY_COST * currentState.heroes.Count;
+    currentState.supplies -= SNACK_SUPPLY_COST;
     CampStatsPanel.Display(currentState);
 
     yield return new WaitForSeconds(1.5f);

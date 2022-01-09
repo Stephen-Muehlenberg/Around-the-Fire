@@ -52,10 +52,13 @@ public class HeroLocation : MonoBehaviour
     zones.ForEach(it => it.SetHighlighted(false));
   }
 
-  public void Add(HeroPortrait hero)
+  public bool HasSpace()
+    => zones.Any(it => it.heroes.Count < it.maxHeroes);
+
+  public void Add(HeroPortrait hero, bool showActions = true)
   {
     heroes.Add(hero);
-    ShowActions(hero);
+    if (showActions) ShowActions(hero);
   }
 
   public void CancelMove(HeroPortrait hero)

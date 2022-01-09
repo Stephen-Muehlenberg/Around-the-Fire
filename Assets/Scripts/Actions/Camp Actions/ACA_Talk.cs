@@ -8,6 +8,7 @@ public class ACA_Talk : HeroAction
   public override string title => "Talk";
   public override string titlePresentProgressive => "Talking";
   public override string description => "Get to know your fellow adventurers.";
+  public override HeroLocation location => HeroLocation.Around;
 
   public override string GetCompletionAnnouncement(Hero hero, CampState context)
   {

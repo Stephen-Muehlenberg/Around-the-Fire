@@ -7,6 +7,7 @@ public class ACP_Forage : HeroAction
   public override string title => "Forage";
   public override string titlePresentProgressive => "Foraging";
   public override string description => "Search for supplies.";
+  public override HeroLocation location => HeroLocation.Perimeter;
 
   public override string GetAssignmentAnnouncement(Hero hero, CampState campState)
   {

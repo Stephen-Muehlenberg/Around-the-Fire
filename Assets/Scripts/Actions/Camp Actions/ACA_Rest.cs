@@ -1,7 +1,5 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class ACA_Rest : HeroAction
@@ -9,8 +7,12 @@ public class ACA_Rest : HeroAction
   public override string title => "Rest";
   public override string titlePresentProgressive => "Resting";
   public override string description => "Take a load off and unwind.";
+  public override HeroLocation location => HeroLocation.Around;
 
-  public override string GetCompletionAnnouncement(Hero hero, CampState context)
+  public override float GetAutoAssignWeight(Hero hero, CampState campState)
+    => StandardAutoAssignWeight(hero, rest: 15, mood: 5);
+
+  public override string GetCompletionAnnouncement(Hero hero, CampState campState)
   {
     return new string[] {
       "Ahh... nice to take a load off.",

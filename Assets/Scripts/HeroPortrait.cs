@@ -1,3 +1,5 @@
+using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -31,7 +33,7 @@ public class HeroPortrait : MonoBehaviour,
     nameText.text = hero.name;
     portrait.sprite = hero.icon;
     this.location = location;
-    location.zones[0].Add(this);
+    location.zones[0].Add(hero: this, showActions: false);
     canvas = GetComponentInParent<Canvas>();
     raycaster = GetComponentInParent<GraphicRaycaster>();
     ShowSelectedAction(null);
@@ -47,6 +49,20 @@ public class HeroPortrait : MonoBehaviour,
   {
     if (CampController.uiState != CampController.UIState.INTERACTIVE) return;
     Unhighlight();
+  }
+
+  public void Highlight()
+  {
+    highlight.enabled = true;
+    highlight.color = (hero == CampController.selectedHero) ? COLOR_SELECTED : COLOR_HIGHLIGHTED;
+    HeroStatsPanel.ShowStatsFor(hero);
+  }
+
+  public void Unhighlight()
+  {
+    var selected = CampController.selectedHero;
+    highlight.enabled = (hero == selected);
+    HeroStatsPanel.ShowStatsFor((selected == null) ? null : selected);
   }
 
   public void OnPointerClick(PointerEventData eventData)
@@ -108,20 +124,6 @@ public class HeroPortrait : MonoBehaviour,
     CampController.uiState = CampController.UIState.INTERACTIVE;
   }
 
-  public void Highlight()
-  {
-    highlight.enabled = true;
-    highlight.color = (hero == CampController.selectedHero) ? COLOR_SELECTED : COLOR_HIGHLIGHTED;
-    HeroStatsPanel.ShowStatsFor(hero);
-  }
-
-  public void Unhighlight()
-  {
-    var selected = CampController.selectedHero;
-    highlight.enabled = (hero == selected);
-    HeroStatsPanel.ShowStatsFor((selected == null) ? null : selected);
-  }
-
   public void Select()
   {
     if (CampController.selectedHero != null)
@@ -143,11 +145,20 @@ public class HeroPortrait : MonoBehaviour,
       CampController.selectedHero = null;
   }
 
-  private void MoveTo(LocationZone newZone)
+  private void MoveTo(LocationZone newZone, bool showActions = true)
   {
     location.Remove(this);
-    newZone.Add(this);
+    newZone.Add(this, showActions);
     location = newZone.location;
+  }
+
+  public IEnumerator AnimateMoveTo(HeroLocation location)
+  {
+    var zone = location.zones
+      .First(it => it.heroes.Count < it.maxHeroes);
+    MoveTo(newZone: zone, showActions: false);
+    // TODO animate.
+    yield return new WaitForSeconds(0.2f);
   }
 
   public void ShowSelectedAction(HeroAction action)

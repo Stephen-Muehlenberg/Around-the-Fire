@@ -8,6 +8,10 @@ public class ACA_Carouse : HeroAction
   public override string title => "Carouse";
   public override string titlePresentProgressive => "Carousing";
   public override string description => "Have a drink and some laughs with friends.";
+  public override HeroLocation location => HeroLocation.Around;
+
+  public override float GetAutoAssignWeight(Hero hero, CampState campState)
+    => StandardAutoAssignWeight(hero, mood: 15);
 
   public override string GetCompletionAnnouncement(Hero hero, CampState context)
   {

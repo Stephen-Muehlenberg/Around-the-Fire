@@ -7,6 +7,7 @@ public class ACC_Drill : HeroAction
   public override string title => "Drill";
   public override string titlePresentProgressive => "Drilling";
   public override string description => "Improve the training of others.";
+  public override HeroLocation location => HeroLocation.Clearing;
 
   public override bool AcceptedBy(Hero hero, CampState context)
   {

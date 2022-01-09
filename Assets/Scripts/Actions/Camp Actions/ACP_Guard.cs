@@ -7,6 +7,7 @@ public class ACP_Guard : HeroAction
   public override string title => "Stand Watch";
   public override string titlePresentProgressive => "Standing watch";
   public override string description => "Guard the camp.";
+  public override HeroLocation location => HeroLocation.Perimeter;
 
   public override IEnumerator Process(Hero hero, CampState previousState, CampState currentState, Action callback)
   {

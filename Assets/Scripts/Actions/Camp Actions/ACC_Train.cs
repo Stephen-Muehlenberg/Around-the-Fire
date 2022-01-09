@@ -7,8 +7,9 @@ public class ACC_Train : HeroAction
   public override string title => "Train";
   public override string titlePresentProgressive => "Training";
   public override string description => "Improve your combat skills.";
+  public override HeroLocation location => HeroLocation.Clearing;
 
-  public override bool AcceptedBy(Hero hero, CampState context)
+  public override bool AcceptedBy(Hero hero, CampState campState)
   {
     return hero.hunger > 10
       && hero.rest > 20;

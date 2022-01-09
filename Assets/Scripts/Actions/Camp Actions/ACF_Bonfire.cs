@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.Linq;
 using UnityEngine;
 
 public class ACF_Bonfire : HeroAction
@@ -8,6 +7,7 @@ public class ACF_Bonfire : HeroAction
   public override string title => "Build a Bonfire";
   public override string titlePresentProgressive => "Building a bonfire";
   public override string description => "A roaring fire to raise your spirits.";
+  public override HeroLocation location => HeroLocation.Fire;
   public override int hours => 1;
 
   public override Availability AvailableFor(Hero hero, CampState campState)

@@ -7,6 +7,7 @@ public class ACC_Exercise : HeroAction
   public override string title => "Exercise";
   public override string titlePresentProgressive => "Exercising";
   public override string description => "Increase your max health and stamina.";
+  public override HeroLocation location => HeroLocation.Clearing;
 
   public override bool AcceptedBy(Hero hero, CampState context)
   {

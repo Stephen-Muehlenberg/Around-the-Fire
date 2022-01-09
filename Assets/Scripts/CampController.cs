@@ -1,17 +1,21 @@
 using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Main game state and logic controller.
+/// </summary>
 public class CampController : MonoBehaviour
 {
   public enum UIState { INTERACTIVE, DRAG_IN_PROCESS, UNINTERACTIVE }
 
-  private static CampController singleton;
-  public static UIState uiState = UIState.UNINTERACTIVE;
-
   public static List<Hero> heroes { get => campState.heroes; }
   public static Hero selectedHero;
   public static CampState campState;
+  public static UIState uiState = UIState.UNINTERACTIVE;
+
+  private static CampController singleton;
 
   [SerializeField] private GameObject portraitPrefab;
   [SerializeField] private HeroLocation characterPanel;
@@ -64,6 +68,7 @@ public class CampController : MonoBehaviour
 
   private void Start()
   {
+    ActionManager.Initialise();
     foreach (Hero hero in heroes)
     {
       var portrait = Instantiate(portraitPrefab, characterPanel.transform)
@@ -75,7 +80,8 @@ public class CampController : MonoBehaviour
     CampStatsPanel.Display(campState);
     TimeOfDayController.SetTime(campState.hour);
     FireEffects.SetState(campState.fire);
-    uiState = UIState.INTERACTIVE;
+
+    StartCoroutine(NewHourSequence(campState.hour));
   }
 
   private void Update()
@@ -90,19 +96,54 @@ public class CampController : MonoBehaviour
     }
   }
 
+  private IEnumerator NewHourSequence(int hour)
+  {
+    yield return TimePopup.Show(hour);
+
+    var heroesToProcess = new List<Hero>(heroes.Count);
+    heroes.ForEach(it => heroesToProcess.Add(it));
+    while (heroesToProcess.Count > 0)
+    {
+      // Choose a hero at random, so we don't always
+      // have the first hero take the best available actions.
+      int i = Random.Range(0, heroesToProcess.Count);
+      var hero = heroesToProcess[i];
+      heroesToProcess.RemoveAt(i);
+
+      // Calculate the most desirable action for the hero.
+      (HeroAction action, float weight) 
+        = ActionManager.GetMostWantedAction(hero, campState);
+      
+      // Determine if Hero will assign themselves the task,
+      // or resist the temptation.
+      float randomVariance = Random.Range(0f, 1.25f);
+      float outcome = (hero.mood / 100) + randomVariance - weight;
+      UnityEngine.Debug.Log(hero.name + " wants to " + action.title + " (mood " + (hero.mood / 100) + " + random " + randomVariance + " - weight " + weight + " = " + outcome + ")");
+      if (outcome > 0)
+        continue;
+
+      // Assign task to self.
+      yield return hero.portrait.AnimateMoveTo(action.location);
+      hero.SelectAction(action);
+      hero.portrait.Select();
+      yield return SpeechBubble.Show(hero.portrait, "I feel like doing this.");
+    }
+
+    if (selectedHero != null) selectedHero.portrait.Deselect();
+    uiState = UIState.INTERACTIVE;
+  }
+
   public static void OnActionSelected(Hero hero)
   {
     if (hero.action != null)
     {
       string message = hero.action.GetAssignmentAnnouncement(hero, campState);
-      SpeechBubble.Show(hero.portrait, message);
+      SpeechBubble.Show(hero.portrait, message, null);
     }
 
-    singleton.confirmActionsButton.SetActive(AllHeroesReady());
+    bool allHeroesReady = heroes.All(it => it.action != null);
+    singleton.confirmActionsButton.SetActive(allHeroesReady);
   }
-
-  private static bool AllHeroesReady()
-    => heroes.All(it => it.action != null);
 
   public void ConfirmActions()
   {
@@ -224,5 +265,7 @@ public class CampController : MonoBehaviour
     // Update UI.
     HeroStatsPanel.ShowStatsFor(null);
     uiState = UIState.INTERACTIVE;
+
+    StartCoroutine(NewHourSequence(campState.hour));
   }
 }

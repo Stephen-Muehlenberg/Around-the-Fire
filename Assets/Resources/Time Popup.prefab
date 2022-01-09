@@ -10,6 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 5620337566671624114}
   - component: {fileID: 4358298050528395724}
+  - component: {fileID: 8150622123150317626}
+  - component: {fileID: 4037233190503096315}
   m_Layer: 0
   m_Name: Time Popup
   m_TagString: Untagged
@@ -48,6 +50,32 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 239116815954361252}
   m_CullTransparentMesh: 1
+--- !u!114 &8150622123150317626
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 239116815954361252}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2bce0eff9e2c8f246a0f96dde92419b6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  canvasGroup: {fileID: 4037233190503096315}
+  text: {fileID: 4648389654608802210}
+--- !u!225 &4037233190503096315
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 239116815954361252}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 0
+  m_BlocksRaycasts: 0
+  m_IgnoreParentGroups: 0
 --- !u!1 &4479536812673349056
 GameObject:
   m_ObjectHideFlags: 0

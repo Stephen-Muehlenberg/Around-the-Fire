@@ -21,6 +21,18 @@ public class SpeechBubble : MonoBehaviour
     instance.GetComponent<SpeechBubble>().Initialise(text, hero.transform, callback);
   }
 
+  public static IEnumerator Show(HeroPortrait hero, string text)
+  {
+    if (prefab == null)
+      prefab = Resources.Load<GameObject>("Speech Bubble");
+
+    var instance = Instantiate(prefab, PopupController.canvasTransform);
+    instance.GetComponent<SpeechBubble>().Initialise(text, hero.transform, null);
+
+    float duration = text.Length * REVEAL_DELAY_PER_CHAR + REVEAL_END_DELAY;
+    yield return new WaitForSeconds(duration);
+  }
+
   private void Initialise(string text, Transform origin, Action callback)
   {
     transform.position = origin.position + (Vector3.up * 140);

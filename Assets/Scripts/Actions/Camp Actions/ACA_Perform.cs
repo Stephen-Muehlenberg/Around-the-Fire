@@ -8,6 +8,7 @@ public class ACA_Perform : HeroAction
   public override string title => "Perform";
   public override string titlePresentProgressive => "Performing";
   public override string description => "Entertain your friends around the fire.";
+  public override HeroLocation location => HeroLocation.Around;
 
   public override IEnumerator Process(Hero hero, CampState previousState, CampState currentState, Action callback)
   {

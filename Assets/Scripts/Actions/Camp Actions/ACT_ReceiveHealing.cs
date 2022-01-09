@@ -8,6 +8,7 @@ public class ACT_ReceiveHealing : HeroAction
   public override string title => "Receive Healing";
   public override string titlePresentProgressive => "Receiving healing";
   public override string description => "Become a priority target for Heal Wounds, and receive better treatment.";
+  public override HeroLocation location => HeroLocation.Tent;
 
   public override Availability AvailableFor(Hero hero, CampState context)
   {

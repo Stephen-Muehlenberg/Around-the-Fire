@@ -7,6 +7,7 @@ public class ACP_Explore : HeroAction
   public override string title => "Explore";
   public override string titlePresentProgressive => "Exploring";
   public override string description => "Scout the area for threats and opportunities.";
+  public override HeroLocation location => HeroLocation.Perimeter;
 
   public override IEnumerator Process(Hero hero, CampState previousState, CampState currentState, Action callback)
   {
