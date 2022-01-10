@@ -24,10 +24,10 @@ public class Hero
     HEALTH, HUNGER, REST, MORALE
   }
 
-  public void SelectAction(HeroAction action)
+  public void SelectAction(HeroAction action, bool assignedBySelf = false)
   {
     this.action = action;
     portrait.ShowSelectedAction(action);
-    CampController.OnActionSelected(this);
+    CampController.OnActionSelected(this, assignedBySelf);
   }
 }

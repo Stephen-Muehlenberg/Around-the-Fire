@@ -15,7 +15,7 @@ public class CampStatsPanel : MonoBehaviour
   public static void Display(CampState state)
   {
     singleton.time.text = "Time: " + (state.hour - 12).ToString() + "pm"
-      + "\nSupplies: " + state.supplies + " (" + Mathf.FloorToInt(state.supplies / 4f / state.heroes.Count) + " days)"
-      + "\nWood: " + state.firewood + " (" + Mathf.FloorToInt(state.firewood / 8) + " days)";
+      + "\nSupplies: " + Mathf.FloorToInt(state.supplies) + " (" + Mathf.FloorToInt(state.supplies / 4f / state.heroes.Count) + " days)"
+      + "\nWood: " + Mathf.FloorToInt(state.firewood) + " (" + Mathf.FloorToInt(state.firewood / 8) + " days)";
   }
 }

@@ -80,7 +80,7 @@ public class HeroPortrait : MonoBehaviour,
     highlight.raycastTarget = false;
     nameText.raycastTarget = false;
 
-    Select();
+    Select(showActions: false);
 
     transform.localPosition += new Vector3(
       eventData.delta.x,
@@ -124,15 +124,15 @@ public class HeroPortrait : MonoBehaviour,
     CampController.uiState = CampController.UIState.INTERACTIVE;
   }
 
-  public void Select()
+  public void Select(bool showActions = true)
   {
     if (CampController.selectedHero != null)
       CampController.selectedHero.portrait.Deselect();
     CampController.selectedHero = hero;
     highlight.enabled = true;
     highlight.color = COLOR_SELECTED;
-    if (hero.action == null)
-      location.ShowActions(this);
+    if (hero.action == null && showActions)
+      location.ShowActions(hero);
     else
       location.ShowActions(null);
     HeroStatsPanel.ShowStatsFor(hero);
@@ -174,7 +174,7 @@ public class HeroPortrait : MonoBehaviour,
   {
     hero.SelectAction(null);
     if (CampController.selectedHero == hero)
-      location.ShowActions(this);
+      location.ShowActions(hero);
   }
 
   public void AllowCancel(bool allowed)

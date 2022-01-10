@@ -48,8 +48,8 @@ public class CampController : MonoBehaviour
     {
       hour = 17,
       heroes = new List<Hero>(heroCount),
-      firewood = Random.Range(0, 20),
-      supplies = Random.Range(0, 20)
+      firewood = Random.Range(0f, 20f),
+      supplies = Random.Range(0f, 20f)
     };
 
     for (int i = 0; i < heroCount; i++)
@@ -124,7 +124,7 @@ public class CampController : MonoBehaviour
 
       // Assign task to self.
       yield return hero.portrait.AnimateMoveTo(action.location);
-      hero.SelectAction(action);
+      hero.SelectAction(action, assignedBySelf: true);
       hero.portrait.Select();
       yield return SpeechBubble.Show(hero.portrait, "I feel like doing this.");
     }
@@ -133,9 +133,9 @@ public class CampController : MonoBehaviour
     uiState = UIState.INTERACTIVE;
   }
 
-  public static void OnActionSelected(Hero hero)
+  public static void OnActionSelected(Hero hero, bool wasAssignedBySelf = false)
   {
-    if (hero.action != null)
+    if (hero.action != null && !wasAssignedBySelf)
     {
       string message = hero.action.GetAssignmentAnnouncement(hero, campState);
       SpeechBubble.Show(hero.portrait, message, null);

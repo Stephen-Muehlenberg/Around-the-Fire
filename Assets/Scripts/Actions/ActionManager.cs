@@ -53,7 +53,11 @@ public class ActionManager
   }
 
   public static List<HeroAction> GetActionsFor(HeroLocation location)
-    => actionsByLocation[location];
+  {
+    if (actionsByLocation.ContainsKey(location))
+      return actionsByLocation[location];
+    return new List<HeroAction>();
+  }
 
   /// <summary>
   /// Calculate which available Action the <paramref name="hero"/> most

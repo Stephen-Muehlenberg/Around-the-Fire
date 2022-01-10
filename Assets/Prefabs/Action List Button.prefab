@@ -254,6 +254,8 @@ MonoBehaviour:
   tint: {fileID: 8740156134298785794}
   title: {fileID: 1359492397831844163}
   description: {fileID: 7336058367773985717}
+  unavailableUI: {fileID: 1148874621084431439}
+  unavailableReason: {fileID: 6482171773578706788}
 --- !u!1 &3194624065972709822
 GameObject:
   m_ObjectHideFlags: 0

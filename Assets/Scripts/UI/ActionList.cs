@@ -17,7 +17,7 @@ public class ActionList : MonoBehaviour
     gameObject.SetActive(false);
   }
 
-  public static void Show(List<HeroAction> actions, Action<HeroAction> callback)
+  public static void Show(List<(HeroAction, HeroAction.Availability)> actions, Action<HeroAction> callback)
   {
     if (actions.Count > singleton.buttons.Count)
       throw new Exception("Too many actions - can't display " + actions.Count + " in " + singleton.buttons.Count + " buttons.");
@@ -29,7 +29,7 @@ public class ActionList : MonoBehaviour
       if (actions.Count > i)
       {
         button.gameObject.SetActive(true);
-        button.SetAction(actions[i]);
+        button.SetAction(actions[i].Item1, actions[i].Item2);
       } 
       else
         button.gameObject.SetActive(false);

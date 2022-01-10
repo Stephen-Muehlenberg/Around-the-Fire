@@ -58,14 +58,14 @@ public class HeroLocation : MonoBehaviour
   public void Add(HeroPortrait hero, bool showActions = true)
   {
     heroes.Add(hero);
-    if (showActions) ShowActions(hero);
+    if (showActions) ShowActions(hero.hero);
   }
 
   public void CancelMove(HeroPortrait hero)
   {
     zones.First(it => it.heroes.Contains(hero))
       .ReturnToPreviousPosition(hero);
-    ShowActions(hero);
+    ShowActions(hero.hero);
   }
 
   public void Remove(HeroPortrait hero)
@@ -74,7 +74,7 @@ public class HeroLocation : MonoBehaviour
     zones.ForEach(it => it.heroes.Remove(hero));
   }
 
-  public void ShowActions(HeroPortrait hero)
+  public void ShowActions(Hero hero)
   {
     if (hero == null)
     {
@@ -83,8 +83,8 @@ public class HeroLocation : MonoBehaviour
     }
 
     var actions = ActionManager.GetActionsFor(this)
-      // TODO Show unavailable but not hidden actions differently.
-      .Where(it => it.AvailableFor(hero.hero, CampController.campState) == HeroAction.Availability.AVAILABLE)
+      .Select(it => (it, it.AvailableFor(hero, CampController.campState)))
+      .Where(it => it.Item2 != HeroAction.Availability.HIDDEN)
       .ToList();
     ActionList.Show(actions, OnActionSelected);
   }
