@@ -13,17 +13,17 @@ public class ACF_Meal : HeroAction
   public override HeroLocation location => HeroLocation.Fire;
   public override int hours => 2;
 
-  public override Availability AvailableFor(Hero hero, CampState campState)
+  public override Availability AvailableFor(Hero hero, PartyState context)
   {
-    if (campState.fire == CampState.FireState.NONE)
+    if (context.camp.fire == CampState.FireState.NONE)
       return Availability.HIDDEN;
     return Availability.AVAILABLE;
   }
 
-  public override float GetAutoAssignWeight(Hero hero, CampState campState)
+  public override float GetAutoAssignWeight(Hero hero, PartyState context)
     => StandardAutoAssignWeight(hero, hunger: 45, rest: -20);
 
-  public override string GetCompletionAnnouncement(Hero hero, CampState context)
+  public override string GetCompletionAnnouncement(Hero hero, PartyState context)
   {
     return new string[] {
       "Come get your grub!",
@@ -33,7 +33,7 @@ public class ACF_Meal : HeroAction
     }.Random();
   }
 
-  public override IEnumerator Process(Hero hero, CampState previousState, CampState currentState, Action callback)
+  public override IEnumerator Process(Hero hero, PartyState previousState, PartyState currentState, Action callback)
   {
     RaiseStatsAndShowPopups(hero, (Hero.Stat.HUNGER, 45), (Hero.Stat.REST, -20));
     currentState.heroes

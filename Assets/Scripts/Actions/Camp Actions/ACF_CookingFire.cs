@@ -10,16 +10,16 @@ public class ACF_CookingFire : HeroAction
   public override HeroLocation location => HeroLocation.Fire;
   public override int hours => 1;
 
-  public override Availability AvailableFor(Hero hero, CampState campState)
+  public override Availability AvailableFor(Hero hero, PartyState context)
   {
-    if (campState.fire >= CampState.FireState.SMALL)
+    if (context.camp.fire >= CampState.FireState.SMALL)
       return Availability.HIDDEN; // Already have a fire.
-    if (campState.firewood < 4)
+    if (context.firewood < 4)
       return Availability.NOT_ENOUGH_WOOD;
     return Availability.AVAILABLE;
   }
 
-  public override string GetCompletionAnnouncement(Hero hero, CampState context)
+  public override string GetCompletionAnnouncement(Hero hero, PartyState context)
   {
     return new string[] {
       "Cooking fire's ready!",
@@ -27,10 +27,10 @@ public class ACF_CookingFire : HeroAction
     }.Random();
   }
 
-  public override IEnumerator Process(Hero hero, CampState previousState, CampState currentState, Action callback)
+  public override IEnumerator Process(Hero hero, PartyState previousState, PartyState currentState, Action callback)
   {
     currentState.firewood -= 4;
-    currentState.fire = CampState.FireState.SMALL;
+    currentState.camp.fire = CampState.FireState.SMALL;
     FireEffects.SetState(CampState.FireState.SMALL);
     HeroStatsPanel.ShowStatsFor(hero);
     // TODO Lower supplies

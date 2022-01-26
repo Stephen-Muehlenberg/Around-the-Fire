@@ -9,7 +9,7 @@ public class ACP_Explore : HeroAction
   public override string description => "Scout the area for threats and opportunities.";
   public override HeroLocation location => HeroLocation.Perimeter;
 
-  public override IEnumerator Process(Hero hero, CampState previousState, CampState currentState, Action callback)
+  public override IEnumerator Process(Hero hero, PartyState previousState, PartyState currentState, Action callback)
   {
     RaiseStatsAndShowPopups(hero, (Hero.Stat.REST, -15));
     HeroStatsPanel.ShowStatsFor(hero);

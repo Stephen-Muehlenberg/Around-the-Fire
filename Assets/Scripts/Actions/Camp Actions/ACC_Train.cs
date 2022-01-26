@@ -9,13 +9,13 @@ public class ACC_Train : HeroAction
   public override string description => "Improve your combat skills.";
   public override HeroLocation location => HeroLocation.Clearing;
 
-  public override bool AcceptedBy(Hero hero, CampState campState)
+  public override bool AcceptedBy(Hero hero, PartyState context)
   {
     return hero.hunger > 10
       && hero.rest > 20;
   }
 
-  public override string GetCompletionAnnouncement(Hero hero, CampState context)
+  public override string GetCompletionAnnouncement(Hero hero, PartyState context)
   {
     return new string[] {
       "Die, target dummy!",
@@ -23,7 +23,7 @@ public class ACC_Train : HeroAction
     }.Random();
   }
 
-  public override IEnumerator Process(Hero hero, CampState previousContext, CampState context, Action callback)
+  public override IEnumerator Process(Hero hero, PartyState previousContext, PartyState context, Action callback)
   {
     RaiseStatsAndShowPopups(hero,
       (Hero.Stat.HUNGER, -10),

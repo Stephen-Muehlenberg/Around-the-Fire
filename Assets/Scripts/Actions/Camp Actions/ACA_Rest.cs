@@ -9,10 +9,10 @@ public class ACA_Rest : HeroAction
   public override string description => "Take a load off and unwind.";
   public override HeroLocation location => HeroLocation.Around;
 
-  public override float GetAutoAssignWeight(Hero hero, CampState campState)
+  public override float GetAutoAssignWeight(Hero hero, PartyState context)
     => StandardAutoAssignWeight(hero, rest: 15, mood: 5);
 
-  public override string GetCompletionAnnouncement(Hero hero, CampState campState)
+  public override string GetCompletionAnnouncement(Hero hero, PartyState context)
   {
     return new string[] {
       "Ahh... nice to take a load off.",
@@ -21,7 +21,7 @@ public class ACA_Rest : HeroAction
     }.Random();
   }
 
-  public override IEnumerator Process(Hero hero, CampState previousState, CampState currentState, Action callback)
+  public override IEnumerator Process(Hero hero, PartyState previousState, PartyState currentState, Action callback)
   {
     RaiseStatsAndShowPopups(hero,
       (Hero.Stat.MORALE, 5),

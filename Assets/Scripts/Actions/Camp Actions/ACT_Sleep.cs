@@ -10,10 +10,10 @@ public class ACT_Sleep : HeroAction
   public override string description => "Take a nap, or call it a night.";
   public override HeroLocation location => HeroLocation.Tent;
 
-  public override float GetAutoAssignWeight(Hero hero, CampState campState)
+  public override float GetAutoAssignWeight(Hero hero, PartyState context)
     => StandardAutoAssignWeight(hero, rest: 25);
 
-  public override string GetCompletionAnnouncement(Hero hero, CampState context)
+  public override string GetCompletionAnnouncement(Hero hero, PartyState context)
   {
     return new string[] {
       "Goodnight, everyone.",
@@ -22,7 +22,7 @@ public class ACT_Sleep : HeroAction
     }.Random();
   }
 
-  public override IEnumerator Process(Hero hero, CampState previousState, CampState currentState, Action callback)
+  public override IEnumerator Process(Hero hero, PartyState previousState, PartyState currentState, Action callback)
   {
     RaiseStatsAndShowPopups(hero, (Hero.Stat.REST, 25));
     HeroStatsPanel.ShowStatsFor(hero);

@@ -9,12 +9,12 @@ public class ACC_Drill : HeroAction
   public override string description => "Improve the training of others.";
   public override HeroLocation location => HeroLocation.Clearing;
 
-  public override bool AcceptedBy(Hero hero, CampState context)
+  public override bool AcceptedBy(Hero hero, PartyState context)
   {
     return hero.rest > 10;
   }
 
-  public override string GetAssignmentAnnouncement(Hero hero, CampState camp)
+  public override string GetAssignmentAnnouncement(Hero hero, PartyState context)
   {
     return new string[] {
       "Show me what you're made of!",
@@ -22,7 +22,7 @@ public class ACC_Drill : HeroAction
     }.Random();
   }
 
-  public override IEnumerator Process(Hero hero, CampState previousContext, CampState context, Action callback)
+  public override IEnumerator Process(Hero hero, PartyState previousContext, PartyState context, Action callback)
   {
     // TODO Show "Training++" on Heroes exercising/sparring/training.
     HeroStatsPanel.ShowStatsFor(hero);

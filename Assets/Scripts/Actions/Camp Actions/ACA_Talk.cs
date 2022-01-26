@@ -10,7 +10,7 @@ public class ACA_Talk : HeroAction
   public override string description => "Get to know your fellow adventurers.";
   public override HeroLocation location => HeroLocation.Around;
 
-  public override string GetCompletionAnnouncement(Hero hero, CampState context)
+  public override string GetCompletionAnnouncement(Hero hero, PartyState context)
   {
     return new string[] {
       "How are you holding up?",
@@ -19,7 +19,7 @@ public class ACA_Talk : HeroAction
     }.Random();
   }
 
-  public override IEnumerator Process(Hero hero, CampState previousState, CampState currentState, Action callback)
+  public override IEnumerator Process(Hero hero, PartyState previousState, PartyState currentState, Action callback)
   {
     // TODO imrpove friendship?
     yield return new WaitForSeconds(1.5f);

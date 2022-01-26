@@ -9,7 +9,7 @@ public class ACP_Guard : HeroAction
   public override string description => "Guard the camp.";
   public override HeroLocation location => HeroLocation.Perimeter;
 
-  public override IEnumerator Process(Hero hero, CampState previousState, CampState currentState, Action callback)
+  public override IEnumerator Process(Hero hero, PartyState previousState, PartyState currentState, Action callback)
   {
     RaiseStatsAndShowPopups(hero, (Hero.Stat.REST, -10));
     HeroStatsPanel.ShowStatsFor(hero);

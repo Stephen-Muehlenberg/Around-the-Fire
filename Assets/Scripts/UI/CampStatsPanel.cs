@@ -12,9 +12,9 @@ public class CampStatsPanel : MonoBehaviour
     singleton = this;
   }
 
-  public static void Display(CampState state)
+  public static void Display(PartyState state)
   {
-    singleton.time.text = "Time: " + (state.hour - 12).ToString() + "pm"
+    singleton.time.text = "Time: " + (Mathf.FloorToInt(state.time) - 12).ToString() + "pm"
       + "\nSupplies: " + Mathf.FloorToInt(state.supplies) + " (" + Mathf.FloorToInt(state.supplies / 4f / state.heroes.Count) + " days)"
       + "\nWood: " + Mathf.FloorToInt(state.firewood) + " (" + Mathf.FloorToInt(state.firewood / 8) + " days)";
   }

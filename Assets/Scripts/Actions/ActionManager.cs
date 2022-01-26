@@ -63,7 +63,7 @@ public class ActionManager
   /// Calculate which available Action the <paramref name="hero"/> most
   /// wants to assign themselves, and how much (0 min, 1 max) they want it.
   /// </summary>
-  public static (HeroAction, float) GetMostWantedAction(Hero hero, CampState state)
+  public static (HeroAction, float) GetMostWantedAction(Hero hero, PartyState state)
   {
     return allActions
       .Where(it => it.location.HasSpace())

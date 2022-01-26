@@ -10,7 +10,7 @@ public class ACA_Perform : HeroAction
   public override string description => "Entertain your friends around the fire.";
   public override HeroLocation location => HeroLocation.Around;
 
-  public override IEnumerator Process(Hero hero, CampState previousState, CampState currentState, Action callback)
+  public override IEnumerator Process(Hero hero, PartyState previousState, PartyState currentState, Action callback)
   {
     RaiseStatsAndShowPopups(hero, (Hero.Stat.REST, -10));
     currentState.heroes

@@ -83,7 +83,7 @@ public class HeroLocation : MonoBehaviour
     }
 
     var actions = ActionManager.GetActionsFor(this)
-      .Select(it => (it, it.AvailableFor(hero, CampController.campState)))
+      .Select(it => (it, it.AvailableFor(hero, Party.currentState)))
       .Where(it => it.Item2 != HeroAction.Availability.HIDDEN)
       .ToList();
     ActionList.Show(actions, OnActionSelected);

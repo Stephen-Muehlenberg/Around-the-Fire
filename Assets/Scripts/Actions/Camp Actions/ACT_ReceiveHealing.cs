@@ -10,14 +10,14 @@ public class ACT_ReceiveHealing : HeroAction
   public override string description => "Become a priority target for Heal Wounds, and receive better treatment.";
   public override HeroLocation location => HeroLocation.Tent;
 
-  public override Availability AvailableFor(Hero hero, CampState context)
+  public override Availability AvailableFor(Hero hero, PartyState context)
   {
     if (hero.health < 100)
       return Availability.AVAILABLE;
     return Availability.HIDDEN;
   }
 
-  public override string GetAssignmentAnnouncement(Hero hero, CampState campState)
+  public override string GetAssignmentAnnouncement(Hero hero, PartyState context)
   {
     return new string[] {
       "I don't feel so good...",
@@ -26,9 +26,9 @@ public class ACT_ReceiveHealing : HeroAction
     }.Random();
   }
 
-  public override string GetCompletionAnnouncement(Hero hero, CampState campState)
+  public override string GetCompletionAnnouncement(Hero hero, PartyState context)
   {
-    if (campState.heroes.Any(it => it.action is ACT_Heal))
+    if (context.heroes.Any(it => it.action is ACT_Heal))
       return new string[] {
         "Ahhh... That's better.",
         "Ow! Careful with that needle, doc!",
@@ -42,7 +42,7 @@ public class ACT_ReceiveHealing : HeroAction
       }.Random();
   }
 
-  public override IEnumerator Process(Hero hero, CampState previousState, CampState currentState, Action callback)
+  public override IEnumerator Process(Hero hero, PartyState previousState, PartyState currentState, Action callback)
   {
     HeroStatsPanel.ShowStatsFor(hero);
 

@@ -11,24 +11,24 @@ public class ACF_Feast : HeroAction
   public override HeroLocation location => HeroLocation.Fire;
   public override int hours => 3;
 
-  public override Availability AvailableFor(Hero hero, CampState campState)
+  public override Availability AvailableFor(Hero hero, PartyState context)
   {
-    if (campState.fire == CampState.FireState.NONE)
+    if (context.camp.fire == CampState.FireState.NONE)
       return Availability.HIDDEN;
     return Availability.AVAILABLE;
   }
 
-  public override float GetAutoAssignWeight(Hero hero, CampState campState)
+  public override float GetAutoAssignWeight(Hero hero, PartyState context)
     => StandardAutoAssignWeight(hero, hunger: 55, rest: -35, mood: 20);
 
-  public override string GetCompletionAnnouncement(Hero hero, CampState context)
+  public override string GetCompletionAnnouncement(Hero hero, PartyState context)
   {
     return new string[] {
       "Gather round, everyone! It's feasting time!",
     }.Random();
   }
 
-  public override IEnumerator Process(Hero hero, CampState previousState, CampState currentState, Action callback)
+  public override IEnumerator Process(Hero hero, PartyState previousState, PartyState currentState, Action callback)
   {
     RaiseStatsAndShowPopups(hero, 
       (Hero.Stat.HUNGER, 55),

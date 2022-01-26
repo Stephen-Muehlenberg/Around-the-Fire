@@ -35,21 +35,21 @@ public abstract class HeroAction
   /// If not, what's the reason. "Subjective" things look Mood and Rest shouldn't affect
   /// this - this is just about strict limitations, e.g. not enough firewood for a fire.
   /// </summary>
-  public virtual Availability AvailableFor(Hero hero, CampState campState) => Availability.AVAILABLE;
+  public virtual Availability AvailableFor(Hero hero, PartyState context) => Availability.AVAILABLE;
 
   /// <summary>
   /// Calculate how much the given <paramref name="hero"/> wants to assign
   /// themselves this Action, from 0 (min) to 1 (max).
   /// </summary>
-  public virtual float GetAutoAssignWeight(Hero hero, CampState campState) => 0f;
+  public virtual float GetAutoAssignWeight(Hero hero, PartyState context) => 0f;
 
   /// <summary>
   /// True if the <paramref name="hero"/> will allow themselves to be assigned to this
   /// Action.
   /// </summary>
-  public virtual bool AcceptedBy(Hero hero, CampState context) => true;
+  public virtual bool AcceptedBy(Hero hero, PartyState context) => true;
 
-  public virtual string GetAssignmentAnnouncement(Hero hero, CampState campState)
+  public virtual string GetAssignmentAnnouncement(Hero hero, PartyState context)
   {
     return new string[] {
       "Alright.",
@@ -67,7 +67,7 @@ public abstract class HeroAction
     }.Random();
   }
 
-  public virtual string GetCompletionAnnouncement(Hero hero, CampState context)
+  public virtual string GetCompletionAnnouncement(Hero hero, PartyState context)
   {
     return new string[] {
       "Finished.",
@@ -78,7 +78,13 @@ public abstract class HeroAction
     }.Random();
   }
 
-  public abstract IEnumerator Process(Hero hero, CampState previousState, CampState currentState, Action callback);
+  /// <summary>
+  /// Asynchronously performs this action, modifying the <paramref name="currentState"/>.
+  /// The <paramref name="previousState"/> is provided so that all actions are performed
+  /// based on the starting state, and aren't influenced by each other's results.
+  /// Invokes <paramref name="callback"/> when finished.
+  /// </summary>
+  public abstract IEnumerator Process(Hero hero, PartyState previousState, PartyState currentState, Action callback);
 
   /// <summary>
   /// Calculates the auto-assign weight for a standard Action which just
