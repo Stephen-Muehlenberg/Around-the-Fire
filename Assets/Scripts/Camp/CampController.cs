@@ -2,86 +2,60 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 /// <summary>
 /// Main game state and logic controller.
 /// </summary>
-public class CampController : MonoBehaviour
+public class CampController : MonoBehaviour, HeroPortrait.EventsCallback
 {
   public enum UIState { INTERACTIVE, DRAG_IN_PROCESS, UNINTERACTIVE }
 
-  public static List<Hero> heroes { get => campState.heroes; }
   public static Hero selectedHero;
-  public static CampState campState;
   public static UIState uiState = UIState.UNINTERACTIVE;
 
   private static CampController singleton;
 
   [SerializeField] private GameObject portraitPrefab;
+  private GraphicRaycaster raycaster;
+  private Canvas characterCanvas;
   [SerializeField] private HeroLocation characterPanel;
   [SerializeField] private GameObject confirmActionsButton;
 
-  [SerializeField] private List<Sprite> TEMP_heroSprites;
-  [SerializeField] private int TEMP_heroCount;
-
-  private CampState previousState;
+  private PartyState previousState;
   private List<Hero> heroesWithPendingActions;
   
   private void Awake()
   {
     if (singleton != null) throw new System.Exception("CampController singleton already created.");
     singleton = this;
-
-    TEMP_GenerateRandomHeroes();
-  }
-
-  private void TEMP_GenerateRandomHeroes()
-  {
-    int heroCount = TEMP_heroSprites.Count < TEMP_heroCount
-      ? TEMP_heroSprites.Count
-      : TEMP_heroCount;
-    string[] names = new string[] { "Alice", "Betty", "Clair", "Diana" };
-    if (heroCount > names.Length)
-      heroCount = names.Length;
-
-    campState = new CampState()
-    {
-      hour = 17,
-      heroes = new List<Hero>(heroCount),
-      firewood = Random.Range(0f, 20f),
-      supplies = Random.Range(0f, 20f)
-    };
-
-    for (int i = 0; i < heroCount; i++)
-    {
-      campState.heroes.Add(new Hero()
-      {
-        name = names[i],
-        icon = TEMP_heroSprites[i],
-        hunger = Random.Range(15, 80),
-        rest = Random.Range(15, 90),
-        health = Mathf.Clamp(Random.Range(30, 170), 0, 100),
-        mood = Random.Range(8, 95),
-      });
-    }
   }
 
   private void Start()
   {
+    characterCanvas = characterPanel.GetComponentInParent<Canvas>();
+    raycaster = characterPanel.GetComponentInParent<GraphicRaycaster>();
+
     ActionManager.Initialise();
-    foreach (Hero hero in heroes)
+    foreach (Hero hero in Party.heroes)
     {
       var portrait = Instantiate(portraitPrefab, characterPanel.transform)
         .GetComponent<HeroPortrait>();
       hero.portrait = portrait;
-      portrait.Initialise(hero, characterPanel);
+      portrait.Initialise(hero, characterPanel, this);
     }
 
-    CampStatsPanel.Display(campState);
-    TimeOfDayController.SetTime(campState.hour);
-    FireEffects.SetState(campState.fire);
+    Party.currentState.camp = new CampState()
+    {
+      fire = CampState.FireState.NONE,
+    };
 
-    StartCoroutine(NewHourSequence(campState.hour));
+    CampStatsPanel.Display(Party.currentState);
+    TimeOfDayController.SetTime(Party.time);
+    FireEffects.SetState(Party.camp.fire);
+
+    this.StartAfterDelay(0.5f, NewHourSequence(Mathf.FloorToInt(Party.time)));
   }
 
   private void Update()
@@ -100,8 +74,8 @@ public class CampController : MonoBehaviour
   {
     yield return TimePopup.Show(hour);
 
-    var heroesToProcess = new List<Hero>(heroes.Count);
-    heroes.ForEach(it => heroesToProcess.Add(it));
+    var heroesToProcess = new List<Hero>(Party.heroes.Count);
+    Party.heroes.ForEach(it => heroesToProcess.Add(it));
     while (heroesToProcess.Count > 0)
     {
       // Choose a hero at random, so we don't always
@@ -112,7 +86,7 @@ public class CampController : MonoBehaviour
 
       // Calculate the most desirable action for the hero.
       (HeroAction action, float weight) 
-        = ActionManager.GetMostWantedAction(hero, campState);
+        = ActionManager.GetMostWantedAction(hero, Party.currentState);
       
       // Determine if Hero will assign themselves the task,
       // or resist the temptation.
@@ -137,11 +111,11 @@ public class CampController : MonoBehaviour
   {
     if (hero.action != null && !wasAssignedBySelf)
     {
-      string message = hero.action.GetAssignmentAnnouncement(hero, campState);
+      string message = hero.action.GetAssignmentAnnouncement(hero, Party.currentState);
       SpeechBubble.Show(hero.portrait, message, null);
     }
 
-    bool allHeroesReady = heroes.All(it => it.action != null);
+    bool allHeroesReady = Party.heroes.All(it => it.action != null);
     singleton.confirmActionsButton.SetActive(allHeroesReady);
   }
 
@@ -151,19 +125,30 @@ public class CampController : MonoBehaviour
     uiState = UIState.UNINTERACTIVE;
     confirmActionsButton.SetActive(false);
     ActionList.Hide();
-    heroes.ForEach(it => {
+    Party.heroes.ForEach(it => {
       it.portrait.AllowCancel(false);
       it.portrait.Deselect();
     });
 
     // Animate time advancing.
-    TimeOfDayController.AdvanceTime(campState.hour, 1, null, OnAdvanceTimeFinished);
+    TimeOfDayController.AdvanceTime(Mathf.FloorToInt(Party.time), 1, null, OnAdvanceTimeFinished);
   }
 
-  private CampState DeepCopyCurrentState()
+  private PartyState DeepCopyCurrentState()
   {
-    var state = new CampState();
-    heroes.ForEach(hero =>
+    var state = new PartyState()
+    {
+      time = Party.time,
+      heroes = new List<Hero>(Party.heroes.Count),
+      supplies = Party.supplies,
+      firewood = Party.firewood,
+      journey = Party.journey, // TODO Might need to deep copy journey?
+      camp = new CampState()
+      {
+        fire = Party.camp.fire,
+      }
+    };
+    Party.heroes.ForEach(hero =>
     {
       state.heroes.Add(new Hero()
       {
@@ -178,24 +163,24 @@ public class CampController : MonoBehaviour
     return state;
   }
 
-  private void OnAdvanceTimeFinished(int newHour)
+  private void OnAdvanceTimeFinished(float newTime)
   {
     // Update UI.
-    campState.hour = newHour;
-    CampStatsPanel.Display(campState);
+    Party.currentState.time = newTime;
+    CampStatsPanel.Display(Party.currentState);
 
     // Copy current camp & party state, so that any changes made as a
     // result of one Action don't affect calculations of subsequent Actions.
     previousState = DeepCopyCurrentState();
 
     // Degrade Hero stats for every hour passed.
-    int hours = heroes
+    int hours = Party.heroes
       .Select(it => it.action.hours)
       .Min();
     DegradeStatsOverTime(hours);
 
     // Sort Heroes by their Action priority, then left-to-right, then top-to-bottom.
-    heroesWithPendingActions = heroes
+    heroesWithPendingActions = Party.heroes
       .OrderBy(it => it.portrait.transform.position.y)
       .OrderBy(it => it.portrait.transform.position.x)
       .OrderBy(it => it.action.completionOrder)
@@ -206,7 +191,7 @@ public class CampController : MonoBehaviour
 
   private void DegradeStatsOverTime(int hours)
   {
-    heroes.ForEach(it => {
+    Party.heroes.ForEach(it => {
       for (int i = 0; i < hours; i++)
       {
         it.hunger -= Random.Range(3.5f, 4.5f);
@@ -237,7 +222,8 @@ public class CampController : MonoBehaviour
   /// </summary>
   private void ProcessNextAction()
   {
-    heroes.ForEach(it => it.portrait.Unhighlight());
+    Party.heroes.ForEach(it => it.portrait.Unhighlight());
+    HeroStatsPanel.ShowStatsFor(selectedHero);
     if (heroesWithPendingActions.Count == 0)
     {
       FinishActions();
@@ -248,24 +234,98 @@ public class CampController : MonoBehaviour
     heroesWithPendingActions.RemoveAt(0);
 
     hero.portrait.Highlight();
+    HeroStatsPanel.ShowStatsFor(hero);
     hero.portrait.ClearActionText();
-    string message = hero.action.GetCompletionAnnouncement(hero, campState);
+    string message = hero.action.GetCompletionAnnouncement(hero, Party.currentState);
     SpeechBubble.Show(hero.portrait, message, () => {
-      StartCoroutine(hero.action.Process(hero, previousState, campState, ProcessNextAction));
+      StartCoroutine(hero.action.Process(hero, previousState, Party.currentState, ProcessNextAction));
     });
   }
 
   private void FinishActions()
   {
     // Clear hero's actions.
-    heroes.ForEach(it => it.SelectAction(null));
-
-    // TODO show new time, and make everyone more tired.
+    Party.heroes.ForEach(it => it.SelectAction(null));
 
     // Update UI.
     HeroStatsPanel.ShowStatsFor(null);
     uiState = UIState.INTERACTIVE;
 
-    StartCoroutine(NewHourSequence(campState.hour));
+    StartCoroutine(NewHourSequence(Mathf.FloorToInt(Party.time)));
+  }
+
+  public void OnPointerEnterPortrait(HeroPortrait portrait)
+  {
+    if (uiState != UIState.INTERACTIVE) return;
+    portrait.Highlight();
+    HeroStatsPanel.ShowStatsFor(portrait.hero);
+  }
+
+  public void OnPointerExitPortrait(HeroPortrait portrait)
+  {
+    if (uiState != UIState.INTERACTIVE) return;
+    portrait.Unhighlight();
+    HeroStatsPanel.ShowStatsFor(selectedHero);
+  }
+
+  public void OnPointerClickPortrait(HeroPortrait portrait)
+  {
+    if (uiState != UIState.INTERACTIVE) return;
+    portrait.Select();
+  }
+
+  public void OnPortraitDragStart(HeroPortrait portrait, PointerEventData data)
+  {
+    if (uiState != UIState.INTERACTIVE) return;
+
+    uiState = UIState.DRAG_IN_PROCESS;
+    portrait.SetRaycastTarget(false);
+    portrait.Select(showActions: false);
+
+    portrait.transform.localPosition += new Vector3(
+      data.delta.x,
+      data.delta.y,
+      0);// / transform.lossyScale.x; // Thanks to the canvas scaler we need to devide pointer delta by canvas scale to match pointer movement.
+
+    portrait.transform.SetParent(characterCanvas.transform, true);
+    portrait.transform.SetAsLastSibling();
+  }
+
+  public void OnPotraitDrag(HeroPortrait portrait, PointerEventData data)
+  {
+    portrait.transform.localPosition += new Vector3(
+      data.delta.x,
+      data.delta.y,
+      0);// / transform.lossyScale.x; // Thanks to the canvas scaler we need to devide pointer delta by canvas scale to match pointer movement.
+  }
+
+  public void OnPotraitDragEnd(HeroPortrait portrait, PointerEventData data)
+  {
+    var results = new List<RaycastResult>();
+    raycaster.Raycast(data, results);
+
+    // Get drag destination.
+    LocationZone newZone = null;
+    foreach (RaycastResult result in results)
+    {
+      newZone = result.gameObject.GetComponentInParent<LocationZone>();
+      if (newZone != null) break;
+    }
+
+    // If destination can accept this, move there.
+    if (newZone != null && newZone.CanAccept(portrait))
+      portrait.MoveTo(newZone);
+    else
+      portrait.location.CancelMove(portrait);
+
+    portrait.SetRaycastTarget(true);
+    uiState = UIState.INTERACTIVE;
+  }
+
+  public void OnPortaitCancelPressed(HeroPortrait portrait)
+  {
+    portrait.hero.SelectAction(null);
+    if (selectedHero == portrait.hero)
+      portrait.location.ShowActions(portrait.hero);
   }
 }
