@@ -5,7 +5,7 @@ using UnityEngine.UI;
 public class TravelController : MonoBehaviour
 {
   private const int AVG_HOURS_TRAVELLED_PER_DAY = 10;
-  private const float REAL_SECONDS_PER_GAME_HOUR = 1f;
+  private const float REAL_SECONDS_PER_GAME_HOUR = 2f;
 
   public TMPro.TMP_Text timeOfDayText;
   public TMPro.TMP_Text journeyLengthText;
@@ -15,6 +15,7 @@ public class TravelController : MonoBehaviour
   public GameObject portraitPrefab;
 
   [SerializeField] private TravelBackground background;
+  [SerializeField] private TimeOfDayController timeOfDay;
   private List<HeroTravelBounce> heroBouncePortraits;
 
   private float hoursToDestination;
@@ -49,6 +50,7 @@ public class TravelController : MonoBehaviour
     timeOfDayText.text = (Mathf.FloorToInt(Party.time) - (Party.time < 13 ? 0 : 12)) + (Party.time < 13 ? "am" : "pm");
 
     background.TravelDistance(hoursTravelledThisFrame);
+    timeOfDay.SetTime(Party.time);
   }
 
   public void StartJourney(float hoursToDestination, float hoursTravelled)

@@ -17,6 +17,7 @@ public class CampController : MonoBehaviour, HeroPortrait.EventsCallback
 
   private static CampController singleton;
 
+  [SerializeField] private TimeOfDayController timeOfDayController;
   [SerializeField] private GameObject portraitPrefab;
   private GraphicRaycaster raycaster;
   private Canvas characterCanvas;
@@ -52,10 +53,10 @@ public class CampController : MonoBehaviour, HeroPortrait.EventsCallback
     };
 
     CampStatsPanel.Display(Party.currentState);
-    TimeOfDayController.SetTime(Party.time);
+    timeOfDayController.SetTime(Party.time);
     FireEffects.SetState(Party.camp.fire);
 
-    this.StartAfterDelay(0.5f, NewHourSequence(Mathf.FloorToInt(Party.time)));
+    this.StartAfterDelay(0.5f, NewHourSequence(Party.time));
   }
 
   private void Update()
@@ -70,7 +71,7 @@ public class CampController : MonoBehaviour, HeroPortrait.EventsCallback
     }
   }
 
-  private IEnumerator NewHourSequence(int hour)
+  private IEnumerator NewHourSequence(float hour)
   {
     yield return TimePopup.Show(hour);
 
@@ -131,7 +132,7 @@ public class CampController : MonoBehaviour, HeroPortrait.EventsCallback
     });
 
     // Animate time advancing.
-    TimeOfDayController.AdvanceTime(Mathf.FloorToInt(Party.time), 1, null, OnAdvanceTimeFinished);
+    timeOfDayController.AdvanceTime(Mathf.FloorToInt(Party.time), 1, null, OnAdvanceTimeFinished);
   }
 
   private PartyState DeepCopyCurrentState()
@@ -251,7 +252,7 @@ public class CampController : MonoBehaviour, HeroPortrait.EventsCallback
     HeroStatsPanel.ShowStatsFor(null);
     uiState = UIState.INTERACTIVE;
 
-    StartCoroutine(NewHourSequence(Mathf.FloorToInt(Party.time)));
+    StartCoroutine(NewHourSequence(Party.time));
   }
 
   public void OnPointerEnterPortrait(HeroPortrait portrait)

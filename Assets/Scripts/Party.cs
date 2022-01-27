@@ -3,7 +3,7 @@ using System.Collections.Generic;
 /// <summary>
 /// Public static wrapper for party state, for ease of access.
 /// </summary>
-public class Party
+public static class Party
 {
   public static PartyState currentState;
 

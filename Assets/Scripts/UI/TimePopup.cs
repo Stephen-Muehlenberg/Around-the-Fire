@@ -6,14 +6,14 @@ public class TimePopup : MonoBehaviour
   [SerializeField] private CanvasGroup canvasGroup;
   [SerializeField] private TMPro.TMP_Text text;
 
-  public static IEnumerator Show(int hour)
+  public static IEnumerator Show(float time)
   {
     var prefab = Resources.Load<GameObject>("Time Popup");
     var instance = Instantiate(prefab, PopupController.canvasTransform);
 
     // Set display text.
     var popup = instance.GetComponent<TimePopup>();
-    popup.text.text = (hour - 12).ToString() + (hour == 24 ? "am" : "pm");
+    popup.text.text = Utils.GetDisplayTime(time);
 
     // Animate popup from right to left, slowing at the center.
     var transform = popup.transform;

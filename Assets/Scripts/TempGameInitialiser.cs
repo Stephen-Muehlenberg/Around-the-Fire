@@ -9,6 +9,7 @@ public class TempGameInitialiser : MonoBehaviour
 {
   [SerializeField] private List<Sprite> TEMP_heroSprites;
   [SerializeField] private int TEMP_heroCount;
+  [SerializeField] private float startTime;
   private static bool initialized;
 
   void Awake()
@@ -28,7 +29,7 @@ public class TempGameInitialiser : MonoBehaviour
 
     Party.currentState = new PartyState()
     {
-      time = 8,
+      time = startTime,
       heroes = new List<Hero>(heroCount),
       firewood = Random.Range(0f, 20f),
       supplies = Random.Range(0f, 20f),

@@ -134,6 +134,7 @@ GameObject:
   - component: {fileID: 10343501}
   - component: {fileID: 10343500}
   - component: {fileID: 10343502}
+  - component: {fileID: 10343503}
   m_Layer: 0
   m_Name: Scene Controller
   m_TagString: Untagged
@@ -153,15 +154,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b2bcfcc35ecf004183fc18ec2324638, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  timeOfDayController: {fileID: 10343502}
   portraitPrefab: {fileID: 9102505041924870482, guid: 8861aa0d34b29bf469647425d0b62790, type: 3}
   characterPanel: {fileID: 585213364}
   confirmActionsButton: {fileID: 171311392}
-  TEMP_heroSprites:
-  - {fileID: 21300000, guid: e52f471fea1259e4c8d0d8233438efc3, type: 3}
-  - {fileID: 21300000, guid: 0215d1555d4f2ff4ab04fd26a9a9088c, type: 3}
-  - {fileID: 21300000, guid: 045610c93489bdd4992ad6626f11c7f0, type: 3}
-  - {fileID: 21300000, guid: 7d88226fe32bd1841929e532bf381b97, type: 3}
-  TEMP_heroCount: 4
 --- !u!4 &10343501
 Transform:
   m_ObjectHideFlags: 0
@@ -174,7 +170,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &10343502
 MonoBehaviour:
@@ -191,64 +187,6 @@ MonoBehaviour:
   demoOnStart: 0
   sun: {fileID: 1885127754}
   mainCamera: {fileID: 985723889}
-  sunColorByHour:
-    serializedVersion: 2
-    key0: {r: 1, g: 1, b: 0.75, a: 0.6392157}
-    key1: {r: 1, g: 0.68337244, b: 0.4764151, a: 0.43137255}
-    key2: {r: 0.6784314, g: 0.38367555, b: 0.30588236, a: 0}
-    key3: {r: 0.35599634, g: 0.2765664, b: 0.5188679, a: 0}
-    key4: {r: 0.23082057, g: 0.23191781, b: 0.5377358, a: 0}
-    key5: {r: 0.16611627, g: 0.16415983, b: 0.2924528, a: 0}
-    key6: {r: 1, g: 1, b: 1, a: 0}
-    key7: {r: 1, g: 1, b: 1, a: 0}
-    ctime0: 0
-    ctime1: 9358
-    ctime2: 19005
-    ctime3: 28115
-    ctime4: 37420
-    ctime5: 46792
-    ctime6: 65342
-    ctime7: 65535
-    atime0: 0
-    atime1: 22552
-    atime2: 34695
-    atime3: 35466
-    atime4: 0
-    atime5: 0
-    atime6: 0
-    atime7: 0
-    m_Mode: 0
-    m_NumColorKeys: 6
-    m_NumAlphaKeys: 3
-  skyColorByHour:
-    serializedVersion: 2
-    key0: {r: 0.72169816, g: 0.9432631, b: 0.9622642, a: 1}
-    key1: {r: 0.990566, g: 0.9454129, b: 0.60275006, a: 1}
-    key2: {r: 0.7924528, g: 0.3476326, b: 0.35412624, a: 0}
-    key3: {r: 0.1962084, g: 0.12156861, b: 0.3764706, a: 0}
-    key4: {r: 0.035294116, g: 0.0486732, b: 0.16078432, a: 0}
-    key5: {r: 0.020247413, g: 0.03805475, b: 0.066037714, a: 0}
-    key6: {r: 0.014017441, g: 0.01580825, b: 0.047169805, a: 0}
-    key7: {r: 0.043137256, g: 0.09019608, b: 0.16078432, a: 0}
-    ctime0: 0
-    ctime1: 5397
-    ctime2: 10409
-    ctime3: 15806
-    ctime4: 20432
-    ctime5: 29684
-    ctime6: 39707
-    ctime7: 46792
-    atime0: 0
-    atime1: 65535
-    atime2: 34695
-    atime3: 0
-    atime4: 0
-    atime5: 0
-    atime6: 0
-    atime7: 0
-    m_Mode: 0
-    m_NumColorKeys: 7
-    m_NumAlphaKeys: 2
   sunDirectionByHour:
   - {x: 55, y: 15, z: 0}
   - {x: 35, y: 45, z: 0}
@@ -260,6 +198,251 @@ MonoBehaviour:
   - {x: 0, y: 88, z: 0}
   - {x: 0, y: 88, z: 0}
   - {x: 0, y: 88, z: 0}
+  sunColor:
+  - serializedVersion: 2
+    key0: {r: 0.16470589, g: 0.16470589, b: 0.29411766, a: 0}
+    key1: {r: 1, g: 1, b: 1, a: 1}
+    key2: {r: 1, g: 1, b: 1, a: 0}
+    key3: {r: 1, g: 1, b: 1, a: 0}
+    key4: {r: 1, g: 1, b: 1, a: 0}
+    key5: {r: 1, g: 1, b: 1, a: 0}
+    key6: {r: 1, g: 1, b: 1, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 0
+    ctime1: 10944
+    ctime2: 21823
+    ctime3: 32768
+    ctime4: 43712
+    ctime5: 54591
+    ctime6: 65535
+    ctime7: 0
+    atime0: 0
+    atime1: 65535
+    atime2: 0
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_NumColorKeys: 7
+    m_NumAlphaKeys: 2
+  - serializedVersion: 2
+    key0: {r: 1, g: 1, b: 1, a: 1}
+    key1: {r: 1, g: 1, b: 1, a: 1}
+    key2: {r: 0, g: 0, b: 0, a: 0}
+    key3: {r: 0, g: 0, b: 0, a: 0}
+    key4: {r: 0, g: 0, b: 0, a: 0}
+    key5: {r: 0, g: 0, b: 0, a: 0}
+    key6: {r: 0, g: 0, b: 0, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 0
+    ctime1: 65535
+    ctime2: 0
+    ctime3: 0
+    ctime4: 0
+    ctime5: 0
+    ctime6: 0
+    ctime7: 0
+    atime0: 0
+    atime1: 65535
+    atime2: 65535
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_NumColorKeys: 2
+    m_NumAlphaKeys: 2
+  - serializedVersion: 2
+    key0: {r: 1, g: 1, b: 1, a: 1}
+    key1: {r: 1, g: 1, b: 1, a: 0.6392157}
+    key2: {r: 1, g: 1, b: 1, a: 0.54901963}
+    key3: {r: 1, g: 1, b: 1, a: 0}
+    key4: {r: 1, g: 1, b: 1, a: 0}
+    key5: {r: 1, g: 1, b: 0.7490196, a: 0}
+    key6: {r: 1, g: 0.68235296, b: 0.4745098, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 0
+    ctime1: 10918
+    ctime2: 21823
+    ctime3: 32768
+    ctime4: 43646
+    ctime5: 54591
+    ctime6: 65535
+    ctime7: 0
+    atime0: 0
+    atime1: 54591
+    atime2: 65535
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_NumColorKeys: 7
+    m_NumAlphaKeys: 3
+  - serializedVersion: 2
+    key0: {r: 1, g: 0.68235296, b: 0.4745098, a: 0.54901963}
+    key1: {r: 0.6784314, g: 0.38431373, b: 0.30588236, a: 0.43137255}
+    key2: {r: 0.35686275, g: 0.2784314, b: 0.5176471, a: 0}
+    key3: {r: 0.23137255, g: 0.23137255, b: 0.5372549, a: 1}
+    key4: {r: 0.16470589, g: 0.16470589, b: 0.29411766, a: 0}
+    key5: {r: 0, g: 0, b: 0, a: 0}
+    key6: {r: 0, g: 0, b: 0, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 0
+    ctime1: 10944
+    ctime2: 21823
+    ctime3: 32768
+    ctime4: 43712
+    ctime5: 64957
+    ctime6: 65535
+    ctime7: 0
+    atime0: 0
+    atime1: 15035
+    atime2: 28720
+    atime3: 65535
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_NumColorKeys: 5
+    m_NumAlphaKeys: 3
+  skyColor:
+  - serializedVersion: 2
+    key0: {r: 0, g: 0, b: 0, a: 1}
+    key1: {r: 0, g: 0, b: 0, a: 1}
+    key2: {r: 0, g: 0, b: 0, a: 0}
+    key3: {r: 0, g: 0, b: 0, a: 0}
+    key4: {r: 0, g: 0, b: 0, a: 0}
+    key5: {r: 0, g: 0, b: 0, a: 0}
+    key6: {r: 0, g: 0, b: 0, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 0
+    ctime1: 65535
+    ctime2: 0
+    ctime3: 0
+    ctime4: 0
+    ctime5: 0
+    ctime6: 0
+    ctime7: 0
+    atime0: 0
+    atime1: 65535
+    atime2: 0
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_NumColorKeys: 2
+    m_NumAlphaKeys: 2
+  - serializedVersion: 2
+    key0: {r: 0, g: 0, b: 0, a: 1}
+    key1: {r: 1, g: 1, b: 1, a: 1}
+    key2: {r: 0, g: 0, b: 0, a: 0}
+    key3: {r: 0, g: 0, b: 0, a: 0}
+    key4: {r: 0, g: 0, b: 0, a: 0}
+    key5: {r: 0, g: 0, b: 0, a: 0}
+    key6: {r: 0, g: 0, b: 0, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 0
+    ctime1: 65535
+    ctime2: 0
+    ctime3: 0
+    ctime4: 0
+    ctime5: 0
+    ctime6: 0
+    ctime7: 0
+    atime0: 0
+    atime1: 65535
+    atime2: 0
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_NumColorKeys: 2
+    m_NumAlphaKeys: 2
+  - serializedVersion: 2
+    key0: {r: 1, g: 1, b: 1, a: 1}
+    key1: {r: 0.72156864, g: 0.94509804, b: 0.9607843, a: 1}
+    key2: {r: 0.99215686, g: 0.94509804, b: 0.6039216, a: 0}
+    key3: {r: 0.7921569, g: 0.34901962, b: 0.3529412, a: 0}
+    key4: {r: 0.7921569, g: 0.34901962, b: 0.3529412, a: 0}
+    key5: {r: 0.7921569, g: 0.34901962, b: 0.3529412, a: 0}
+    key6: {r: 0, g: 0, b: 0, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 0
+    ctime1: 54591
+    ctime2: 60096
+    ctime3: 65535
+    ctime4: 65535
+    ctime5: 65535
+    ctime6: 0
+    ctime7: 0
+    atime0: 0
+    atime1: 65535
+    atime2: 0
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_NumColorKeys: 4
+    m_NumAlphaKeys: 2
+  - serializedVersion: 2
+    key0: {r: 0.7921569, g: 0.34901962, b: 0.3529412, a: 1}
+    key1: {r: 0.19607843, g: 0.12156863, b: 0.3764706, a: 1}
+    key2: {r: 0.03529412, g: 0.047058824, b: 0.16078432, a: 0}
+    key3: {r: 0.019607844, g: 0.039215688, b: 0.06666667, a: 0}
+    key4: {r: 0.019607844, g: 0.039215688, b: 0.06666667, a: 0}
+    key5: {r: 0.015686275, g: 0.015686275, b: 0.047058824, a: 0}
+    key6: {r: 0, g: 0, b: 0, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 0
+    ctime1: 5439
+    ctime2: 10879
+    ctime3: 15420
+    ctime4: 24094
+    ctime5: 32768
+    ctime6: 65535
+    ctime7: 0
+    atime0: 0
+    atime1: 65535
+    atime2: 0
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_NumColorKeys: 7
+    m_NumAlphaKeys: 2
+--- !u!114 &10343503
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 10343499}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5b7026f1f287674fb64694407bf6527, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  TEMP_heroSprites:
+  - {fileID: 21300000, guid: e52f471fea1259e4c8d0d8233438efc3, type: 3}
+  - {fileID: 21300000, guid: 0215d1555d4f2ff4ab04fd26a9a9088c, type: 3}
+  - {fileID: 21300000, guid: 045610c93489bdd4992ad6626f11c7f0, type: 3}
+  - {fileID: 21300000, guid: 7d88226fe32bd1841929e532bf381b97, type: 3}
+  TEMP_heroCount: 1
+  startTime: 16
 --- !u!1001 &17655875
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -29214,7 +29397,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 15, y: 0, z: 0}
 --- !u!114 &985723891
 MonoBehaviour:

@@ -9,23 +9,21 @@ public class TimeOfDayController : MonoBehaviour
 {
   private static readonly float ADVANCE_SPEED_SECONDS_PER_HOUR = 2.5f;
 
-  private static TimeOfDayController singleton;
-
   [SerializeField] private bool demoOnStart;
   [SerializeField] private Light sun;
   [SerializeField] private Camera mainCamera;
-  [SerializeField] private Gradient sunColorByHour;
-  [SerializeField] private Gradient skyColorByHour;
   [SerializeField] private Vector3[] sunDirectionByHour;
 
-  private void Awake()
-  {
-    if (singleton != null) throw new System.Exception("Multiple singletons created.");
-    singleton = this;
-  }
+  [Tooltip("Main light color. Each Gradient covers a 6 hour period, starting from midnight. Alpha is intensity.")]
+  [SerializeField] private Gradient[] sunColor;
+
+  [Tooltip("Background color. Each Gradient covers a 6 hour period, starting from midnight.")]
+  [SerializeField] private Gradient[] skyColor;
 
   private void Start()
   {
+    if (sunColor.Length != 4 || skyColor.Length != 4)
+      throw new Exception("sunColor[] and skyColor[] must have exactly 4 elements, but had " + sunColor.Length + " and " + skyColor.Length + ", respectively.");
     if (demoOnStart)
       PlayDemo(0);
   }
@@ -39,31 +37,17 @@ public class TimeOfDayController : MonoBehaviour
   }
 
   /// <summary>
-  /// Sets scene lighting to match the specified time of day.
-  /// <paramref name="hour"/> must be in 24hour time between <see cref="MIN_HOUR"/> and <see cref="MAX_HOUR"/>.
-  /// </summary>
-  public static void SetTime(float time)
-  {
-    int hour = Mathf.FloorToInt(time);
-    singleton.SetTime(
-      currentHourIndex: hour,
-      currentHourFraction: time - (int) time,
-      totalTimeFraction: hour / 24
-    );
-  }
-
-  /// <summary>
   /// Animate the scene lighting changing over time.
   /// <paramref name="startHour"/> is in 24hour time, and 
   /// the start and end times must be within <see cref="MIN_HOUR"/>
   /// and <see cref="MAX_HOUR"/>.
   /// </summary>
-  public static void AdvanceTime(
+  public void AdvanceTime(
     float startTime, int hours,
     Action<int> onHourEnd = null, Action<float> onFinished = null)
   {
     if (hours <= 0) throw new Exception("Time must be between 1 and 24 but was " + hours + ".");
-    singleton.StartCoroutine(singleton.AdvanceTimeCoroutine(startTime, hours, onHourEnd, onFinished));
+    StartCoroutine(AdvanceTimeCoroutine(startTime, hours, onHourEnd, onFinished));
   }
 
   private IEnumerator AdvanceTimeCoroutine(
@@ -91,10 +75,7 @@ public class TimeOfDayController : MonoBehaviour
       }
 
       // Update visuals.
-      SetTime(
-        currentHourIndex: currentHourIndex,
-        currentHourFraction: currentTime - Mathf.Floor(currentTime),
-        totalTimeFraction: currentTime / 24);
+      SetTime(currentTime);
 
       // Advance time, then smooth step it for the purposes of animation.
       progress += Time.deltaTime / ADVANCE_SPEED_SECONDS_PER_HOUR / hours;
@@ -104,30 +85,38 @@ public class TimeOfDayController : MonoBehaviour
     }
 
     // Snap to exactly the end time.
-    SetTime(
-      currentHourIndex: (int) endTime,
-      currentHourFraction: 0,
-      totalTimeFraction: endTime / 24);
+    SetTime(endTime);
 
     // Invoke final callback.
     if (onFinish != null) onFinish.Invoke(endTime);
   }
 
-  private void SetTime(int currentHourIndex, float currentHourFraction, float totalTimeFraction)
+  /// <summary>
+  /// Sets scene lighting to match the specified time of day.
+  /// <paramref name="hour"/> must be in 24-hour time between (0 - 23.999...).
+  /// </summary>
+  public void SetTime(float time)
   {
-    sun.color = sunColorByHour.Evaluate(totalTimeFraction);
+    if (time < 0 || time >= 24) throw new Exception("Time must be between 0 (inclusive) and 24 (exclusive), but was " + time + ".");
+
+    // Which quarter of the day (0-6, 6-12, 12-18, 18-24) are we in?
+    int dayQuarter = Mathf.FloorToInt(time / 6);
+    // How far through that quater are we?
+    float quarterFraction = (time - (dayQuarter * 6)) / 6f;
+
+    // Set light and background colours.
+    sun.color = sunColor[dayQuarter].Evaluate(quarterFraction);
     sun.intensity = sun.color.a;
+    mainCamera.backgroundColor = skyColor[dayQuarter].Evaluate(quarterFraction);
 
     // For all times except the final moment, Lerp between different sun angles.
-    if (currentHourIndex + 1 < sunDirectionByHour.Length)
+/*    if (currentHourIndex + 1 < sunDirectionByHour.Length)
       sun.transform.rotation = Quaternion.Euler(Vector3.Lerp(
         a: sunDirectionByHour[currentHourIndex],
         b: sunDirectionByHour[currentHourIndex + 1],
         t: currentHourFraction));
     // For the very final moment (and end of the array), just use the last sun angle.
     else
-      sun.transform.rotation = Quaternion.Euler(sunDirectionByHour[currentHourIndex]);
-
-    mainCamera.backgroundColor = skyColorByHour.Evaluate(totalTimeFraction);
+      sun.transform.rotation = Quaternion.Euler(sunDirectionByHour[currentHourIndex]);*/
   }
 }
