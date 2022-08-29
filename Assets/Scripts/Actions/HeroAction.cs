@@ -113,21 +113,54 @@ public abstract class HeroAction
       + moodIncrease * 0.9f; // Mood less important than other stats.
   }
 
-  protected void RaiseStatsAndShowPopups(Hero hero, params (Hero.Stat, int)[] statDeltas)
+  /// <summary>
+  /// Modifies the <paramref name="hero"/>'s stats based on supplied params.
+  /// Normal params will show a popup, hidden ones will not.
+  /// </summary>
+  protected void AdjustStats(Hero hero,
+    int? health = null, int? hiddenHealth = null,
+    int? hunger = null, int? hiddenHunger = null,
+    int? mood = null, int? hiddenMood = null,
+    int? rest = null, int? hiddenRest = null)
   {
-    Hero.Stat stat;
-    int amount;
-    for (int i = 0; i < statDeltas.Length; i++)
-    {
-      (stat, amount) = statDeltas[i];
-      switch (stat)
-      {
-        case Hero.Stat.HEALTH: hero.health += amount; break;
-        case Hero.Stat.HUNGER: hero.hunger += amount; break;
-        case Hero.Stat.MORALE: hero.mood += amount; break;
-        case Hero.Stat.REST: hero.rest += amount; break;
-      }
-      StatPopup.Show(hero.portrait, stat, amount, statDeltas.Length - i - 1);
+    int popupOffset = 0;
+
+    if (health != null) {
+      hero.health += health.Value;
+      StatPopup.Show(hero.portrait, Hero.Stat.HEALTH, health.Value, popupOffset++);
     }
+    if (hiddenHealth != null) hero.health += hiddenHealth.Value;
+
+    if (hunger != null) {
+      hero.hunger += hunger.Value;
+      StatPopup.Show(hero.portrait, Hero.Stat.HUNGER, hunger.Value, popupOffset++);
+    }
+    if (hiddenHunger != null) hero.hunger += hiddenHunger.Value;
+
+    if (mood != null) {
+      hero.mood += mood.Value;
+      StatPopup.Show(hero.portrait, Hero.Stat.MORALE, mood.Value, popupOffset++);
+    }
+    if (hiddenMood != null) hero.mood += hiddenMood.Value;
+
+    if (rest != null) {
+      hero.rest += rest.Value;
+      StatPopup.Show(hero.portrait, Hero.Stat.REST, rest.Value, popupOffset++);
+    }
+    if (hiddenRest != null) hero.rest += hiddenRest.Value;
+  }
+
+  public Option ToOption()
+  {
+    return new Option()
+    {
+      title = this.title,
+      // TODO icon = ???
+      hoverDescription = this.description,
+      // TODO unavailable = ???
+      // TODO text overlay = ???
+      // TODO bottom text = ???
+      reference = this
+    };
   }
 }

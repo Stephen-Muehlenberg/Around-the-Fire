@@ -10,6 +10,12 @@ public class TempGameInitialiser : MonoBehaviour
   [SerializeField] private List<Sprite> TEMP_heroSprites;
   [SerializeField] private int TEMP_heroCount;
   [SerializeField] private float startTime;
+  [SerializeField] private Vector2 healthRange = new Vector2(30, 180);
+  [SerializeField] private Vector2 hungerRange = new Vector2(30, 100);
+  [SerializeField] private Vector2 moodRange = new Vector2(20, 100);
+  [SerializeField] private Vector2 restRange = new Vector2(50, 110);
+  [SerializeField] private float journeyDays = 3;
+  [SerializeField] private float journeyFractionComplete = 0;
   private static bool initialized;
 
   void Awake()
@@ -29,14 +35,15 @@ public class TempGameInitialiser : MonoBehaviour
 
     Party.currentState = new PartyState()
     {
-      time = startTime,
+      totalTime = startTime,
       heroes = new List<Hero>(heroCount),
       firewood = Random.Range(0f, 20f),
       supplies = Random.Range(0f, 20f),
       journey = new JourneyState()
       {
-        hoursRequired = 30,
+        lengthInKilometres = journeyDays * JourneyState.EXPECTED_KM_PER_DAY,
         hoursTravelled = 0,
+        kilometresTravelled = 0,
       },
     };
 
@@ -46,10 +53,10 @@ public class TempGameInitialiser : MonoBehaviour
       {
         name = names[i],
         icon = TEMP_heroSprites[i],
-        hunger = Random.Range(15, 80),
-        rest = Random.Range(15, 90),
-        health = Mathf.Clamp(Random.Range(30, 170), 0, 100),
-        mood = Random.Range(8, 95),
+        health = Mathf.Clamp(Random.Range(healthRange.x, healthRange.y), 0, 100),
+        hunger = Mathf.Clamp(Random.Range(hungerRange.x, hungerRange.y), 0, 100),
+        mood = Mathf.Clamp(Random.Range(moodRange.x, moodRange.y), 0, 100),
+        rest = Mathf.Clamp(Random.Range(restRange.x, restRange.y), 0, 100),
       });
     }
 

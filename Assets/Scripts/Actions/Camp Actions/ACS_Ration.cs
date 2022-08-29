@@ -33,20 +33,10 @@ public class ACS_Ration : HeroAction
 
   public override IEnumerator Process(Hero hero, PartyState previousState, PartyState currentState, Action callback)
   {
-    RaiseStatsAndShowPopups(hero,
-      (Hero.Stat.HUNGER, 35),
-      (Hero.Stat.MORALE, -10),
-      (Hero.Stat.REST, -5));
     currentState.heroes
-      .Where(it => it != hero)
-      .ToList()
-      .ForEach(it => RaiseStatsAndShowPopups(it,
-      (Hero.Stat.HUNGER, 35),
-      (Hero.Stat.MORALE, -10)));
-    HeroStatsPanel.ShowStatsFor(hero);
+      .ForEach(it => AdjustStats(it, hunger: 30, mood: -10));
 
     currentState.supplies -= RATION_SUPPLY_COST * currentState.heroes.Count;
-    CampStatsPanel.Display(currentState);
 
     yield return new WaitForSeconds(1.5f);
     callback.Invoke();

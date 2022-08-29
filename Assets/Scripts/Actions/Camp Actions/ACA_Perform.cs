@@ -12,16 +12,19 @@ public class ACA_Perform : HeroAction
 
   public override IEnumerator Process(Hero hero, PartyState previousState, PartyState currentState, Action callback)
   {
-    RaiseStatsAndShowPopups(hero, (Hero.Stat.REST, -10));
+    AdjustStats(hero, hiddenRest: -10);
     currentState.heroes
-      .Where(it => it != hero)
+      .Where(it => it != hero && it.location == HeroLocation.Around)
       .ToList()
-      .ForEach(it => RaiseStatsAndShowPopups(it, (Hero.Stat.MORALE, 20)));
+      .ForEach(it => AdjustStats(it, mood: 20));
     currentState.heroes
       .Where(it => it.location == HeroLocation.Fire)
       .ToList()
-      .ForEach(it => RaiseStatsAndShowPopups(it, (Hero.Stat.MORALE, 10)));
-    HeroStatsPanel.ShowStatsFor(hero);
+      .ForEach(it => AdjustStats(it, mood: 10));
+    currentState.heroes
+      .Where(it => it.location == HeroLocation.Tent || it.location == HeroLocation.Supplies)
+      .ToList()
+      .ForEach(it => AdjustStats(it, hiddenMood: 5));
 
     yield return new WaitForSeconds(1.5f);
     callback.Invoke();

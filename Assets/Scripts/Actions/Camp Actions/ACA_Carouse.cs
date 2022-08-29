@@ -24,16 +24,15 @@ public class ACA_Carouse : HeroAction
 
   public override IEnumerator Process(Hero hero, PartyState previousState, PartyState newState, Action callback)
   {
-    RaiseStatsAndShowPopups(hero, (Hero.Stat.MORALE, 15));
+    AdjustStats(hero, mood: 15);
     newState.heroes
       .Where(it => it != hero && it.location == HeroLocation.Around)
       .ToList()
-      .ForEach(it => RaiseStatsAndShowPopups(it, (Hero.Stat.MORALE, 10)));
+      .ForEach(it => AdjustStats(it, mood: 10));
     newState.heroes
       .Where(it => it.location == HeroLocation.Fire)
       .ToList()
-      .ForEach(it => RaiseStatsAndShowPopups(it, (Hero.Stat.MORALE, 5)));
-    HeroStatsPanel.ShowStatsFor(hero);
+      .ForEach(it => AdjustStats(it, hiddenMood: 5));
 
     yield return new WaitForSeconds(1.5f);
     callback.Invoke();

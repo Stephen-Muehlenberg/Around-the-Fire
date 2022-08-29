@@ -11,7 +11,7 @@ public class ACP_Wood : HeroAction
 
   public override string GetAssignmentAnnouncement(Hero hero, PartyState context)
   {
-    if (context.time > 18)
+    if (context.timeOfDay >= 19)
       return new string[]
       {
         "Are you sure? It's getting pretty dark out there...",
@@ -23,7 +23,7 @@ public class ACP_Wood : HeroAction
 
   public override string GetCompletionAnnouncement(Hero hero, PartyState context)
   {
-    if (context.time > 19)
+    if (context.timeOfDay >= 20)
       return new string[] {
         "Getting pretty hard to find anything in the dark.",
         "I can't see anything out there.",
@@ -38,14 +38,12 @@ public class ACP_Wood : HeroAction
 
   public override IEnumerator Process(Hero hero, PartyState previousState, PartyState currentState, Action callback)
   {
-    RaiseStatsAndShowPopups(hero, (Hero.Stat.REST, -15));
-    HeroStatsPanel.ShowStatsFor(hero);
+    AdjustStats(hero, rest: -12);
 
     float woodFound = UnityEngine.Random.Range(4, 12);
-    if (currentState.time > 19) woodFound -= 4;
+    if (currentState.timeOfDay >= 20) woodFound -= 4;
     currentState.firewood += woodFound;
-    CampStatsPanel.Display(currentState);
-
+    
     yield return new WaitForSeconds(1.5f);
     callback.Invoke();
   }

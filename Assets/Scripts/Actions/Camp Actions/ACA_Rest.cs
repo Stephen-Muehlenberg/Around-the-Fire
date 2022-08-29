@@ -23,10 +23,8 @@ public class ACA_Rest : HeroAction
 
   public override IEnumerator Process(Hero hero, PartyState previousState, PartyState currentState, Action callback)
   {
-    RaiseStatsAndShowPopups(hero,
-      (Hero.Stat.MORALE, 5),
-      (Hero.Stat.REST, 15));
-    HeroStatsPanel.ShowStatsFor(hero);
+    AdjustStats(hero, rest: 15, hiddenMood: 5);
+
     yield return new WaitForSeconds(1.5f);
     callback.Invoke();
   }

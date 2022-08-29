@@ -17,10 +17,13 @@ public class CampController : MonoBehaviour, HeroPortrait.EventsCallback
 
   private static CampController singleton;
 
+  public ActionList actionList;
+
   [SerializeField] private TimeOfDayController timeOfDayController;
   [SerializeField] private GameObject portraitPrefab;
   private GraphicRaycaster raycaster;
   private Canvas characterCanvas;
+  [SerializeField] private HeroStatsPanel heroStatsPanel;
   [SerializeField] private HeroLocation characterPanel;
   [SerializeField] private GameObject confirmActionsButton;
 
@@ -39,24 +42,23 @@ public class CampController : MonoBehaviour, HeroPortrait.EventsCallback
     raycaster = characterPanel.GetComponentInParent<GraphicRaycaster>();
 
     ActionManager.Initialise();
-    foreach (Hero hero in Party.heroes)
+    Party.heroes.ForEach(hero =>
     {
       var portrait = Instantiate(portraitPrefab, characterPanel.transform)
         .GetComponent<HeroPortrait>();
       hero.portrait = portrait;
       portrait.Initialise(hero, characterPanel, this);
-    }
+    });
 
     Party.currentState.camp = new CampState()
     {
       fire = CampState.FireState.NONE,
     };
 
-    CampStatsPanel.Display(Party.currentState);
-    timeOfDayController.SetTime(Party.time);
+    timeOfDayController.SetTime(Party.timeOfDay);
     FireEffects.SetState(Party.camp.fire);
 
-    this.StartAfterDelay(0.5f, NewHourSequence(Party.time));
+    this.StartAfterDelay(0.5f, NewHourSequence(Party.timeOfDay));
   }
 
   private void Update()
@@ -71,12 +73,38 @@ public class CampController : MonoBehaviour, HeroPortrait.EventsCallback
     }
   }
 
+  private void SelectHero(Hero hero, bool showActions = true)
+  {
+    if (selectedHero != null)
+      selectedHero.portrait.Deselect();
+    selectedHero = hero;
+    hero.portrait.Select();
+    heroStatsPanel.ShowStatsFor(hero);
+    if (hero.location != null)
+    {
+//      if (hero.action == null && showActions)
+  //      hero.location.ShowActions(hero);
+    //  else
+      //  hero.location.ShowActions(null);
+    }
+  }
+
+  private void DeselectHero(Hero hero)
+  {
+    if (hero != null && hero.portrait != null)
+      hero.portrait.Deselect();
+    if (selectedHero == hero)
+      selectedHero = null;
+  }
+
   private IEnumerator NewHourSequence(float hour)
   {
     yield return TimePopup.Show(hour);
 
     var heroesToProcess = new List<Hero>(Party.heroes.Count);
     Party.heroes.ForEach(it => heroesToProcess.Add(it));
+    HeroAction action;
+    float actionWeight;
     while (heroesToProcess.Count > 0)
     {
       // Choose a hero at random, so we don't always
@@ -85,26 +113,32 @@ public class CampController : MonoBehaviour, HeroPortrait.EventsCallback
       var hero = heroesToProcess[i];
       heroesToProcess.RemoveAt(i);
 
-      // Calculate the most desirable action for the hero.
-      (HeroAction action, float weight) 
-        = ActionManager.GetMostWantedAction(hero, Party.currentState);
-      
-      // Determine if Hero will assign themselves the task,
-      // or resist the temptation.
-      float randomVariance = Random.Range(0f, 1.25f);
-      float outcome = (hero.mood / 100) + randomVariance - weight;
-      UnityEngine.Debug.Log(hero.name + " wants to " + action.title + " (mood " + (hero.mood / 100) + " + random " + randomVariance + " - weight " + weight + " = " + outcome + ")");
-      if (outcome > 0)
-        continue;
+      // If time is midnight, all heroes automatically sleep.
+      if (Party.timeOfDay == 0)
+        action = new ACT_Sleep();
+      else
+      {
+        // Calculate the most desirable action for the hero.
+        (action, actionWeight)
+          = ActionManager.GetMostWantedCampAction(hero, Party.currentState);
+
+        // Determine if Hero will assign themselves the task,
+        // or resist the temptation.
+        float randomVariance = Random.Range(0f, 1.25f);
+        float outcome = (hero.mood / 100) + randomVariance - actionWeight;
+        UnityEngine.Debug.Log(hero.name + " wants to " + action.title + " (mood " + (hero.mood / 100) + " + random " + randomVariance + " - weight " + actionWeight + " = " + outcome + ")");
+        if (outcome > 0)
+          continue;
+      }
 
       // Assign task to self.
       yield return hero.portrait.AnimateMoveTo(action.location);
       hero.SelectAction(action, assignedBySelf: true);
-      hero.portrait.Select();
+      SelectHero(hero);
       yield return SpeechBubble.Show(hero.portrait, "I feel like doing this.");
     }
 
-    if (selectedHero != null) selectedHero.portrait.Deselect();
+    if (selectedHero != null) DeselectHero(selectedHero);
     uiState = UIState.INTERACTIVE;
   }
 
@@ -125,54 +159,24 @@ public class CampController : MonoBehaviour, HeroPortrait.EventsCallback
     // Disable action UI.
     uiState = UIState.UNINTERACTIVE;
     confirmActionsButton.SetActive(false);
-    ActionList.Hide();
+   // ActionList.Hide();
     Party.heroes.ForEach(it => {
       it.portrait.AllowCancel(false);
-      it.portrait.Deselect();
+      DeselectHero(it);
     });
 
     // Animate time advancing.
-    timeOfDayController.AdvanceTime(Mathf.FloorToInt(Party.time), 1, null, OnAdvanceTimeFinished);
+    timeOfDayController.AdvanceTime((int) Party.timeOfDay, 1, null, OnAdvanceTimeFinished);
   }
 
-  private PartyState DeepCopyCurrentState()
-  {
-    var state = new PartyState()
-    {
-      time = Party.time,
-      heroes = new List<Hero>(Party.heroes.Count),
-      supplies = Party.supplies,
-      firewood = Party.firewood,
-      journey = Party.journey, // TODO Might need to deep copy journey?
-      camp = new CampState()
-      {
-        fire = Party.camp.fire,
-      }
-    };
-    Party.heroes.ForEach(hero =>
-    {
-      state.heroes.Add(new Hero()
-      {
-        health = hero.health,
-        hunger = hero.hunger,
-        mood = hero.mood,
-        rest = hero.rest,
-        action = hero.action,
-        location = hero.location
-      });
-    });
-    return state;
-  }
-
-  private void OnAdvanceTimeFinished(float newTime)
+  private void OnAdvanceTimeFinished(float timePassed, float newTime)
   {
     // Update UI.
-    Party.currentState.time = newTime;
-    CampStatsPanel.Display(Party.currentState);
+    Party.AdvanceTime(timePassed);
 
-    // Copy current camp & party state, so that any changes made as a
+    // Copy current party & camp state, so that any changes made as a
     // result of one Action don't affect calculations of subsequent Actions.
-    previousState = DeepCopyCurrentState();
+    previousState = Party.currentState.Clone();
 
     // Degrade Hero stats for every hour passed.
     int hours = Party.heroes
@@ -224,7 +228,7 @@ public class CampController : MonoBehaviour, HeroPortrait.EventsCallback
   private void ProcessNextAction()
   {
     Party.heroes.ForEach(it => it.portrait.Unhighlight());
-    HeroStatsPanel.ShowStatsFor(selectedHero);
+    heroStatsPanel.ShowStatsFor(selectedHero);
     if (heroesWithPendingActions.Count == 0)
     {
       FinishActions();
@@ -235,7 +239,7 @@ public class CampController : MonoBehaviour, HeroPortrait.EventsCallback
     heroesWithPendingActions.RemoveAt(0);
 
     hero.portrait.Highlight();
-    HeroStatsPanel.ShowStatsFor(hero);
+    heroStatsPanel.ShowStatsFor(hero);
     hero.portrait.ClearActionText();
     string message = hero.action.GetCompletionAnnouncement(hero, Party.currentState);
     SpeechBubble.Show(hero.portrait, message, () => {
@@ -245,34 +249,48 @@ public class CampController : MonoBehaviour, HeroPortrait.EventsCallback
 
   private void FinishActions()
   {
+    if (Party.heroes.All(it => it.action is ACT_Sleep))
+    {
+      float timeUntil8 = Party.timeOfDay < 8
+        ? 8 - Party.timeOfDay
+        : 32 - Party.timeOfDay;
+      Party.AdvanceTime(timeUntil8, updateRest: false);
+      Party.heroes.ForEach(it => {
+        it.hoursAwake = 0;
+        it.rest += (int) timeUntil8 * 10;
+      });
+      UnityEngine.SceneManagement.SceneManager.LoadScene("Travel");
+      return;
+    }
+
     // Clear hero's actions.
     Party.heroes.ForEach(it => it.SelectAction(null));
 
     // Update UI.
-    HeroStatsPanel.ShowStatsFor(null);
+    heroStatsPanel.ShowStatsFor(null);
     uiState = UIState.INTERACTIVE;
 
-    StartCoroutine(NewHourSequence(Party.time));
+    StartCoroutine(NewHourSequence(Party.timeOfDay));
   }
 
   public void OnPointerEnterPortrait(HeroPortrait portrait)
   {
     if (uiState != UIState.INTERACTIVE) return;
     portrait.Highlight();
-    HeroStatsPanel.ShowStatsFor(portrait.hero);
+    heroStatsPanel.ShowStatsFor(portrait.hero);
   }
 
   public void OnPointerExitPortrait(HeroPortrait portrait)
   {
     if (uiState != UIState.INTERACTIVE) return;
     portrait.Unhighlight();
-    HeroStatsPanel.ShowStatsFor(selectedHero);
+    heroStatsPanel.ShowStatsFor(selectedHero);
   }
 
   public void OnPointerClickPortrait(HeroPortrait portrait)
   {
     if (uiState != UIState.INTERACTIVE) return;
-    portrait.Select();
+    SelectHero(portrait.hero);
   }
 
   public void OnPortraitDragStart(HeroPortrait portrait, PointerEventData data)
@@ -281,7 +299,7 @@ public class CampController : MonoBehaviour, HeroPortrait.EventsCallback
 
     uiState = UIState.DRAG_IN_PROCESS;
     portrait.SetRaycastTarget(false);
-    portrait.Select(showActions: false);
+    SelectHero(portrait.hero, false);
 
     portrait.transform.localPosition += new Vector3(
       data.delta.x,
@@ -326,7 +344,7 @@ public class CampController : MonoBehaviour, HeroPortrait.EventsCallback
   public void OnPortaitCancelPressed(HeroPortrait portrait)
   {
     portrait.hero.SelectAction(null);
-    if (selectedHero == portrait.hero)
-      portrait.location.ShowActions(portrait.hero);
+ //   if (selectedHero == portrait.hero)
+ //     portrait.location.ShowActions(portrait.hero);
   }
 }

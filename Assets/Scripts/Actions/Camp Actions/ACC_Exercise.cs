@@ -25,10 +25,7 @@ public class ACC_Exercise : HeroAction
 
   public override IEnumerator Process(Hero hero, PartyState previousContext, PartyState context, Action callback)
   {
-    RaiseStatsAndShowPopups(hero,
-      (Hero.Stat.HUNGER, -10),
-      (Hero.Stat.REST, -20));
-    HeroStatsPanel.ShowStatsFor(hero);
+    AdjustStats(hero, rest: -20, hiddenHunger: -10);
 
     yield return new WaitForSeconds(1.5f);
     callback.Invoke();

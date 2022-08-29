@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class ACF_Meal : HeroAction
 {
-  private static float MEAL_SUPPLY_COST = 2;
+  private const float MEAL_SUPPLY_COST = 2;
 
   public override string title => "Cook a Meal";
   public override string titlePresentProgressive => "Cooking a meal";
@@ -35,15 +35,13 @@ public class ACF_Meal : HeroAction
 
   public override IEnumerator Process(Hero hero, PartyState previousState, PartyState currentState, Action callback)
   {
-    RaiseStatsAndShowPopups(hero, (Hero.Stat.HUNGER, 45), (Hero.Stat.REST, -20));
+    AdjustStats(hero, hunger: 45, hiddenRest: -10);
     currentState.heroes
       .Where(it => it != hero)
       .ToList()
-      .ForEach(it => RaiseStatsAndShowPopups(it, (Hero.Stat.HUNGER, 45)));
-    HeroStatsPanel.ShowStatsFor(hero);
+      .ForEach(it => AdjustStats(it, hunger: 45));
 
     currentState.supplies -= MEAL_SUPPLY_COST * currentState.heroes.Count;
-    CampStatsPanel.Display(currentState);
 
     yield return new WaitForSeconds(1.5f);
     callback.Invoke();

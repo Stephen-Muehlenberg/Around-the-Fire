@@ -1,37 +1,33 @@
 using UnityEngine;
 
 /// <summary>
-/// Animates the travel scene's paralax background.
+/// Animates the travel scene's parallax background.
 /// </summary>
 public class TravelBackground : MonoBehaviour
 {
-  private const float MOUNTAIN_PAN_SPEED = 0.6f;
-  private const float TREE_PAN_SPEED = 3;
   private const float OFFSCREEN_X_CUTOFF = -25;
 
-  public Transform[] mountains;
-  public Transform[] trees;
+  private Transform[] parallaxElements;
+
+  private void Awake()
+  {
+    parallaxElements = new Transform[transform.childCount];
+    for (int i = 0; i < transform.childCount; i++)
+      parallaxElements[i] = transform.GetChild(i);
+  }
 
   /// <summary>
-  /// Pans the paralax background. 1 <paramref name="distance"/> = 1 hour's travel
-  /// under normal conditions.
+  /// Pans the parallax background by the specified <paramref name="distance"/>.
   /// </summary>
   public void TravelDistance(float distance)
   {
     // TODO Psuedo-randomly generate backgrounds.
 
-    foreach (Transform mountain in mountains)
+    foreach (Transform element in parallaxElements)
     {
-      mountain.localPosition += Vector3.left * distance * MOUNTAIN_PAN_SPEED;
-      if (mountain.localPosition.x < OFFSCREEN_X_CUTOFF)
-        mountain.localPosition += Vector3.left * OFFSCREEN_X_CUTOFF * 2;
-    }
-
-    foreach (Transform tree in trees)
-    {
-      tree.localPosition += Vector3.left * distance * TREE_PAN_SPEED;
-      if (tree.localPosition.x < OFFSCREEN_X_CUTOFF)
-        tree.localPosition += Vector3.left * OFFSCREEN_X_CUTOFF * 2;
+      element.localPosition += Vector3.left * distance / element.localPosition.z;
+      if (element.localPosition.x < OFFSCREEN_X_CUTOFF)
+        element.localPosition += Vector3.left * OFFSCREEN_X_CUTOFF * 2;
     }
   }
 }

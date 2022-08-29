@@ -24,8 +24,7 @@ public class ACT_Sleep : HeroAction
 
   public override IEnumerator Process(Hero hero, PartyState previousState, PartyState currentState, Action callback)
   {
-    RaiseStatsAndShowPopups(hero, (Hero.Stat.REST, 25));
-    HeroStatsPanel.ShowStatsFor(hero);
+    AdjustStats(hero, rest: 25);
 
     yield return new WaitForSeconds(1.5f);
     callback.Invoke();

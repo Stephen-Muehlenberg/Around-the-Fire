@@ -11,7 +11,6 @@ public class HeroPortrait : MonoBehaviour,
   IBeginDragHandler, IDragHandler, IEndDragHandler,
   IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
-
   private static Color COLOR_HIGHLIGHTED = new Color(1, 0.9227282f, 0, 0.2784314f);
   private static Color COLOR_SELECTED = new Color(0.2293994f, 1, 0, 0.2784314f);
 
@@ -48,28 +47,15 @@ public class HeroPortrait : MonoBehaviour,
     highlight.enabled = (hero == CampController.selectedHero);
   }
 
-  public void Select(bool showActions = true)
+  public void Select()
   {
-    if (CampController.selectedHero != null)
-      CampController.selectedHero.portrait.Deselect();
-    CampController.selectedHero = hero;
     highlight.enabled = true;
     highlight.color = COLOR_SELECTED;
-    if (location != null)
-    {
-      if (hero.action == null && showActions)
-        location.ShowActions(hero);
-      else
-        location.ShowActions(null);
-    }
-    HeroStatsPanel.ShowStatsFor(hero);
   }
 
   public void Deselect()
   {
     highlight.enabled = false;
-    if (CampController.selectedHero == hero)
-      CampController.selectedHero = null;
   }
 
   /// <summary>
@@ -132,22 +118,16 @@ public class HeroPortrait : MonoBehaviour,
 
   public void OnPointerEnter(PointerEventData eventData)
     => callback?.OnPointerEnterPortrait(this);
-
   public void OnPointerExit(PointerEventData eventData)
     => callback?.OnPointerExitPortrait(this);
-
   public void OnPointerClick(PointerEventData eventData)
     => callback?.OnPointerClickPortrait(this);
-
   public void OnBeginDrag(PointerEventData eventData)
     => callback?.OnPortraitDragStart(this, eventData);
-
   public void OnDrag(PointerEventData eventData)
     => callback?.OnPotraitDrag(this, eventData);
-
   public void OnEndDrag(PointerEventData eventData)
     => callback?.OnPotraitDragEnd(this, eventData);
-
   public void CancelAction()
     => callback?.OnPortaitCancelPressed(this);
 }

@@ -10,8 +10,9 @@ using System.Linq;
 /// the inspector, or load them dynamically.
 public class ActionManager
 {
-  private static List<HeroAction> allActions;
-  private static Dictionary<HeroLocation, List<HeroAction>> actionsByLocation;
+  private static List<HeroAction> travelActions;
+  private static List<HeroAction> campActions;
+  private static Dictionary<HeroLocation, List<HeroAction>> campActionsByLocation;
 
   /// <summary>
   /// Must be called before any other <see cref="ActionManager"/> methods,
@@ -19,7 +20,15 @@ public class ActionManager
   /// </summary>
   public static void Initialise()
   {
-    allActions = new List<HeroAction>()
+    travelActions = new List<HeroAction>()
+    {
+      new ATC_March(),
+      new ATC_Relax(),
+      new ATC_Guard(),
+      new ATC_Forage(),
+    };
+
+    campActions = new List<HeroAction>()
     {
       new ACA_Rest(),
       new ACA_Talk(),
@@ -47,15 +56,25 @@ public class ActionManager
       new ACT_Sleep(),
     };
 
-    actionsByLocation = allActions
+    // TODO THIS MUST BE COMMENTED OUT IN TRAVEL SCENE,
+    // AND UNCOMMENTED IN CAMP SCENE.
+    // Very much needs an overhaul.
+    /*
+    campActionsByLocation = campActions
       .GroupBy(it => it.location)
-      .ToDictionary(it => it.Key, it => it.ToList());
+      .ToDictionary(it => it.Key, it => it.ToList());*/
   }
 
-  public static List<HeroAction> GetActionsFor(HeroLocation location)
+  public static List<HeroAction> GetTravelActionsFor(Hero hero, PartyState context)
   {
-    if (actionsByLocation.ContainsKey(location))
-      return actionsByLocation[location];
+    // TODO filter list by context
+    return travelActions;
+  }
+
+  public static List<HeroAction> GetCampActionsFor(HeroLocation location)
+  {
+    if (campActionsByLocation.ContainsKey(location))
+      return campActionsByLocation[location];
     return new List<HeroAction>();
   }
 
@@ -63,9 +82,23 @@ public class ActionManager
   /// Calculate which available Action the <paramref name="hero"/> most
   /// wants to assign themselves, and how much (0 min, 1 max) they want it.
   /// </summary>
-  public static (HeroAction, float) GetMostWantedAction(Hero hero, PartyState state)
+  public static (HeroAction, float) GetMostWantedTravelAction(Hero hero, PartyState context)
   {
-    return allActions
+    return (travelActions.Random(), 0f); // TODO remove this, use below.
+/*    return travelActions
+      .Where(it => it.AvailableFor(hero, context) == HeroAction.Availability.AVAILABLE)
+      .Select(it => (it, it.GetAutoAssignWeight(hero, context)))
+      .OrderByDescending(it => it.Item2)
+      .First();*/
+  }
+
+  /// <summary>
+  /// Calculate which available Action the <paramref name="hero"/> most
+  /// wants to assign themselves, and how much (0 min, 1 max) they want it.
+  /// </summary>
+  public static (HeroAction, float) GetMostWantedCampAction(Hero hero, PartyState state)
+  {
+    return campActions
       .Where(it => it.location.HasSpace())
       .Where(it => it.AvailableFor(hero, state) == HeroAction.Availability.AVAILABLE)
       .Select(it => (it, it.GetAutoAssignWeight(hero, state)))

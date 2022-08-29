@@ -25,13 +25,13 @@ public class TimeOfDayController : MonoBehaviour
     if (sunColor.Length != 4 || skyColor.Length != 4)
       throw new Exception("sunColor[] and skyColor[] must have exactly 4 elements, but had " + sunColor.Length + " and " + skyColor.Length + ", respectively.");
     if (demoOnStart)
-      PlayDemo(0);
+      PlayDemo(0, 0);
   }
 
   /// <summary>
   /// Continuously advances time in a loop, to show off how it looks.
   /// </summary>
-  private void PlayDemo(float _)
+  private void PlayDemo(float _, float __)
   {
     AdvanceTime(0, 24, null, PlayDemo);
   }
@@ -44,7 +44,7 @@ public class TimeOfDayController : MonoBehaviour
   /// </summary>
   public void AdvanceTime(
     float startTime, int hours,
-    Action<int> onHourEnd = null, Action<float> onFinished = null)
+    Action<int> onHourEnd = null, Action<float, float> onFinished = null)
   {
     if (hours <= 0) throw new Exception("Time must be between 1 and 24 but was " + hours + ".");
     StartCoroutine(AdvanceTimeCoroutine(startTime, hours, onHourEnd, onFinished));
@@ -52,7 +52,7 @@ public class TimeOfDayController : MonoBehaviour
 
   private IEnumerator AdvanceTimeCoroutine(
     float startTime, int hours, 
-    Action<int> onHourEnd, Action<float> onFinish)
+    Action<int> onHourEnd, Action<float, float> onFinish)
   {
     float endTime = startTime + hours;
     if (endTime > 24) endTime -= 24;
@@ -88,7 +88,7 @@ public class TimeOfDayController : MonoBehaviour
     SetTime(endTime);
 
     // Invoke final callback.
-    if (onFinish != null) onFinish.Invoke(endTime);
+    if (onFinish != null) onFinish.Invoke(hours, endTime);
   }
 
   /// <summary>

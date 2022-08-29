@@ -36,7 +36,7 @@ public class ACF_Campfire : HeroAction
 
     currentState.camp.fire = CampState.FireState.MEDIUM;
     FireEffects.SetState(CampState.FireState.MEDIUM);
-    HeroStatsPanel.ShowStatsFor(hero);
+
     // TODO Lower supplies
     yield return new WaitForSeconds(1.5f);
     callback.Invoke();

@@ -30,17 +30,12 @@ public class ACF_Feast : HeroAction
 
   public override IEnumerator Process(Hero hero, PartyState previousState, PartyState currentState, Action callback)
   {
-    RaiseStatsAndShowPopups(hero, 
-      (Hero.Stat.HUNGER, 55),
-      (Hero.Stat.MORALE, 20),
-      (Hero.Stat.REST, -35));
+    AdjustStats(hero, hunger: 55, mood: 20, hiddenRest: -15);
     currentState.heroes
       .Where(it => it != hero)
       .ToList()
-      .ForEach(it => RaiseStatsAndShowPopups(it,
-      (Hero.Stat.HUNGER, 55),
-      (Hero.Stat.MORALE, 20)));
-    HeroStatsPanel.ShowStatsFor(hero);
+      .ForEach(it => AdjustStats(it, hunger: 55, mood: 20));
+
     // TODO Lower supplies
     yield return new WaitForSeconds(1.5f);
     callback.Invoke();

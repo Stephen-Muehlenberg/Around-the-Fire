@@ -4,49 +4,38 @@ using UnityEngine;
 
 public class ActionList : MonoBehaviour
 {
-  private static ActionList singleton;
-
-  public Transform listParent;
+  [SerializeField] private GameObject buttonPrefab;
   [SerializeField] private List<ActionButton> buttons;
-  private Action<HeroAction> actionSelectedCallback;
+  private Action<int> onClickCallback;
 
-  private void Awake()
+  public void Show(List<ActionButton.Content> content, Action<int> onClickCallback)
   {
-    if (singleton != null) throw new Exception("ActionList singleton already exists.");
-    singleton = this;
-    gameObject.SetActive(false);
-  }
+    this.onClickCallback = onClickCallback;
 
-  public static void Show(List<(HeroAction, HeroAction.Availability)> actions, Action<HeroAction> callback)
-  {
-    if (actions.Count > singleton.buttons.Count)
-      throw new Exception("Too many actions - can't display " + actions.Count + " in " + singleton.buttons.Count + " buttons.");
+    // Instantiate new buttons if we don't have enough.
+    if (content.Count > buttons.Count)
+      for (int i = content.Count - buttons.Count; i > 0; i--)
+        buttons.Add(Instantiate(buttonPrefab).GetComponent<ActionButton>());
 
     ActionButton button;
-    for (int i = 0; i < singleton.buttons.Count; i++)
+    for (int i = 0; i < buttons.Count; i++)
     {
-      button = singleton.buttons[i];
-      if (actions.Count > i)
-      {
-        button.gameObject.SetActive(true);
-        button.SetAction(actions[i].Item1, actions[i].Item2);
-      } 
+      button = buttons[i];
+      if (content.Count > i)
+        button.Set(content[i]);
       else
-        button.gameObject.SetActive(false);
+        button.Set(null);
     }
-  
-    singleton.actionSelectedCallback = callback;
-    singleton.gameObject.SetActive(true);
   }
 
-  public static void Hide()
+  public void Hide()
   {
-    singleton.gameObject.SetActive(false);
+    buttons.ForEach(it => it.gameObject.SetActive(false));
   }
 
   public void ClickButton(ActionButton button)
   {
     gameObject.SetActive(false);
-    actionSelectedCallback?.Invoke(button.action);
+    onClickCallback.Invoke(button.transform.GetSiblingIndex());
   }
 }

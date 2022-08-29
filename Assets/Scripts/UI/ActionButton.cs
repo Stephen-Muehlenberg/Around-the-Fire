@@ -1,28 +1,37 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class ActionButton : MonoBehaviour
 {
-  public HeroAction action;
   [SerializeField] private Button button;
   [SerializeField] private Image tint;
   [SerializeField] private TMPro.TMP_Text title;
-  [SerializeField] private TMPro.TMP_Text description;
+  [SerializeField] private TMPro.TMP_Text hoverText;
   [SerializeField] private GameObject unavailableUI;
   [SerializeField] private TMPro.TMP_Text unavailableReason;
 
-  public void SetAction(HeroAction action, HeroAction.Availability availability)
+  public class Content
   {
-    this.action = action;
-    title.text = action.title;
-    description.text = action.description;
-    unavailableUI.SetActive(availability != HeroAction.Availability.AVAILABLE);
-    unavailableReason.text = availability switch
-    {
-      HeroAction.Availability.NEEDS_A_FIRE => "Needs a Fire",
-      HeroAction.Availability.NOT_ENOUGH_SUPPLIES => "Not enough Supplies",
-      HeroAction.Availability.NOT_ENOUGH_WOOD => "Not enough Wood",
-      _ => ""
-    };
+    public string text;
+    public string hoverText;
+    public int state;
+  }
+
+  public void Set(Content content)
+  {
+    gameObject.SetActive(content != null);
+    if (content == null) return;
+
+    title.text = content.text;
+    hoverText.text = content.hoverText;
+  //  unavailableUI.SetActive(content.state > 0);
+ //   unavailableReason.text = content.state switch
+ //   {
+//      HeroAction.Availability.NEEDS_A_FIRE => "Needs a Fire",
+ //     HeroAction.Availability.NOT_ENOUGH_SUPPLIES => "Not enough Supplies",
+  //    HeroAction.Availability.NOT_ENOUGH_WOOD => "Not enough Wood",
+  //    _ => ""
+  //  };
   }
 }

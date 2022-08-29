@@ -1,22 +1,17 @@
 using UnityEngine;
 
+/// <summary>
+/// Animates hero portrait bouncing up and down.
+/// </summary>
 public class HeroTravelBounce : MonoBehaviour
 {
   // TODO Make bounce height and speed based on hero condition (health, rest, hunger, mood)
   private enum BounceState { STOPPED, STOPPING, BOUNCING }
-  private static readonly float BOUNCE_HEIGHT = 80;
-  private static readonly float BOUNCE_SPEED = 3.5f;
 
   public Hero hero;
   private Vector3 origin;
   private BounceState state = BounceState.STOPPED;
-  private float startTime;
-  private float unscaledBounceY;
-  private float previousUnscaledBounceY;
-  private float yDelta;
-  private float previousYDelta;
-
-  private static float bounceMultiplier; // Cached to avoid frequent reallocations.
+  private float yVelocity;
 
   public void Initialize(Hero hero)
   {
@@ -31,12 +26,6 @@ public class HeroTravelBounce : MonoBehaviour
 
   public void StartBouncing()
   {
-    if (state == BounceState.STOPPED)
-    {
-      startTime = Time.time;
-      unscaledBounceY = 0;
-      yDelta = 0;
-    }
     state = BounceState.BOUNCING;
   }
 
@@ -49,22 +38,23 @@ public class HeroTravelBounce : MonoBehaviour
   {
     if (state == BounceState.STOPPED) return;
 
-    bounceMultiplier = 0.5f + (hero.health + hero.hunger + hero.rest + hero.mood) / 800f;
-
-    previousUnscaledBounceY = unscaledBounceY;
-    previousYDelta = yDelta;
-
-    unscaledBounceY = Mathf.Abs(Mathf.Sin((Time.time - startTime) * bounceMultiplier * BOUNCE_SPEED));
-    yDelta = unscaledBounceY - previousUnscaledBounceY;
-
-    // Hit the ground and rebounded
-    if (state == BounceState.STOPPING && previousYDelta <= 0 && yDelta > 0)
+    // If on ground, start bouncing.
+    if (transform.localPosition.y <= origin.y)
     {
-      transform.localPosition = origin;
-      state = BounceState.STOPPED;
+      if (state == BounceState.STOPPING)
+      {
+        state = BounceState.STOPPED;
+        return;
+      }
+
+      float bounceMultiplier = 0.4f + (hero.health + hero.hunger + hero.rest + hero.mood) / 666f;
+      yVelocity = 400 * bounceMultiplier;
     }
 
-    // TODO Take into account character status, e.g. tired characters bounce less.
-    transform.localPosition = origin + Vector3.up * BOUNCE_HEIGHT * bounceMultiplier * unscaledBounceY;
+    transform.localPosition += Vector3.up * yVelocity * Time.deltaTime;
+    if (transform.localPosition.y < origin.y)
+      transform.localPosition = origin;
+
+    yVelocity -= Time.deltaTime * 600f;
   }
 }

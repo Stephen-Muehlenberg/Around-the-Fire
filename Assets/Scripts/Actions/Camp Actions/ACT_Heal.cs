@@ -30,7 +30,6 @@ public class ACT_Heal : HeroAction
   public override IEnumerator Process(Hero hero, PartyState previousState, PartyState currentState, Action callback)
   {
     // TODO
-    HeroStatsPanel.ShowStatsFor(hero);
 
     yield return new WaitForSeconds(1.5f);
     callback.Invoke();

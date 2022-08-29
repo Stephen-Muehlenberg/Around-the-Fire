@@ -44,8 +44,6 @@ public class ACT_ReceiveHealing : HeroAction
 
   public override IEnumerator Process(Hero hero, PartyState previousState, PartyState currentState, Action callback)
   {
-    HeroStatsPanel.ShowStatsFor(hero);
-
     yield return new WaitForSeconds(1.5f);
     callback.Invoke();
   }

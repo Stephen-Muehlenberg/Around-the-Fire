@@ -58,14 +58,14 @@ public class HeroLocation : MonoBehaviour
   public void Add(HeroPortrait hero, bool showActions = true)
   {
     heroes.Add(hero);
-    if (showActions) ShowActions(hero.hero);
+  //  if (showActions) ShowActions(hero.hero);
   }
 
   public void CancelMove(HeroPortrait hero)
   {
     zones.First(it => it.heroes.Contains(hero))
       .ReturnToPreviousPosition(hero);
-    ShowActions(hero.hero);
+  //  ShowActions(hero.hero);
   }
 
   public void Remove(HeroPortrait hero)
@@ -74,19 +74,23 @@ public class HeroLocation : MonoBehaviour
     zones.ForEach(it => it.heroes.Remove(hero));
   }
 
-  public void ShowActions(Hero hero)
+  public void ShowActions(Hero hero, ActionList actionList)
   {
     if (hero == null)
     {
-      ActionList.Hide();
+      actionList.Hide();
       return;
     }
 
-    var actions = ActionManager.GetActionsFor(this)
-      .Select(it => (it, it.AvailableFor(hero, Party.currentState)))
-      .Where(it => it.Item2 != HeroAction.Availability.HIDDEN)
+    var actions = ActionManager.GetCampActionsFor(this);
+    var actionButtons = actions
+      .Select(it => new ActionButton.Content() {
+        text = it.title,
+        hoverText = it.description,
+        state = (int) it.AvailableFor(hero, Party.currentState)
+      })
       .ToList();
-    ActionList.Show(actions, OnActionSelected);
+    actionList.Show(actionButtons, (i) => OnActionSelected(actions[i]));
   }
 
   private void OnActionSelected(HeroAction action)

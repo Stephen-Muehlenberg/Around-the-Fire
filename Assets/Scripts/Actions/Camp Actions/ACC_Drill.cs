@@ -25,7 +25,6 @@ public class ACC_Drill : HeroAction
   public override IEnumerator Process(Hero hero, PartyState previousContext, PartyState context, Action callback)
   {
     // TODO Show "Training++" on Heroes exercising/sparring/training.
-    HeroStatsPanel.ShowStatsFor(hero);
 
     yield return new WaitForSeconds(1.5f);
     callback.Invoke();

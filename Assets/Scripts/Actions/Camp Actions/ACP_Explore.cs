@@ -11,8 +11,7 @@ public class ACP_Explore : HeroAction
 
   public override IEnumerator Process(Hero hero, PartyState previousState, PartyState currentState, Action callback)
   {
-    RaiseStatsAndShowPopups(hero, (Hero.Stat.REST, -15));
-    HeroStatsPanel.ShowStatsFor(hero);
+    AdjustStats(hero, rest: -15);
 
     yield return new WaitForSeconds(1.5f);
     callback.Invoke();

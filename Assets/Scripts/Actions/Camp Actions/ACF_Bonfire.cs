@@ -33,7 +33,6 @@ public class ACF_Bonfire : HeroAction
     currentState.firewood += ((int) previousState.camp.fire -3) * 4;
     currentState.camp.fire = CampState.FireState.LARGE;
     FireEffects.SetState(CampState.FireState.LARGE);
-    HeroStatsPanel.ShowStatsFor(hero);
 
     // TODO Lower supplies
 

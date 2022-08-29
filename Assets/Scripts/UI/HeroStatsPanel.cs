@@ -13,31 +13,41 @@ public class HeroStatsPanel : MonoBehaviour
   public Image moodFill;
   public Gradient fillColour;
 
-  private static HeroStatsPanel singleton;
-
-  void Awake()
-  {
-    if (singleton != null) throw new System.Exception("Cannot have two StatsPanel singletons.");
-    singleton = this;
-  }
+  private Hero currentHero;
 
   void Start()
   {
     ShowStatsFor(null);
   }
 
-  public static void ShowStatsFor(Hero hero)
+  private void OnDestroy()
   {
-    singleton.gameObject.SetActive(hero != null);
+    if (currentHero != null)
+      currentHero.statusChanges -= UpdateStats;
+  }
+
+  public void ShowStatsFor(Hero hero)
+  {
+    if (currentHero != null)
+      currentHero.statusChanges -= UpdateStats;
+    currentHero = hero;
+    if (hero != null)
+      hero.statusChanges += UpdateStats;
+    UpdateStats(hero);
+  }
+
+  private void UpdateStats(Hero hero)
+  {
+    gameObject.SetActive(hero != null);
     if (hero == null) return;
 
-    singleton.health.value = hero.health;
-    singleton.healthFill.color = singleton.fillColour.Evaluate(hero.health / 100f);
-    singleton.hunger.value = hero.hunger;
-    singleton.hungerFill.color = singleton.fillColour.Evaluate(hero.hunger / 100f);
-    singleton.rest.value = hero.rest;
-    singleton.restFill.color = singleton.fillColour.Evaluate(hero.rest / 100f);
-    singleton.mood.value = hero.mood;
-    singleton.moodFill.color = singleton.fillColour.Evaluate(hero.mood / 100f);
+    health.value = hero.health;
+    healthFill.color = fillColour.Evaluate(hero.health / 100f);
+    hunger.value = hero.hunger;
+    hungerFill.color = fillColour.Evaluate(hero.hunger / 100f);
+    rest.value = hero.rest;
+    restFill.color = fillColour.Evaluate(hero.rest / 100f);
+    mood.value = hero.mood;
+    moodFill.color = fillColour.Evaluate(hero.mood / 100f);
   }
 }

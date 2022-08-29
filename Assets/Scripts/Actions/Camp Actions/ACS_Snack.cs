@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ACS_Snack : HeroAction
 {
-  private static float SNACK_SUPPLY_COST = 7;
+  private const float SNACK_SUPPLY_COST = 7;
 
   public override string title => "Eat a Snack";
   public override string titlePresentProgressive => "Snacking";
@@ -33,13 +33,9 @@ public class ACS_Snack : HeroAction
 
   public override IEnumerator Process(Hero hero, PartyState previousState, PartyState currentState, Action callback)
   {
-    RaiseStatsAndShowPopups(hero,
-      (Hero.Stat.HUNGER, 20),
-      (Hero.Stat.MORALE, 5));
-    HeroStatsPanel.ShowStatsFor(hero);
+    AdjustStats(hero, hunger: 15, mood: 5);
 
     currentState.supplies -= SNACK_SUPPLY_COST;
-    CampStatsPanel.Display(currentState);
 
     yield return new WaitForSeconds(1.5f);
     callback.Invoke();
