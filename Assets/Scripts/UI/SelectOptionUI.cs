@@ -46,6 +46,8 @@ public class SelectOptionUI : MonoBehaviour
   {
     selectionCallback = null;
     HideButtonPopup();
+    foreach (OptionButton button in buttons)
+      button.gameObject.SetActive(false);
     // TODO Hide buttons' parent panel.
   }
 

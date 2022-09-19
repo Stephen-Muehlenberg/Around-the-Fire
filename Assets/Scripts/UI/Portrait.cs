@@ -20,12 +20,13 @@ public class Portrait : MonoBehaviour,
   public bool highlighted { get; private set; }
   public bool selected { get; private set; }
 
-  public void Initialise(Character character, Interactions interactions = Interactions.NONE)
+  public void Initialise(Character character, Interactions interactions = Interactions.NONE, EventsCallback callbacks = null)
   {
     this.character = character;
     nameText.text = character.name;
     portrait.sprite = character.icon;
     this.interactions = interactions;
+    this.callbacks = callbacks;
     SetHighlighted(false);
     SetSelected(false);
   }
@@ -64,27 +65,27 @@ public class Portrait : MonoBehaviour,
 
   public interface EventsCallback
   {
-    public void OnPointerEnter(Portrait portrait);
-    public void OnPointerExit(Portrait portrait);
-    public void OnPointerClick(Portrait portrait);
+    public void OnPortraitPointerEnter(Portrait portrait);
+    public void OnPortraitPointerExit(Portrait portrait);
+    public void OnPortraitClick(Portrait portrait);
   }
 
   public void OnPointerClick(PointerEventData eventData)
   {
     if (interactions != Interactions.CLICKABLE) return;
     if (selectOnClick) SetSelected(true);
-    callbacks?.OnPointerClick(this);
+    callbacks?.OnPortraitClick(this);
   }
 
   public void OnPointerEnter(PointerEventData eventData)
   {
     SetHighlighted(true);
-    callbacks?.OnPointerEnter(this);
+    callbacks?.OnPortraitPointerEnter(this);
   }
 
   public void OnPointerExit(PointerEventData eventData)
   {
     SetHighlighted(false);
-    callbacks?.OnPointerExit(this);
+    callbacks?.OnPortraitPointerExit(this);
   }
 }

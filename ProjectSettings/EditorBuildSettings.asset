@@ -14,4 +14,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Camp.unity
     guid: 47c045a1ea7a74a4697dd64afca52f51
+  - enabled: 1
+    path: Assets/Scenes/Town.unity
+    guid: 9a92fd33f9562fb41876ff6e5f2133e1
+  - enabled: 1
+    path: Assets/Scenes/Guild.unity
+    guid: 4db875ea1ac21e241b21de5d5ae49cb1
   m_configObjects: {}

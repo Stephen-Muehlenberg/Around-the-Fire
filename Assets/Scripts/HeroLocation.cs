@@ -43,7 +43,7 @@ public class HeroLocation : MonoBehaviour
 
   public void OnPointerEnter()
   {
-    if (CampController.uiState != CampController.UIState.DRAG_IN_PROCESS) return;
+    if (CampScene.uiState != CampScene.UIState.DRAG_IN_PROCESS) return;
     zones.ForEach(it => it.SetHighlighted(true));
   }
 
@@ -87,7 +87,7 @@ public class HeroLocation : MonoBehaviour
       .Select(it => new ActionButton.Content() {
         text = it.title,
         hoverText = it.description,
-        state = (int) it.AvailableFor(hero, Party.currentState)
+        state = (int) it.AvailableFor(hero, Game.state)
       })
       .ToList();
     actionList.Show(actionButtons, (i) => OnActionSelected(actions[i]));
@@ -95,9 +95,9 @@ public class HeroLocation : MonoBehaviour
 
   private void OnActionSelected(HeroAction action)
   {
-    if (CampController.selectedHero == null)
+    if (CampScene.selectedHero == null)
       throw new System.Exception("Cannot select an action when no heroes selected!");
 
-    CampController.selectedHero.SelectAction(action);
+    CampScene.selectedHero.SelectAction(action);
   }
 }

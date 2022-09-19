@@ -223,6 +223,27 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: emoji_time
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 256
+        width: 128
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e2fbea8dd70d22f41abd8f726be29b02
+      internalID: -678828544
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     physicsShape: []
     bones: []
@@ -234,6 +255,7 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
+      emoji_time: -678828544
       emoji_health: 604829126271660023
       emoji_rest: -2976306034618162161
       emoji_hunger: 540455808545669907

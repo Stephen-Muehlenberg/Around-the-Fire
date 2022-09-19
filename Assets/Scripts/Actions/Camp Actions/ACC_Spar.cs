@@ -9,7 +9,7 @@ public class ACC_Spar : HeroAction
   public override string description => "Test your mettle against a partner.";
   public override HeroLocation location => HeroLocation.Clearing;
 
-  public override string GetCompletionAnnouncement(Hero hero, PartyState context)
+  public override string GetCompletionAnnouncement(Hero hero, GameState context)
   {
     return new string[] {
       "Bring it.",
@@ -19,7 +19,7 @@ public class ACC_Spar : HeroAction
     }.Random();
   }
 
-  public override IEnumerator Process(Hero hero, PartyState previousState, PartyState currentState, Action callback)
+  public override IEnumerator Process(Hero hero, GameState previousState, GameState currentState, Action callback)
   {
     AdjustStats(hero, rest: -25, health: -5);
 

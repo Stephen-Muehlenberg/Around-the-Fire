@@ -10,16 +10,16 @@ public class ACF_Bonfire : HeroAction
   public override HeroLocation location => HeroLocation.Fire;
   public override int hours => 1;
 
-  public override Availability AvailableFor(Hero hero, PartyState context)
+  public override Availability AvailableFor(Hero hero, GameState context)
   {
-    if (context.camp.fire == CampState.FireState.LARGE)
+    if (context.party.camp.fire == CampState.FireState.LARGE)
       return Availability.HIDDEN;
-    if (context.firewood < (3 - (int) context.camp.fire) * 4)
+    if (context.party.inventory.firewood < (3 - (int) context.party.camp.fire) * 4)
       return Availability.NOT_ENOUGH_WOOD;
     return Availability.AVAILABLE;
   }
 
-  public override string GetCompletionAnnouncement(Hero hero, PartyState context)
+  public override string GetCompletionAnnouncement(Hero hero, GameState context)
   {
     return new string[] {
       "Bonfire's up!",
@@ -28,10 +28,10 @@ public class ACF_Bonfire : HeroAction
     }.Random();
   }
 
-  public override IEnumerator Process(Hero hero, PartyState previousState, PartyState currentState, Action callback)
+  public override IEnumerator Process(Hero hero, GameState previousState, GameState currentState, Action callback)
   {
-    currentState.firewood += ((int) previousState.camp.fire -3) * 4;
-    currentState.camp.fire = CampState.FireState.LARGE;
+    currentState.party.inventory.firewood += ((int) previousState.party.camp.fire -3) * 4;
+    currentState.party.camp.fire = CampState.FireState.LARGE;
     FireEffects.SetState(CampState.FireState.LARGE);
 
     // TODO Lower supplies

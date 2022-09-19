@@ -7,6 +7,8 @@ using UnityEngine;
 /// </summary>
 public class TempGameInitialiser : MonoBehaviour
 {
+  public enum JourneyDestination { NONE, TO_QUEST, TO_TOWN }
+
   [SerializeField] private List<Sprite> TEMP_heroSprites;
   [SerializeField] private int TEMP_heroCount;
   [SerializeField] private float startTime;
@@ -14,8 +16,8 @@ public class TempGameInitialiser : MonoBehaviour
   [SerializeField] private Vector2 hungerRange = new Vector2(30, 100);
   [SerializeField] private Vector2 moodRange = new Vector2(20, 100);
   [SerializeField] private Vector2 restRange = new Vector2(50, 110);
-  [SerializeField] private float journeyDays = 3;
-  [SerializeField] private float journeyFractionComplete = 0;
+  [SerializeField] private bool hasDefaultQuest = false;
+  [SerializeField] private JourneyDestination journeyDestination = JourneyDestination.NONE;
   private static bool initialized;
 
   void Awake()
@@ -33,23 +35,35 @@ public class TempGameInitialiser : MonoBehaviour
     if (heroCount > names.Length)
       heroCount = names.Length;
 
-    Party.currentState = new PartyState()
+    var gameState = new GameState()
     {
-      totalTime = startTime,
-      heroes = new List<Hero>(heroCount),
-      firewood = Random.Range(0f, 20f),
-      supplies = Random.Range(0f, 20f),
-      journey = new JourneyState()
+      party = new Party()
       {
-        lengthInKilometres = journeyDays * JourneyState.EXPECTED_KM_PER_DAY,
-        hoursTravelled = 0,
-        kilometresTravelled = 0,
+        heroes = new List<Hero>(heroCount),
+        inventory = new Inventory()
+        {
+          firewood = Random.Range(0f, 20f),
+          supplies = Random.Range(0f, 20f),
+        },
+        quest = hasDefaultQuest ? new Quest()
+        {
+          title = "Default Quest",
+          description = "Example quest description.",
+          distanceFromTownKm = 30
+        } : null
       },
+      world = new World()
+      {
+        time = new WorldTime()
+        {
+          hourOfDay = startTime
+        }
+      }
     };
 
     for (int i = 0; i < heroCount; i++)
     {
-      Party.currentState.heroes.Add(new Hero()
+      gameState.party.heroes.Add(new Hero()
       {
         name = names[i],
         icon = TEMP_heroSprites[i],
@@ -59,6 +73,17 @@ public class TempGameInitialiser : MonoBehaviour
         rest = Mathf.Clamp(Random.Range(restRange.x, restRange.y), 0, 100),
       });
     }
+
+    if (journeyDestination != JourneyDestination.NONE)
+    {
+      gameState.party.journey = new Journey()
+      {
+        distanceKm = gameState.party.quest.distanceFromTownKm,
+        startTime = gameState.world.time,
+      };
+    }
+
+    Game.SetState(gameState);
 
     initialized = true;
   }

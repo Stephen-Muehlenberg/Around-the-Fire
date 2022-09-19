@@ -9,9 +9,9 @@ public class ACP_Forage : HeroAction
   public override string description => "Search for supplies.";
   public override HeroLocation location => HeroLocation.Perimeter;
 
-  public override string GetAssignmentAnnouncement(Hero hero, PartyState context)
+  public override string GetAssignmentAnnouncement(Hero hero, GameState context)
   {
-    if (context.timeOfDay >= 19)
+    if (context.world.time.hourOfDay >= 19)
       return new string[]
       {
         "Are you sure? It's getting pretty dark out there...",
@@ -26,9 +26,9 @@ public class ACP_Forage : HeroAction
     }.Random();
   }
 
-  public override string GetCompletionAnnouncement(Hero hero, PartyState context)
+  public override string GetCompletionAnnouncement(Hero hero, GameState context)
   {
-    if (context.timeOfDay >= 20)
+    if (context.world.time.hourOfDay >= 20)
       return new string[] {
         "Getting pretty hard to find anything in the dark.",
         "I can't see anything out there.",
@@ -41,13 +41,13 @@ public class ACP_Forage : HeroAction
     }.Random();
   }
 
-  public override IEnumerator Process(Hero hero, PartyState previousState, PartyState currentState, Action callback)
+  public override IEnumerator Process(Hero hero, GameState previousState, GameState currentState, Action callback)
   {
     AdjustStats(hero, rest: -13);
 
     float foodFound = UnityEngine.Random.Range(0, 10f);
-    if (currentState.timeOfDay >= 20) foodFound /= 2;
-    currentState.supplies += foodFound;
+    if (currentState.world.time.hourOfDay >= 20) foodFound /= 2;
+    currentState.party.inventory.supplies += foodFound;
 
     yield return new WaitForSeconds(1.5f);
     callback.Invoke();

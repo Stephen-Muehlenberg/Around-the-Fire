@@ -12,14 +12,15 @@ public class SpeechBubble : MonoBehaviour
   [SerializeField] private TMPro.TMP_Text text;
 
   // TODO use object pooling
-  public static void Show(HeroPortrait hero, string text, Action callback = null)
+  public static void Show(Transform targetTransform, string text, Action callback = null)
   {
     if (prefab == null)
       prefab = Resources.Load<GameObject>("Speech Bubble");
 
     var instance = Instantiate(prefab, PopupController.canvasTransform);
-    instance.GetComponent<SpeechBubble>().Initialise(text, hero.transform, callback);
+    instance.GetComponent<SpeechBubble>().Initialise(text, targetTransform, callback);
   }
+  public static void Show(HeroPortrait hero, string text, Action callback = null) => Show(hero.transform, text, callback);
 
   public static IEnumerator Show(HeroPortrait hero, string text)
   {

@@ -10,14 +10,14 @@ public class ACT_Heal : HeroAction
   public override string description => "Restore party health, prioritizing the most injured.";
   public override HeroLocation location => HeroLocation.Tent;
 
-  public override Availability AvailableFor(Hero hero, PartyState context)
+  public override Availability AvailableFor(Hero hero, GameState context)
   {
-    if (context.heroes.Any(it => it.health < 100))
+    if (context.party.heroes.Any(it => it.health < 100))
       return Availability.AVAILABLE;
     return Availability.HIDDEN;
   }
 
-  public override string GetAssignmentAnnouncement(Hero hero, PartyState context)
+  public override string GetAssignmentAnnouncement(Hero hero, GameState context)
   {
     return new string[] {
       "Alright, let's take a look.",
@@ -27,7 +27,7 @@ public class ACT_Heal : HeroAction
     }.Random();
   }
 
-  public override IEnumerator Process(Hero hero, PartyState previousState, PartyState currentState, Action callback)
+  public override IEnumerator Process(Hero hero, GameState previousState, GameState currentState, Action callback)
   {
     // TODO
 

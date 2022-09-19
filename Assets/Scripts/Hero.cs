@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 
+[Serializable]
 public class Hero : Character
 {
   /// <summary>0 - 100 inclusive.</summary>
@@ -77,6 +78,6 @@ public class Hero : Character
   {
     this.action = action;
     portrait.ShowSelectedAction(action);
-    CampController.OnActionSelected(this, assignedBySelf);
+    CampScene.OnActionSelected(this, assignedBySelf);
   }
 }

@@ -13,17 +13,17 @@ public class ACF_Meal : HeroAction
   public override HeroLocation location => HeroLocation.Fire;
   public override int hours => 2;
 
-  public override Availability AvailableFor(Hero hero, PartyState context)
+  public override Availability AvailableFor(Hero hero, GameState context)
   {
-    if (context.camp.fire == CampState.FireState.NONE)
+    if (context.party.camp.fire == CampState.FireState.NONE)
       return Availability.HIDDEN;
     return Availability.AVAILABLE;
   }
 
-  public override float GetAutoAssignWeight(Hero hero, PartyState context)
+  public override float GetAutoAssignWeight(Hero hero, GameState context)
     => StandardAutoAssignWeight(hero, hunger: 45, rest: -20);
 
-  public override string GetCompletionAnnouncement(Hero hero, PartyState context)
+  public override string GetCompletionAnnouncement(Hero hero, GameState context)
   {
     return new string[] {
       "Come get your grub!",
@@ -33,15 +33,15 @@ public class ACF_Meal : HeroAction
     }.Random();
   }
 
-  public override IEnumerator Process(Hero hero, PartyState previousState, PartyState currentState, Action callback)
+  public override IEnumerator Process(Hero hero, GameState previousState, GameState currentState, Action callback)
   {
     AdjustStats(hero, hunger: 45, hiddenRest: -10);
-    currentState.heroes
+    currentState.party.heroes
       .Where(it => it != hero)
       .ToList()
       .ForEach(it => AdjustStats(it, hunger: 45));
 
-    currentState.supplies -= MEAL_SUPPLY_COST * currentState.heroes.Count;
+    currentState.party.inventory.supplies -= MEAL_SUPPLY_COST * currentState.party.heroes.Count;
 
     yield return new WaitForSeconds(1.5f);
     callback.Invoke();

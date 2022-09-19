@@ -11,18 +11,18 @@ public class ACS_Snack : HeroAction
   public override string description => "Take the edge off your hunger.";
   public override HeroLocation location => HeroLocation.Supplies;
 
-  public override Availability AvailableFor(Hero hero, PartyState context)
+  public override Availability AvailableFor(Hero hero, GameState context)
   {
-    if (context.supplies < SNACK_SUPPLY_COST)
+    if (context.party.inventory.supplies < SNACK_SUPPLY_COST)
       return Availability.NOT_ENOUGH_SUPPLIES;
     return Availability.AVAILABLE;
   }
 
-  public override float GetAutoAssignWeight(Hero hero, PartyState context)
+  public override float GetAutoAssignWeight(Hero hero, GameState context)
     => StandardAutoAssignWeight(hero, hunger: 20, mood: 5);
 
 
-  public override string GetCompletionAnnouncement(Hero hero, PartyState context)
+  public override string GetCompletionAnnouncement(Hero hero, GameState context)
   {
     return new string[] {
       "Alright everyone, rations are ready.",
@@ -31,11 +31,11 @@ public class ACS_Snack : HeroAction
     }.Random();
   }
 
-  public override IEnumerator Process(Hero hero, PartyState previousState, PartyState currentState, Action callback)
+  public override IEnumerator Process(Hero hero, GameState previousState, GameState currentState, Action callback)
   {
     AdjustStats(hero, hunger: 15, mood: 5);
 
-    currentState.supplies -= SNACK_SUPPLY_COST;
+    currentState.party.inventory.supplies -= SNACK_SUPPLY_COST;
 
     yield return new WaitForSeconds(1.5f);
     callback.Invoke();

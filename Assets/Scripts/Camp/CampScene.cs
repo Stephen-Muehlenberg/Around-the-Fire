@@ -8,14 +8,14 @@ using UnityEngine.EventSystems;
 /// <summary>
 /// Main game state and logic controller.
 /// </summary>
-public class CampController : MonoBehaviour, HeroPortrait.EventsCallback
+public class CampScene : MonoBehaviour, HeroPortrait.EventsCallback
 {
   public enum UIState { INTERACTIVE, DRAG_IN_PROCESS, UNINTERACTIVE }
 
   public static Hero selectedHero;
   public static UIState uiState = UIState.UNINTERACTIVE;
 
-  private static CampController singleton;
+  private static CampScene singleton;
 
   public ActionList actionList;
 
@@ -27,7 +27,7 @@ public class CampController : MonoBehaviour, HeroPortrait.EventsCallback
   [SerializeField] private HeroLocation characterPanel;
   [SerializeField] private GameObject confirmActionsButton;
 
-  private PartyState previousState;
+  private GameState previousState;
   private List<Hero> heroesWithPendingActions;
   
   private void Awake()
@@ -42,7 +42,7 @@ public class CampController : MonoBehaviour, HeroPortrait.EventsCallback
     raycaster = characterPanel.GetComponentInParent<GraphicRaycaster>();
 
     ActionManager.Initialise();
-    Party.heroes.ForEach(hero =>
+    Game.heroes.ForEach(hero =>
     {
       var portrait = Instantiate(portraitPrefab, characterPanel.transform)
         .GetComponent<HeroPortrait>();
@@ -50,15 +50,15 @@ public class CampController : MonoBehaviour, HeroPortrait.EventsCallback
       portrait.Initialise(hero, characterPanel, this);
     });
 
-    Party.currentState.camp = new CampState()
+    Game.party.camp = new CampState()
     {
       fire = CampState.FireState.NONE,
     };
 
-    timeOfDayController.SetTime(Party.timeOfDay);
-    FireEffects.SetState(Party.camp.fire);
+    timeOfDayController.SetTime(Game.time.hourOfDay);
+    FireEffects.SetState(Game.party.camp.fire);
 
-    this.StartAfterDelay(0.5f, NewHourSequence(Party.timeOfDay));
+    this.StartAfterDelay(0.5f, NewHourSequence(Game.time.hourOfDay));
   }
 
   private void Update()
@@ -82,8 +82,8 @@ public class CampController : MonoBehaviour, HeroPortrait.EventsCallback
     heroStatsPanel.ShowStatsFor(hero);
     if (hero.location != null)
     {
-//      if (hero.action == null && showActions)
-  //      hero.location.ShowActions(hero);
+  //    if (hero.action == null && showActions)
+    //    hero.location.ShowActions(hero);
     //  else
       //  hero.location.ShowActions(null);
     }
@@ -101,8 +101,8 @@ public class CampController : MonoBehaviour, HeroPortrait.EventsCallback
   {
     yield return TimePopup.Show(hour);
 
-    var heroesToProcess = new List<Hero>(Party.heroes.Count);
-    Party.heroes.ForEach(it => heroesToProcess.Add(it));
+    var heroesToProcess = new List<Hero>(Game.heroes.Count);
+    Game.heroes.ForEach(it => heroesToProcess.Add(it));
     HeroAction action;
     float actionWeight;
     while (heroesToProcess.Count > 0)
@@ -114,13 +114,13 @@ public class CampController : MonoBehaviour, HeroPortrait.EventsCallback
       heroesToProcess.RemoveAt(i);
 
       // If time is midnight, all heroes automatically sleep.
-      if (Party.timeOfDay == 0)
+      if (Game.time.hourOfDay == 0)
         action = new ACT_Sleep();
       else
       {
         // Calculate the most desirable action for the hero.
         (action, actionWeight)
-          = ActionManager.GetMostWantedCampAction(hero, Party.currentState);
+          = ActionManager.GetMostWantedCampAction(hero, Game.state);
 
         // Determine if Hero will assign themselves the task,
         // or resist the temptation.
@@ -146,11 +146,11 @@ public class CampController : MonoBehaviour, HeroPortrait.EventsCallback
   {
     if (hero.action != null && !wasAssignedBySelf)
     {
-      string message = hero.action.GetAssignmentAnnouncement(hero, Party.currentState);
+      string message = hero.action.GetAssignmentAnnouncement(hero, Game.state);
       SpeechBubble.Show(hero.portrait, message, null);
     }
 
-    bool allHeroesReady = Party.heroes.All(it => it.action != null);
+    bool allHeroesReady = Game.heroes.All(it => it.action != null);
     singleton.confirmActionsButton.SetActive(allHeroesReady);
   }
 
@@ -159,33 +159,33 @@ public class CampController : MonoBehaviour, HeroPortrait.EventsCallback
     // Disable action UI.
     uiState = UIState.UNINTERACTIVE;
     confirmActionsButton.SetActive(false);
-   // ActionList.Hide();
-    Party.heroes.ForEach(it => {
+    // ActionList.Hide();
+    Game.heroes.ForEach(it => {
       it.portrait.AllowCancel(false);
       DeselectHero(it);
     });
 
     // Animate time advancing.
-    timeOfDayController.AdvanceTime((int) Party.timeOfDay, 1, null, OnAdvanceTimeFinished);
+    timeOfDayController.AdvanceTime((int) Game.time.hourOfDay, 1, null, OnAdvanceTimeFinished);
   }
 
   private void OnAdvanceTimeFinished(float timePassed, float newTime)
   {
     // Update UI.
-    Party.AdvanceTime(timePassed);
+    Game.time.Advance(timePassed);
 
     // Copy current party & camp state, so that any changes made as a
     // result of one Action don't affect calculations of subsequent Actions.
-    previousState = Party.currentState.Clone();
+    previousState = Game.state.DeepCopy();
 
     // Degrade Hero stats for every hour passed.
-    int hours = Party.heroes
+    int hours = Game.heroes
       .Select(it => it.action.hours)
       .Min();
     DegradeStatsOverTime(hours);
 
     // Sort Heroes by their Action priority, then left-to-right, then top-to-bottom.
-    heroesWithPendingActions = Party.heroes
+    heroesWithPendingActions = Game.heroes
       .OrderBy(it => it.portrait.transform.position.y)
       .OrderBy(it => it.portrait.transform.position.x)
       .OrderBy(it => it.action.completionOrder)
@@ -196,7 +196,7 @@ public class CampController : MonoBehaviour, HeroPortrait.EventsCallback
 
   private void DegradeStatsOverTime(int hours)
   {
-    Party.heroes.ForEach(it => {
+    Game.heroes.ForEach(it => {
       for (int i = 0; i < hours; i++)
       {
         it.hunger -= Random.Range(3.5f, 4.5f);
@@ -227,7 +227,7 @@ public class CampController : MonoBehaviour, HeroPortrait.EventsCallback
   /// </summary>
   private void ProcessNextAction()
   {
-    Party.heroes.ForEach(it => it.portrait.Unhighlight());
+    Game.heroes.ForEach(it => it.portrait.Unhighlight());
     heroStatsPanel.ShowStatsFor(selectedHero);
     if (heroesWithPendingActions.Count == 0)
     {
@@ -241,21 +241,21 @@ public class CampController : MonoBehaviour, HeroPortrait.EventsCallback
     hero.portrait.Highlight();
     heroStatsPanel.ShowStatsFor(hero);
     hero.portrait.ClearActionText();
-    string message = hero.action.GetCompletionAnnouncement(hero, Party.currentState);
+    string message = hero.action.GetCompletionAnnouncement(hero, Game.state);
     SpeechBubble.Show(hero.portrait, message, () => {
-      StartCoroutine(hero.action.Process(hero, previousState, Party.currentState, ProcessNextAction));
+      StartCoroutine(hero.action.Process(hero, previousState, Game.state, ProcessNextAction));
     });
   }
 
   private void FinishActions()
   {
-    if (Party.heroes.All(it => it.action is ACT_Sleep))
+    if (Game.heroes.All(it => it.action is ACT_Sleep))
     {
-      float timeUntil8 = Party.timeOfDay < 8
-        ? 8 - Party.timeOfDay
-        : 32 - Party.timeOfDay;
-      Party.AdvanceTime(timeUntil8, updateRest: false);
-      Party.heroes.ForEach(it => {
+      float timeUntil8 = Game.time.hourOfDay < 8
+        ? 8 - Game.time.hourOfDay
+        : 32 - Game.time.hourOfDay;
+      Game.time.Advance(timeUntil8, updateRest: false);
+      Game.heroes.ForEach(it => {
         it.hoursAwake = 0;
         it.rest += (int) timeUntil8 * 10;
       });
@@ -264,13 +264,13 @@ public class CampController : MonoBehaviour, HeroPortrait.EventsCallback
     }
 
     // Clear hero's actions.
-    Party.heroes.ForEach(it => it.SelectAction(null));
+    Game.heroes.ForEach(it => it.SelectAction(null));
 
     // Update UI.
     heroStatsPanel.ShowStatsFor(null);
     uiState = UIState.INTERACTIVE;
 
-    StartCoroutine(NewHourSequence(Party.timeOfDay));
+    StartCoroutine(NewHourSequence(Game.time.hourOfDay));
   }
 
   public void OnPointerEnterPortrait(HeroPortrait portrait)

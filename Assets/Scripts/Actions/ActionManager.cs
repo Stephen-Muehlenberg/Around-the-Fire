@@ -65,7 +65,7 @@ public class ActionManager
       .ToDictionary(it => it.Key, it => it.ToList());*/
   }
 
-  public static List<HeroAction> GetTravelActionsFor(Hero hero, PartyState context)
+  public static List<HeroAction> GetTravelActionsFor(Hero hero, GameState context)
   {
     // TODO filter list by context
     return travelActions;
@@ -82,7 +82,7 @@ public class ActionManager
   /// Calculate which available Action the <paramref name="hero"/> most
   /// wants to assign themselves, and how much (0 min, 1 max) they want it.
   /// </summary>
-  public static (HeroAction, float) GetMostWantedTravelAction(Hero hero, PartyState context)
+  public static (HeroAction, float) GetMostWantedTravelAction(Hero hero, GameState context)
   {
     return (travelActions.Random(), 0f); // TODO remove this, use below.
 /*    return travelActions
@@ -96,7 +96,7 @@ public class ActionManager
   /// Calculate which available Action the <paramref name="hero"/> most
   /// wants to assign themselves, and how much (0 min, 1 max) they want it.
   /// </summary>
-  public static (HeroAction, float) GetMostWantedCampAction(Hero hero, PartyState state)
+  public static (HeroAction, float) GetMostWantedCampAction(Hero hero, GameState state)
   {
     return campActions
       .Where(it => it.location.HasSpace())

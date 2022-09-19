@@ -9,13 +9,13 @@ public class ACC_Exercise : HeroAction
   public override string description => "Increase your max health and stamina.";
   public override HeroLocation location => HeroLocation.Clearing;
 
-  public override bool AcceptedBy(Hero hero, PartyState context)
+  public override bool AcceptedBy(Hero hero, GameState context)
   {
     return hero.hunger > 10
       && hero.rest > 20;
   }
 
-  public override string GetCompletionAnnouncement(Hero hero, PartyState context)
+  public override string GetCompletionAnnouncement(Hero hero, GameState context)
   {
     return new string[] {
       "Forty eight... Forty nine... Fifty!",
@@ -23,7 +23,7 @@ public class ACC_Exercise : HeroAction
     }.Random();
   }
 
-  public override IEnumerator Process(Hero hero, PartyState previousContext, PartyState context, Action callback)
+  public override IEnumerator Process(Hero hero, GameState previousContext, GameState context, Action callback)
   {
     AdjustStats(hero, rest: -20, hiddenHunger: -10);
 

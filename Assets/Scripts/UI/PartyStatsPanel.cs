@@ -9,17 +9,19 @@ public class PartyStatsPanel : MonoBehaviour
 
   public void Start()
   {
-    Display(Party.currentState);
-    Party.currentState.updates += Display;
+    Display(Game.state);
+    Game.onCampaignStateChanged += Display;
   }
 
   public void OnDestroy()
-    => Party.currentState.updates -= Display;
+    => Game.onCampaignStateChanged -= Display;
 
-  public void Display(PartyState state)
+  public void Display(GameState state)
   {
-    textField.text = "Time: " + Utils.GetDisplayTime(state.timeOfDay)
-      + "\nSupplies: " + Mathf.FloorToInt(state.supplies) + " (" + Mathf.FloorToInt(state.supplies / 4f / state.heroes.Count) + " days)"
-      + "\nWood: " + Mathf.FloorToInt(state.firewood) + " (" + Mathf.FloorToInt(state.firewood / 8) + " days)";
+    float supplies = state.party.inventory.supplies;
+    float firewood = state.party.inventory.firewood;
+    textField.text = "Time: " + Utils.GetDisplayTime(state.world.time.hourOfDay)
+      + "\nSupplies: " + Mathf.FloorToInt(supplies) + " (" + state.party.inventory.daysWorthOfSupplies(state.party) + " days)"
+      + "\nWood: " + Mathf.FloorToInt(firewood) + " (" + state.party.inventory.daysWorthOfFirewood(state.party) + " days)";
   }
 }

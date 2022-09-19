@@ -1,20 +1,19 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 
 public class BounceMovement : MonoBehaviour
 {
   private enum BounceState { STOPPED, STOPPING, BOUNCING }
 
-  public bool bounceOnAwake = true;
+  /// <summary>Bounce height is randomly up to 5% higher or lower.</summary>
   public bool addSlightVarianceToBounce = false;
 
   private Vector3 groundPoint;
   private BounceState state;
-  private float bounceHeight = 50;
-  private float bounceDuration = 1;
+  private float bounceHeight = 400; // Just some ok default values, nothing special.
+  private float bounceDuration = 1.1547f; // Just some ok default values, nothing special.
+  private float bounceGravity;
+  private float bounceInitialVelocity;
   private float yVelocity;
 
   private bool moving = false;
@@ -26,7 +25,7 @@ public class BounceMovement : MonoBehaviour
   private void Awake()
   {
     groundPoint = transform.localPosition;
-    state = bounceOnAwake ? BounceState.BOUNCING : BounceState.STOPPED;
+    state = BounceState.STOPPED;
   }
 
   public void Initialise(float? bounceHeight = null, float? bounceDuration = null, bool? addSlightVarianceToBounce = null)
@@ -37,6 +36,27 @@ public class BounceMovement : MonoBehaviour
       this.bounceDuration = bounceDuration.Value;
     if (addSlightVarianceToBounce.HasValue)
       this.addSlightVarianceToBounce = addSlightVarianceToBounce.Value;
+
+    RecalculateBounceVariables();
+  }
+
+  public void SetBouncHeight(float height)
+  {
+    bounceHeight = height;
+    RecalculateBounceVariables();
+  }
+
+  public void SetBounceDuration(float duration)
+  {
+    bounceDuration = duration;
+    RecalculateBounceVariables();
+  }
+
+  private void RecalculateBounceVariables()
+  {
+    // Google "projectile motion equations" for an explanation of the maths.
+    bounceGravity = 2 * bounceHeight / Mathf.Pow(bounceDuration, 2);
+    bounceInitialVelocity = bounceGravity * bounceDuration / 2;
   }
 
   public void MoveTo(Vector3 destination, float? duration = null, Action callback = null)
@@ -66,16 +86,6 @@ public class BounceMovement : MonoBehaviour
       state = BounceState.STOPPING;
   }
 
-  public void SetBouncHeight(float height)
-  {
-    bounceHeight = height;
-  }
-
-  public void SetBounceDuration(float duration)
-  {
-    bounceDuration = duration;
-  }
-
   public void SetGroundPointToCurrentPosition()
   {
     groundPoint = transform.localPosition;
@@ -83,7 +93,6 @@ public class BounceMovement : MonoBehaviour
 
   void Update()
   {
-    // TODO handle bounce height and duration modifiers
     // TODO handle movement.
 
     if (state == BounceState.STOPPED) return;
@@ -99,14 +108,14 @@ public class BounceMovement : MonoBehaviour
         return;
       }
 
-      // If bouncing, launch/bounce off ground;
-      yVelocity = 400 + (addSlightVarianceToBounce ? UnityEngine.Random.Range(-20, 20) : 0);
+      // If bouncing, launch/bounce off ground.
+      yVelocity = bounceInitialVelocity * (addSlightVarianceToBounce ? UnityEngine.Random.Range(0.95f, 1.05f) : 1);
     }
 
     transform.localPosition += Vector3.up * yVelocity * Time.deltaTime;
     if (transform.localPosition.y < groundPoint.y)
       transform.localPosition = groundPoint;
 
-    yVelocity -= Time.deltaTime * 600f;
+    yVelocity -= Time.deltaTime * bounceGravity;
   }
 }

@@ -39,12 +39,12 @@ public class HeroPortrait : MonoBehaviour,
   public void Highlight()
   {
     highlight.enabled = true;
-    highlight.color = (hero == CampController.selectedHero) ? COLOR_SELECTED : COLOR_HIGHLIGHTED;
+    highlight.color = (hero == CampScene.selectedHero) ? COLOR_SELECTED : COLOR_HIGHLIGHTED;
   }
 
   public void Unhighlight()
   {
-    highlight.enabled = (hero == CampController.selectedHero);
+    highlight.enabled = (hero == CampScene.selectedHero);
   }
 
   public void Select()

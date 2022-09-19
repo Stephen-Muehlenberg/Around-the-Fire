@@ -10,10 +10,10 @@ public class ACA_Carouse : HeroAction
   public override string description => "Have a drink and some laughs with friends.";
   public override HeroLocation location => HeroLocation.Around;
 
-  public override float GetAutoAssignWeight(Hero hero, PartyState context)
+  public override float GetAutoAssignWeight(Hero hero, GameState context)
     => StandardAutoAssignWeight(hero, mood: 15);
 
-  public override string GetCompletionAnnouncement(Hero hero, PartyState context)
+  public override string GetCompletionAnnouncement(Hero hero, GameState context)
   {
     return new string[] {
       "A toast! To the greatest heroes in the land!",
@@ -22,14 +22,14 @@ public class ACA_Carouse : HeroAction
     }.Random();
   }
 
-  public override IEnumerator Process(Hero hero, PartyState previousState, PartyState newState, Action callback)
+  public override IEnumerator Process(Hero hero, GameState previousState, GameState newState, Action callback)
   {
     AdjustStats(hero, mood: 15);
-    newState.heroes
+    newState.party.heroes
       .Where(it => it != hero && it.location == HeroLocation.Around)
       .ToList()
       .ForEach(it => AdjustStats(it, mood: 10));
-    newState.heroes
+    newState.party.heroes
       .Where(it => it.location == HeroLocation.Fire)
       .ToList()
       .ForEach(it => AdjustStats(it, hiddenMood: 5));

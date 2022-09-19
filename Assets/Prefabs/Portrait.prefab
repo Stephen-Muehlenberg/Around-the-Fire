@@ -837,4 +837,4 @@ MonoBehaviour:
   nameText: {fileID: 3659874912962158429}
   actionText: {fileID: 9196629845591379667}
   interactions: 0
-  selectOnClick: 1
+  selectOnClick: 0

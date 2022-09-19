@@ -1,9 +1,10 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class MainMenu : MonoBehaviour
 {
   public void NewGame()
   {
-    UnityEngine.SceneManagement.SceneManager.LoadSceneAsync("Travel");
+    SceneManager.LoadSceneAsync("Town");
   }
 }

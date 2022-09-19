@@ -48,7 +48,7 @@ public class SceneController : MonoBehaviour
       {
         text = it.title,
         hoverText = it.description,
-        state = (int) it.AvailableFor(hero, Party.currentState)
+        state = (int) it.AvailableFor(hero, Game.state)
       })
       .ToList();
     actionList.Show(actionButtons, (i) => SelectAction(hero, actions[i]));
@@ -65,7 +65,7 @@ public class SceneController : MonoBehaviour
   //    SpeechBubble.Show(hero.portrait, message, null);
     //}
 
-    bool allHeroesReady = Party.heroes.All(it => it.action != null);
+    bool allHeroesReady = Game.heroes.All(it => it.action != null);
   //  confirmActionsButton.SetActive(allHeroesReady);
   }
 }

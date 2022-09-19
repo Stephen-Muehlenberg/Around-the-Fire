@@ -9,9 +9,9 @@ public class ACP_Wood : HeroAction
   public override string description => "Find fuel for the fire.";
   public override HeroLocation location => HeroLocation.Perimeter;
 
-  public override string GetAssignmentAnnouncement(Hero hero, PartyState context)
+  public override string GetAssignmentAnnouncement(Hero hero, GameState context)
   {
-    if (context.timeOfDay >= 19)
+    if (context.world.time.hourOfDay >= 19)
       return new string[]
       {
         "Are you sure? It's getting pretty dark out there...",
@@ -21,9 +21,9 @@ public class ACP_Wood : HeroAction
     return base.GetAssignmentAnnouncement(hero, context);
   }
 
-  public override string GetCompletionAnnouncement(Hero hero, PartyState context)
+  public override string GetCompletionAnnouncement(Hero hero, GameState context)
   {
-    if (context.timeOfDay >= 20)
+    if (context.world.time.hourOfDay >= 20)
       return new string[] {
         "Getting pretty hard to find anything in the dark.",
         "I can't see anything out there.",
@@ -36,13 +36,13 @@ public class ACP_Wood : HeroAction
     }.Random();
   }
 
-  public override IEnumerator Process(Hero hero, PartyState previousState, PartyState currentState, Action callback)
+  public override IEnumerator Process(Hero hero, GameState previousState, GameState currentState, Action callback)
   {
     AdjustStats(hero, rest: -12);
 
     float woodFound = UnityEngine.Random.Range(4, 12);
-    if (currentState.timeOfDay >= 20) woodFound -= 4;
-    currentState.firewood += woodFound;
+    if (currentState.world.time.hourOfDay >= 20) woodFound -= 4;
+    currentState.party.inventory.firewood += woodFound;
     
     yield return new WaitForSeconds(1.5f);
     callback.Invoke();

@@ -10,16 +10,16 @@ public class ACF_Campfire : HeroAction
   public override HeroLocation location => HeroLocation.Fire;
   public override int hours => 1;
 
-  public override Availability AvailableFor(Hero hero, PartyState context)
+  public override Availability AvailableFor(Hero hero, GameState context)
   {
-    if (context.camp.fire >= CampState.FireState.MEDIUM)
+    if (context.party.camp.fire >= CampState.FireState.MEDIUM)
       return Availability.HIDDEN; // Fire already as big or bigger.
-    if (context.firewood < (2 - (int) context.camp.fire) * 4)
+    if (context.party.inventory.firewood < (2 - (int) context.party.camp.fire) * 4)
       return Availability.NOT_ENOUGH_WOOD;
     return Availability.AVAILABLE;
   }
 
-  public override string GetCompletionAnnouncement(Hero hero, PartyState context)
+  public override string GetCompletionAnnouncement(Hero hero, GameState context)
   {
     return new string[] {
       "Camp fire's ready!",
@@ -27,14 +27,14 @@ public class ACF_Campfire : HeroAction
     }.Random();
   }
 
-  public override IEnumerator Process(Hero hero, PartyState previousState, PartyState currentState, Action callback)
+  public override IEnumerator Process(Hero hero, GameState previousState, GameState currentState, Action callback)
   {
-    if (previousState.camp.fire == CampState.FireState.NONE)
-      currentState.firewood -= 8;
+    if (previousState.party.camp.fire == CampState.FireState.NONE)
+      currentState.party.inventory.firewood -= 8;
     else
-      currentState.camp.fire -= 4;
+      currentState.party.camp.fire -= 4;
 
-    currentState.camp.fire = CampState.FireState.MEDIUM;
+    currentState.party.camp.fire = CampState.FireState.MEDIUM;
     FireEffects.SetState(CampState.FireState.MEDIUM);
 
     // TODO Lower supplies
