@@ -8,12 +8,12 @@ public class ACF_Feast : HeroAction
   public override string title => "Prepare a Feast";
   public override string titlePresentProgressive => "Preparing a feast";
   public override string description => "Treat your party to a delicious, filling banquet!";
-  public override HeroLocation location => HeroLocation.Fire;
+  public override PortraitZone location => Camp.zoneFire;
   public override int hours => 3;
 
   public override Availability AvailableFor(Hero hero, GameState context)
   {
-    if (context.party.camp.fire == CampState.FireState.NONE)
+    if (context.camp.fire == Camp.FireState.NONE)
       return Availability.HIDDEN;
     return Availability.AVAILABLE;
   }

@@ -28,9 +28,13 @@ public class TownScene : MonoBehaviour
     }
     else
     {
-      Game.party.journey = new Journey()
+      Game.state.journey = new Journey()
       {
-        townIsDestination = false,
+        destination = new Location()
+        {
+          name = "Scary Dungeon",
+          isTown = false
+        },
         distanceKm = Game.party.quest.distanceFromTownKm,
         startTime = Game.world.time,
       };

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 /// <summary>
 /// Loads an instance of every <see cref="HeroAction"/> into a list for
@@ -8,18 +9,25 @@ using System.Linq;
 /// </summary>
 /// TODO See if we can somehow list HeroAction classes (*not* instances) in
 /// the inspector, or load them dynamically.
-public class ActionManager
+public class ActionManager : MonoBehaviour
 {
-  private static List<HeroAction> travelActions;
-  private static List<HeroAction> campActions;
-  private static Dictionary<HeroLocation, List<HeroAction>> campActionsByLocation;
+  private static ActionManager singleton;
 
-  /// <summary>
-  /// Must be called before any other <see cref="ActionManager"/> methods,
-  /// and after HeroLocations are initialised (Start should be fine for this).
-  /// </summary>
-  public static void Initialise()
+  private List<HeroAction> travelActions;
+  private List<HeroAction> campActions;
+  private Dictionary<PortraitZone, List<HeroAction>> campActionsByLocation;
+
+  public void Awake()
   {
+    if (singleton != null)
+    {
+      Destroy(gameObject);
+      return;
+    }
+
+    singleton = this;
+    DontDestroyOnLoad(this.gameObject);
+
     travelActions = new List<HeroAction>()
     {
       new ATC_March(),
@@ -56,26 +64,15 @@ public class ActionManager
       new ACT_Sleep(),
     };
 
-    // TODO THIS MUST BE COMMENTED OUT IN TRAVEL SCENE,
-    // AND UNCOMMENTED IN CAMP SCENE.
-    // Very much needs an overhaul.
-    /*
     campActionsByLocation = campActions
       .GroupBy(it => it.location)
-      .ToDictionary(it => it.Key, it => it.ToList());*/
+      .ToDictionary(it => it.Key, it => it.ToList());
   }
 
   public static List<HeroAction> GetTravelActionsFor(Hero hero, GameState context)
   {
-    // TODO filter list by context
-    return travelActions;
-  }
-
-  public static List<HeroAction> GetCampActionsFor(HeroLocation location)
-  {
-    if (campActionsByLocation.ContainsKey(location))
-      return campActionsByLocation[location];
-    return new List<HeroAction>();
+    // TODO Filter out unavailable actions.
+    return singleton.travelActions;
   }
 
   /// <summary>
@@ -84,12 +81,19 @@ public class ActionManager
   /// </summary>
   public static (HeroAction, float) GetMostWantedTravelAction(Hero hero, GameState context)
   {
-    return (travelActions.Random(), 0f); // TODO remove this, use below.
-/*    return travelActions
-      .Where(it => it.AvailableFor(hero, context) == HeroAction.Availability.AVAILABLE)
-      .Select(it => (it, it.GetAutoAssignWeight(hero, context)))
-      .OrderByDescending(it => it.Item2)
-      .First();*/
+    return (singleton.travelActions.Random(), 0f); // TODO remove this, use below.
+    /*    return travelActions
+          .Where(it => it.AvailableFor(hero, context) == HeroAction.Availability.AVAILABLE)
+          .Select(it => (it, it.GetAutoAssignWeight(hero, context)))
+          .OrderByDescending(it => it.Item2)
+          .First();*/
+  }
+
+  public static List<HeroAction> GetCampActionsFor(PortraitZone location)
+  {
+    if (singleton.campActionsByLocation.ContainsKey(location))
+      return singleton.campActionsByLocation[location];
+    return new List<HeroAction>();
   }
 
   /// <summary>
@@ -98,11 +102,16 @@ public class ActionManager
   /// </summary>
   public static (HeroAction, float) GetMostWantedCampAction(Hero hero, GameState state)
   {
-    return campActions
-      .Where(it => it.location.HasSpace())
+    return singleton.campActions
+      .Where(it => it.location.hasSpace)
       .Where(it => it.AvailableFor(hero, state) == HeroAction.Availability.AVAILABLE)
       .Select(it => (it, it.GetAutoAssignWeight(hero, state)))
       .OrderByDescending(it => it.Item2)
       .First();
+  }
+
+  public static HeroAction GetDefaultCampAction()
+  {
+    return singleton.campActions.First(it => it is ACA_Rest);
   }
 }

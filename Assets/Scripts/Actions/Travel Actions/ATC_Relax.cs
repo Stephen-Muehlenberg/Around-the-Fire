@@ -10,7 +10,7 @@ public class ATC_Relax : HeroAction
     "<b>+2 Mood</b> (+1 per companion)" +
     "\n<b>+1 Stamina</b>" +
     "\n\nTake it easy, enjoying the scenery and good company. More effective with more people relaxing.";
-  public override HeroLocation location => HeroLocation.Perimeter; // TODO should be off to the side of the road
+  public override PortraitZone location => Camp.zonePerimeter; // TODO should be off to the side of the road
 
   public override string GetAssignmentAnnouncement(Hero hero, GameState context)
   {

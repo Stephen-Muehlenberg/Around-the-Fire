@@ -7,7 +7,7 @@ public class ACC_Spar : HeroAction
   public override string title => "Spar";
   public override string titlePresentProgressive => "Sparring";
   public override string description => "Test your mettle against a partner.";
-  public override HeroLocation location => HeroLocation.Clearing;
+  public override PortraitZone location => Camp.zoneClearing;
 
   public override string GetCompletionAnnouncement(Hero hero, GameState context)
   {

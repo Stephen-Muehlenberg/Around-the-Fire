@@ -10,7 +10,7 @@ public class ATC_March : HeroAction
     "<b>+5% Speed</b> (+35% if everyone marches)" +
     "\n<b>-2 Stamina</b>" +
     "\n\nUrge the party to a faster pace.";
-  public override HeroLocation location => HeroLocation.Perimeter; // TODO should be off to the side of the road
+  public override PortraitZone location => Camp.zonePerimeter; // TODO should be off to the side of the road
 
   public override string GetAssignmentAnnouncement(Hero hero, GameState context)
   {

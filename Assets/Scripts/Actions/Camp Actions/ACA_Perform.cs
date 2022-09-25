@@ -8,21 +8,21 @@ public class ACA_Perform : HeroAction
   public override string title => "Perform";
   public override string titlePresentProgressive => "Performing";
   public override string description => "Entertain your friends around the fire.";
-  public override HeroLocation location => HeroLocation.Around;
+  public override PortraitZone location => Camp.zoneAround;
 
   public override IEnumerator Process(Hero hero, GameState previousState, GameState currentState, Action callback)
   {
     AdjustStats(hero, hiddenRest: -10);
     currentState.party.heroes
-      .Where(it => it != hero && it.location == HeroLocation.Around)
+      .Where(it => it != hero && it.location == Camp.zoneAround)
       .ToList()
       .ForEach(it => AdjustStats(it, mood: 20));
     currentState.party.heroes
-      .Where(it => it.location == HeroLocation.Fire)
+      .Where(it => it.location == Camp.zoneFire)
       .ToList()
       .ForEach(it => AdjustStats(it, mood: 10));
     currentState.party.heroes
-      .Where(it => it.location == HeroLocation.Tent || it.location == HeroLocation.Supplies)
+      .Where(it => it.location == Camp.zoneTent || it.location == Camp.zoneSupplies)
       .ToList()
       .ForEach(it => AdjustStats(it, hiddenMood: 5));
 

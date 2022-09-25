@@ -7,14 +7,14 @@ public class ACF_Bonfire : HeroAction
   public override string title => "Build a Bonfire";
   public override string titlePresentProgressive => "Building a bonfire";
   public override string description => "A roaring fire to raise your spirits.";
-  public override HeroLocation location => HeroLocation.Fire;
+  public override PortraitZone location => Camp.zoneFire;
   public override int hours => 1;
 
   public override Availability AvailableFor(Hero hero, GameState context)
   {
-    if (context.party.camp.fire == CampState.FireState.LARGE)
+    if (context.camp.fire == Camp.FireState.LARGE)
       return Availability.HIDDEN;
-    if (context.party.inventory.firewood < (3 - (int) context.party.camp.fire) * 4)
+    if (context.party.inventory.firewood < (3 - (int) context.camp.fire) * 4)
       return Availability.NOT_ENOUGH_WOOD;
     return Availability.AVAILABLE;
   }
@@ -30,9 +30,9 @@ public class ACF_Bonfire : HeroAction
 
   public override IEnumerator Process(Hero hero, GameState previousState, GameState currentState, Action callback)
   {
-    currentState.party.inventory.firewood += ((int) previousState.party.camp.fire -3) * 4;
-    currentState.party.camp.fire = CampState.FireState.LARGE;
-    FireEffects.SetState(CampState.FireState.LARGE);
+    currentState.party.inventory.firewood += ((int) previousState.camp.fire -3) * 4;
+    currentState.camp.fire = Camp.FireState.LARGE;
+    FireEffects.SetState(Camp.FireState.LARGE);
 
     // TODO Lower supplies
 

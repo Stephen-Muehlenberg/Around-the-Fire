@@ -1,15 +1,25 @@
 using System;
+using UnityEngine;
 
 [Serializable]
 public class Journey
 {
   public static float EXPECTED_KM_PER_DAY = 32;
 
+  public Location destination;
   public bool townIsDestination; // TODO Replace this with some kind of public Location destination field.
   public float distanceKm;
   public WorldTime startTime;
   public float kilometresTravelled;
-  public float hoursTravelled;
+  /// <summary>Number of days spent travelling, rounded up (e.g. the first day of travel is day 1, the second is day 2).</summary>
+  public int dayOfTravel => 1 + Game.time.day - startTime.day;
   public float fractionComplete => kilometresTravelled / distanceKm;
-  public float estimatedDurationDays => distanceKm / EXPECTED_KM_PER_DAY;
+  public int estimatedDurationDays => Mathf.CeilToInt(distanceKm / EXPECTED_KM_PER_DAY);
+}
+
+// TODO Move this to its own file, add more properties.
+public class Location
+{
+  public string name;
+  public bool isTown; // TODO replace this with a more in-depth system.
 }

@@ -7,7 +7,7 @@ public class ACC_Train : HeroAction
   public override string title => "Train";
   public override string titlePresentProgressive => "Training";
   public override string description => "Improve your combat skills.";
-  public override HeroLocation location => HeroLocation.Clearing;
+  public override PortraitZone location => Camp.zoneClearing;
 
   public override bool AcceptedBy(Hero hero, GameState context)
   {

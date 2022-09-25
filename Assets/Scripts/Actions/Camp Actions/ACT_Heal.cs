@@ -8,7 +8,7 @@ public class ACT_Heal : HeroAction
   public override string title => "Heal Wounds";
   public override string titlePresentProgressive => "Healing wounds";
   public override string description => "Restore party health, prioritizing the most injured.";
-  public override HeroLocation location => HeroLocation.Tent;
+  public override PortraitZone location => Camp.zoneTent;
 
   public override Availability AvailableFor(Hero hero, GameState context)
   {

@@ -10,7 +10,7 @@ public class ACS_Ration : HeroAction
   public override string title => "Distribute Rations";
   public override string titlePresentProgressive => "Distributing rations";
   public override string description => "Feed the party just enough to keep them going.";
-  public override HeroLocation location => HeroLocation.Supplies;
+  public override PortraitZone location => Camp.zoneSupplies;
 
   public override Availability AvailableFor(Hero hero, GameState context)
   {

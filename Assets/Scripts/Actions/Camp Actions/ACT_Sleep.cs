@@ -8,7 +8,7 @@ public class ACT_Sleep : HeroAction
   public override string title => "Sleep";
   public override string titlePresentProgressive => "Sleeping";
   public override string description => "Take a nap, or call it a night.";
-  public override HeroLocation location => HeroLocation.Tent;
+  public override PortraitZone location => Camp.zoneTent;
 
   public override float GetAutoAssignWeight(Hero hero, GameState context)
     => StandardAutoAssignWeight(hero, rest: 25);

@@ -20,7 +20,7 @@ public abstract class HeroAction
   /// <summary>Message displayed while performing action, e.g. title "Cook" becomes "Cooking".</summary>
   public abstract string titlePresentProgressive { get; }
   public abstract string description { get; }
-  public abstract HeroLocation location { get; }
+  public abstract PortraitZone location { get; }
   public virtual int hours => 1; // TODO This might need to be a method, if e.g. a hero's competency can lower the time an action takes.
   /// <summary>
   /// Should this Action end before others (negative), after (positive), or in no particular order (0).

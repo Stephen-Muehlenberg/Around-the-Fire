@@ -14,6 +14,8 @@ public static class Game
   public static List<Hero> heroes => state.party.heroes;
   public static World world => state.world;
   public static WorldTime time => state.world.time;
+  public static Journey journey => state.journey;
+  public static Camp camp => state.camp;
   public static Settings settings { get; private set; }
 
   public static Action<WorldTime> onTimeChanged;
@@ -33,6 +35,10 @@ public static class Game
 public class GameState
 {
   public Party party;
+  /// <summary>Details about the party's current journey. Null if not currently travelling.</summary>
+  public Journey journey;
+  /// <summary>Details about the state of the camp. Null if not currently camping.</summary>
+  public Camp camp;
   public World world;
 
   public GameState DeepCopy()
@@ -51,12 +57,6 @@ public class Party
   // TODO Party current location.
   /// <summary>Details about the party's current quest, or null if no quest currently.</summary>
   public Quest quest;
-  /// <summary>Details about the party's current journey. Null if not travelling anywhere.</summary>
-  /// TODO This perhaps oughtn't be part of the party info. Consider moving it.
-  public Journey journey;
-  /// <summary>Details about the state of the camp. Null if no camp currently set up.</summary>
-  /// TODO This perhaps oughtn't be part of the party info. Consider moving it.
-  public CampState camp;
 }
 
 [Serializable]
@@ -85,7 +85,7 @@ public class World
 }
 
 [Serializable]
-public struct WorldTime
+public class WorldTime
 {
   /// <summary>Number of days since campaign start. First day is day 0.</summary>
   public int day;
@@ -93,6 +93,18 @@ public struct WorldTime
   public float hourOfDay;
 
   public bool isDaytime => hourOfDay >= 6 && hourOfDay < 19;
+  public string timeOfDayDescription { get {
+      if (hourOfDay < 5) return "Late Night";
+      if (hourOfDay < 7) return "Early Morning";
+      if (hourOfDay < 9) return "Morning";
+      if (hourOfDay < 11) return "Late Morning";
+      if (hourOfDay < 13) return "Noon";
+      if (hourOfDay < 15) return "Mid Afternoon";
+      if (hourOfDay < 17) return "Late Afternoon";
+      if (hourOfDay < 19) return "Sunset";
+      if (hourOfDay < 21) return "Evening";
+      return "Night";
+    } }
 
   public void Advance(float hours, bool updateRest = true)
   {
@@ -119,6 +131,8 @@ public struct WorldTime
       }
     });
   }
+
+  public WorldTime Copy() => new WorldTime() { day = day, hourOfDay = hourOfDay };
 }
 
 [Serializable]

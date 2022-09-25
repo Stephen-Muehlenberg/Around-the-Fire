@@ -12,7 +12,7 @@ public class FireEffects : MonoBehaviour
     singleton = this;
   }
 
-  public static void SetState(CampState.FireState state)
+  public static void SetState(Camp.FireState state)
   {
     for (int i = 0; i < 3; i++)
       singleton.firesBySize[i].SetActive((int) state == i + 1);

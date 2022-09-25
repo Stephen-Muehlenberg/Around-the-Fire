@@ -7,7 +7,7 @@ public class ACP_Wood : HeroAction
   public override string title => "Gather Wood";
   public override string titlePresentProgressive => "Gathering wood";
   public override string description => "Find fuel for the fire.";
-  public override HeroLocation location => HeroLocation.Perimeter;
+  public override PortraitZone location => Camp.zonePerimeter;
 
   public override string GetAssignmentAnnouncement(Hero hero, GameState context)
   {

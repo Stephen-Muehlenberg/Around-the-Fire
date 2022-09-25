@@ -6,79 +6,87 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
 /// <summary>
-/// Main game state and logic controller.
+/// Logic for the Camp scene.
 /// </summary>
-public class CampScene : MonoBehaviour, HeroPortrait.EventsCallback
+public class CampScene : MonoBehaviour, PortraitZoneUiGroup.Interactions, Portrait.EventsCallback
 {
   public enum UIState { INTERACTIVE, DRAG_IN_PROCESS, UNINTERACTIVE }
 
-  public static Hero selectedHero;
-  public static UIState uiState = UIState.UNINTERACTIVE;
+  /// <summary>All the scene-relevant info for a single hero, bundled together.</summary>
+  private class HeroCampInfo
+  {
+    public Hero hero;
+    public Portrait portrait;
+    public PortraitZoneUiGroup zone;
+    public BounceMovement bounceMovement;
+    public HeroAction action;
+    public bool actionPending;
+  }
 
-  private static CampScene singleton;
-
-  public ActionList actionList;
-
+  [SerializeField] private CampUi ui;
+  [SerializeField] private List<PortraitZoneUiGroup> zones;
   [SerializeField] private TimeOfDayController timeOfDayController;
   [SerializeField] private GameObject portraitPrefab;
-  private GraphicRaycaster raycaster;
-  private Canvas characterCanvas;
   [SerializeField] private HeroStatsPanel heroStatsPanel;
-  [SerializeField] private HeroLocation characterPanel;
+  [SerializeField] private SelectOptionUI options;
   [SerializeField] private GameObject confirmActionsButton;
 
-  private GameState previousState;
-  private List<Hero> heroesWithPendingActions;
-  
-  private void Awake()
-  {
-    if (singleton != null) throw new System.Exception("CampController singleton already created.");
-    singleton = this;
-  }
+  private Dictionary<Hero, HeroCampInfo> heroInfo;
+  private HeroCampInfo selectedHero;
+  private GameState previousGameState;
+  public UIState uiState = UIState.UNINTERACTIVE;
 
   private void Start()
   {
-    characterCanvas = characterPanel.GetComponentInParent<Canvas>();
-    raycaster = characterPanel.GetComponentInParent<GraphicRaycaster>();
-
-    ActionManager.Initialise();
-    Game.heroes.ForEach(hero =>
+    // Initialise portrait zones.
+    zones.ForEach(zoneUi =>
     {
-      var portrait = Instantiate(portraitPrefab, characterPanel.transform)
-        .GetComponent<HeroPortrait>();
-      hero.portrait = portrait;
-      portrait.Initialise(hero, characterPanel, this);
+      var zone = Camp.zones.First(zone => zoneUi.name == zone.name);
+      zoneUi.Initialise(zone, this);
     });
 
-    Game.party.camp = new CampState()
+    // Initialise hero portraits.
+    heroInfo = new Dictionary<Hero, HeroCampInfo>(Game.heroes.Count);
+    var defaultZone = zones.First(it => it.zone == Camp.zoneAround);
+    var defaultAction = ActionManager.GetDefaultCampAction();
+
+    Game.heroes.ForEach(hero =>
     {
-      fire = CampState.FireState.NONE,
+      var info = new HeroCampInfo() { hero = hero };
+      heroInfo.Add(hero, info);
+
+      var heroUiObject = Instantiate(portraitPrefab);
+      info.portrait = heroUiObject.GetComponent<Portrait>();
+      defaultZone.Add(info.portrait);
+      info.zone = defaultZone;
+
+      info.action = defaultAction;
+      info.portrait.Initialise(hero, Portrait.Interactions.CLICKABLE, this);
+      info.portrait.SetAction(info.action.titlePresentProgressive);
+
+      info.bounceMovement = heroUiObject.AddComponent<BounceMovement>();
+      info.bounceMovement.Initialise(bounceHeight: 480f,
+        bounceDuration: 1.35f,
+        addSlightVarianceToBounce: true);
+    });
+
+    Game.state.camp = new Camp()
+    {
+      fire = Camp.FireState.NONE,
     };
 
     timeOfDayController.SetTime(Game.time.hourOfDay);
-    FireEffects.SetState(Game.party.camp.fire);
+    FireEffects.SetState(Game.camp.fire);
 
-    this.StartAfterDelay(0.5f, NewHourSequence(Game.time.hourOfDay));
-  }
-
-  private void Update()
-  {
-    if (Input.GetKeyDown(KeyCode.Escape))
-    {
-#if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-#else
-      Application.Quit();
-#endif
-    }
+  //  this.StartAfterDelay(0.5f, NewHourSequence(Game.time.hourOfDay));
   }
 
   private void SelectHero(Hero hero, bool showActions = true)
   {
     if (selectedHero != null)
-      selectedHero.portrait.Deselect();
-    selectedHero = hero;
-    hero.portrait.Select();
+      selectedHero.portrait.SetSelected(false);
+    selectedHero = heroInfo[hero];
+    selectedHero.portrait.SetSelected(true);
     heroStatsPanel.ShowStatsFor(hero);
     if (hero.location != null)
     {
@@ -89,10 +97,10 @@ public class CampScene : MonoBehaviour, HeroPortrait.EventsCallback
     }
   }
 
-  private void DeselectHero(Hero hero)
+  private void DeselectHero(HeroCampInfo hero)
   {
     if (hero != null && hero.portrait != null)
-      hero.portrait.Deselect();
+      hero.portrait.SetSelected(false);
     if (selectedHero == hero)
       selectedHero = null;
   }
@@ -132,7 +140,7 @@ public class CampScene : MonoBehaviour, HeroPortrait.EventsCallback
       }
 
       // Assign task to self.
-      yield return hero.portrait.AnimateMoveTo(action.location);
+ //     yield return hero.portrait.AnimateMoveTo(action.location);
       hero.SelectAction(action, assignedBySelf: true);
       SelectHero(hero);
       yield return SpeechBubble.Show(hero.portrait, "I feel like doing this.");
@@ -142,7 +150,7 @@ public class CampScene : MonoBehaviour, HeroPortrait.EventsCallback
     uiState = UIState.INTERACTIVE;
   }
 
-  public static void OnActionSelected(Hero hero, bool wasAssignedBySelf = false)
+  public void OnActionSelected(Hero hero, bool wasAssignedBySelf = false)
   {
     if (hero.action != null && !wasAssignedBySelf)
     {
@@ -151,7 +159,7 @@ public class CampScene : MonoBehaviour, HeroPortrait.EventsCallback
     }
 
     bool allHeroesReady = Game.heroes.All(it => it.action != null);
-    singleton.confirmActionsButton.SetActive(allHeroesReady);
+    confirmActionsButton.SetActive(allHeroesReady);
   }
 
   public void ConfirmActions()
@@ -160,10 +168,12 @@ public class CampScene : MonoBehaviour, HeroPortrait.EventsCallback
     uiState = UIState.UNINTERACTIVE;
     confirmActionsButton.SetActive(false);
     // ActionList.Hide();
-    Game.heroes.ForEach(it => {
-      it.portrait.AllowCancel(false);
-      DeselectHero(it);
-    });
+  //  Game.heroes.ForEach(it => {
+    //  it.portrait.AllowCancel(false);
+  //    DeselectHero(it);
+//    });
+    if (selectedHero != null)
+      DeselectHero(selectedHero);
 
     // Animate time advancing.
     timeOfDayController.AdvanceTime((int) Game.time.hourOfDay, 1, null, OnAdvanceTimeFinished);
@@ -176,7 +186,7 @@ public class CampScene : MonoBehaviour, HeroPortrait.EventsCallback
 
     // Copy current party & camp state, so that any changes made as a
     // result of one Action don't affect calculations of subsequent Actions.
-    previousState = Game.state.DeepCopy();
+    previousGameState = Game.state.DeepCopy();
 
     // Degrade Hero stats for every hour passed.
     int hours = Game.heroes
@@ -185,7 +195,7 @@ public class CampScene : MonoBehaviour, HeroPortrait.EventsCallback
     DegradeStatsOverTime(hours);
 
     // Sort Heroes by their Action priority, then left-to-right, then top-to-bottom.
-    heroesWithPendingActions = Game.heroes
+    heroInfo.Values.Where(it => it.actionPending)
       .OrderBy(it => it.portrait.transform.position.y)
       .OrderBy(it => it.portrait.transform.position.x)
       .OrderBy(it => it.action.completionOrder)
@@ -222,29 +232,29 @@ public class CampScene : MonoBehaviour, HeroPortrait.EventsCallback
   }
 
   /// <summary>
-  /// Recursive method; keeps invoking itself until all <see cref="heroesWithPendingActions"/>
-  /// are processed and the list emptied.
+  /// Recursive method; keeps invoking itself until all <see cref="HeroCampInfo"/>s
+  /// with pending actions are processed.
   /// </summary>
   private void ProcessNextAction()
   {
-    Game.heroes.ForEach(it => it.portrait.Unhighlight());
+ /*   Game.heroes.ForEach(it => it.portrait.Unhighlight());
     heroStatsPanel.ShowStatsFor(selectedHero);
-    if (heroesWithPendingActions.Count == 0)
+    if (heroInfo.Any(it => it.Value.actionPending))
     {
       FinishActions();
       return;
     }
 
-    var hero = heroesWithPendingActions[0];
-    heroesWithPendingActions.RemoveAt(0);
+    var hero = heroInfo.Values.First(it => it.actionPending);
+    hero.actionPending = false;
 
     hero.portrait.Highlight();
-    heroStatsPanel.ShowStatsFor(hero);
+    heroStatsPanel.ShowStatsFor(hero.hero);
     hero.portrait.ClearActionText();
     string message = hero.action.GetCompletionAnnouncement(hero, Game.state);
     SpeechBubble.Show(hero.portrait, message, () => {
-      StartCoroutine(hero.action.Process(hero, previousState, Game.state, ProcessNextAction));
-    });
+      StartCoroutine(hero.action.Process(hero.hero, previousGameState, Game.state, ProcessNextAction));
+    });*/
   }
 
   private void FinishActions()
@@ -273,78 +283,50 @@ public class CampScene : MonoBehaviour, HeroPortrait.EventsCallback
     StartCoroutine(NewHourSequence(Game.time.hourOfDay));
   }
 
-  public void OnPointerEnterPortrait(HeroPortrait portrait)
+  public void OnPointerEnterPortrait(Portrait portrait)
   {
-    if (uiState != UIState.INTERACTIVE) return;
-    portrait.Highlight();
-    heroStatsPanel.ShowStatsFor(portrait.hero);
+    // TODO show highlight character stats
   }
 
-  public void OnPointerExitPortrait(HeroPortrait portrait)
+  public void OnPointerExitPortrait(Portrait portrait)
   {
-    if (uiState != UIState.INTERACTIVE) return;
-    portrait.Unhighlight();
-    heroStatsPanel.ShowStatsFor(selectedHero);
+    // TODO show highlighted character stats
   }
 
-  public void OnPointerClickPortrait(HeroPortrait portrait)
+  public void OnPortraitLeftClick(Portrait portrait)
   {
-    if (uiState != UIState.INTERACTIVE) return;
-    SelectHero(portrait.hero);
+    if (selectedHero != null)
+      selectedHero.portrait.SetSelected(false);
+    selectedHero = heroInfo[portrait.character as Hero];
+    selectedHero.portrait.SetSelected(true);
   }
 
-  public void OnPortraitDragStart(HeroPortrait portrait, PointerEventData data)
+  public void OnPointerEnterZone(PortraitZoneUiGroup zoneUi, PortraitZoneUiArea childEntered)
   {
-    if (uiState != UIState.INTERACTIVE) return;
+    if (selectedHero == null) return;
 
-    uiState = UIState.DRAG_IN_PROCESS;
-    portrait.SetRaycastTarget(false);
-    SelectHero(portrait.hero, false);
-
-    portrait.transform.localPosition += new Vector3(
-      data.delta.x,
-      data.delta.y,
-      0);// / transform.lossyScale.x; // Thanks to the canvas scaler we need to devide pointer delta by canvas scale to match pointer movement.
-
-    portrait.transform.SetParent(characterCanvas.transform, true);
-    portrait.transform.SetAsLastSibling();
-  }
-
-  public void OnPotraitDrag(HeroPortrait portrait, PointerEventData data)
-  {
-    portrait.transform.localPosition += new Vector3(
-      data.delta.x,
-      data.delta.y,
-      0);// / transform.lossyScale.x; // Thanks to the canvas scaler we need to devide pointer delta by canvas scale to match pointer movement.
-  }
-
-  public void OnPotraitDragEnd(HeroPortrait portrait, PointerEventData data)
-  {
-    var results = new List<RaycastResult>();
-    raycaster.Raycast(data, results);
-
-    // Get drag destination.
-    LocationZone newZone = null;
-    foreach (RaycastResult result in results)
-    {
-      newZone = result.gameObject.GetComponentInParent<LocationZone>();
-      if (newZone != null) break;
-    }
-
-    // If destination can accept this, move there.
-    if (newZone != null && newZone.CanAccept(portrait))
-      portrait.MoveTo(newZone);
+    if (zoneUi.CanAccept(selectedHero.portrait))
+      zoneUi.SetAppearance(PortraitZoneUiGroup.Appearance.VALID_TARGET);
     else
-      portrait.location.CancelMove(portrait);
-
-    portrait.SetRaycastTarget(true);
-    uiState = UIState.INTERACTIVE;
+      zoneUi.SetAppearance(PortraitZoneUiGroup.Appearance.INVALID_TARGET);
   }
 
-  public void OnPortaitCancelPressed(HeroPortrait portrait)
+  public void OnPointerExitZone(PortraitZoneUiGroup zoneUi, PortraitZoneUiArea childExited)
   {
-    portrait.hero.SelectAction(null);
- //   if (selectedHero == portrait.hero)
- //     portrait.location.ShowActions(portrait.hero);
+    zoneUi.SetAppearance(PortraitZoneUiGroup.Appearance.HIDDEN);
+  }
+
+  public void OnRightClickZone(PortraitZoneUiGroup zoneUi, PortraitZoneUiArea childClicked)
+  {
+    if (selectedHero == null) return;
+
+    if (zoneUi.CanAccept(selectedHero.portrait))
+    {
+      selectedHero.zone.Remove(selectedHero.portrait);
+      zoneUi.Add(selectedHero.portrait);
+      zoneUi.SetAppearance(PortraitZoneUiGroup.Appearance.HIDDEN);
+      // TODO show new location's actions
+      // TODO animate character moving/bouncing to location
+    }
   }
 }

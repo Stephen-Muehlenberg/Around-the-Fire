@@ -9,7 +9,7 @@ public class ATC_Forage : HeroAction
   public override string description => 
     "<b>+1-3 Supplies (30%)</b>" +
     "\n\nSearch for food while on the move.";
-  public override HeroLocation location => HeroLocation.Perimeter; // TODO should be off to the side of the road
+  public override PortraitZone location => Camp.zonePerimeter; // TODO should be off to the side of the road
 
   public override string GetAssignmentAnnouncement(Hero hero, GameState context)
   {

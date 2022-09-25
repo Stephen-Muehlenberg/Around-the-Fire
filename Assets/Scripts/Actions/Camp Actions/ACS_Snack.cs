@@ -9,7 +9,7 @@ public class ACS_Snack : HeroAction
   public override string title => "Eat a Snack";
   public override string titlePresentProgressive => "Snacking";
   public override string description => "Take the edge off your hunger.";
-  public override HeroLocation location => HeroLocation.Supplies;
+  public override PortraitZone location => Camp.zoneSupplies;
 
   public override Availability AvailableFor(Hero hero, GameState context)
   {

@@ -2,6 +2,9 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
+/// <summary>
+/// A standard representation of a <see cref="Character"/>.
+/// </summary>
 public class Portrait : MonoBehaviour,
   IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
@@ -65,27 +68,28 @@ public class Portrait : MonoBehaviour,
 
   public interface EventsCallback
   {
-    public void OnPortraitPointerEnter(Portrait portrait);
-    public void OnPortraitPointerExit(Portrait portrait);
-    public void OnPortraitClick(Portrait portrait);
+    public void OnPointerEnterPortrait(Portrait portrait) { }
+    public void OnPointerExitPortrait(Portrait portrait) { }
+    public void OnPortraitLeftClick(Portrait portrait) { }
   }
 
   public void OnPointerClick(PointerEventData eventData)
   {
+    if (eventData.button != PointerEventData.InputButton.Left) return;
     if (interactions != Interactions.CLICKABLE) return;
     if (selectOnClick) SetSelected(true);
-    callbacks?.OnPortraitClick(this);
+    callbacks?.OnPortraitLeftClick(this);
   }
 
   public void OnPointerEnter(PointerEventData eventData)
   {
     SetHighlighted(true);
-    callbacks?.OnPortraitPointerEnter(this);
+    callbacks?.OnPointerEnterPortrait(this);
   }
 
   public void OnPointerExit(PointerEventData eventData)
   {
     SetHighlighted(false);
-    callbacks?.OnPortraitPointerExit(this);
+    callbacks?.OnPointerExitPortrait(this);
   }
 }

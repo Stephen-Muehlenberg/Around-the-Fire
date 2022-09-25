@@ -49,7 +49,7 @@ public class TempGameInitialiser : MonoBehaviour
         {
           title = "Default Quest",
           description = "Example quest description.",
-          distanceFromTownKm = 30
+          distanceFromTownKm = 40
         } : null
       },
       world = new World()
@@ -76,10 +76,15 @@ public class TempGameInitialiser : MonoBehaviour
 
     if (journeyDestination != JourneyDestination.NONE)
     {
-      gameState.party.journey = new Journey()
+      gameState.journey = new Journey()
       {
+        destination = new Location()
+        {
+          name = "Scary Dungeon",
+          isTown = false,
+        },
         distanceKm = gameState.party.quest.distanceFromTownKm,
-        startTime = gameState.world.time,
+        startTime = gameState.world.time.Copy(),
       };
     }
 

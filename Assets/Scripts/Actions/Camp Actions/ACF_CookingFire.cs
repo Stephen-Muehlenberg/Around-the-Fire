@@ -7,12 +7,12 @@ public class ACF_CookingFire : HeroAction
   public override string title => "Build a Cooking Fire";
   public override string titlePresentProgressive => "Building a cooking fire";
   public override string description => "Make a cozy little fire for cooking.";
-  public override HeroLocation location => HeroLocation.Fire;
+  public override PortraitZone location => Camp.zoneFire;
   public override int hours => 1;
 
   public override Availability AvailableFor(Hero hero, GameState context)
   {
-    if (context.party.camp.fire >= CampState.FireState.SMALL)
+    if (context.camp.fire >= Camp.FireState.SMALL)
       return Availability.HIDDEN; // Already have a fire.
     if (context.party.inventory.firewood < 4)
       return Availability.NOT_ENOUGH_WOOD;
@@ -30,8 +30,8 @@ public class ACF_CookingFire : HeroAction
   public override IEnumerator Process(Hero hero, GameState previousState, GameState currentState, Action callback)
   {
     currentState.party.inventory.firewood -= 4;
-    currentState.party.camp.fire = CampState.FireState.SMALL;
-    FireEffects.SetState(CampState.FireState.SMALL);
+    currentState.camp.fire = Camp.FireState.SMALL;
+    FireEffects.SetState(Camp.FireState.SMALL);
 
     // TODO Lower supplies
     yield return new WaitForSeconds(1.5f);

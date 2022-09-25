@@ -10,12 +10,12 @@ public class ACF_Meal : HeroAction
   public override string title => "Cook a Meal";
   public override string titlePresentProgressive => "Cooking a meal";
   public override string description => "Feed the whole party.";
-  public override HeroLocation location => HeroLocation.Fire;
+  public override PortraitZone location => Camp.zoneFire;
   public override int hours => 2;
 
   public override Availability AvailableFor(Hero hero, GameState context)
   {
-    if (context.party.camp.fire == CampState.FireState.NONE)
+    if (context.camp.fire == Camp.FireState.NONE)
       return Availability.HIDDEN;
     return Availability.AVAILABLE;
   }

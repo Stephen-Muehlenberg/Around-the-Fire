@@ -9,7 +9,7 @@ public class ATC_Guard : HeroAction
   public override string description => 
     "<b>+5 Defense</b>" +
     "\n\nKeep your weapon ready and your eyes open.";
-  public override HeroLocation location => HeroLocation.Perimeter; // TODO should be off to the side of the road
+  public override PortraitZone location => Camp.zonePerimeter; // TODO should be off to the side of the road
 
   public override string GetAssignmentAnnouncement(Hero hero, GameState context)
   {

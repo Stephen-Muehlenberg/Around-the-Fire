@@ -8,7 +8,7 @@ public class ACA_Carouse : HeroAction
   public override string title => "Carouse";
   public override string titlePresentProgressive => "Carousing";
   public override string description => "Have a drink and some laughs with friends.";
-  public override HeroLocation location => HeroLocation.Around;
+  public override PortraitZone location => Camp.zoneAround;
 
   public override float GetAutoAssignWeight(Hero hero, GameState context)
     => StandardAutoAssignWeight(hero, mood: 15);
@@ -26,11 +26,11 @@ public class ACA_Carouse : HeroAction
   {
     AdjustStats(hero, mood: 15);
     newState.party.heroes
-      .Where(it => it != hero && it.location == HeroLocation.Around)
+      .Where(it => it != hero && it.location == Camp.zoneAround)
       .ToList()
       .ForEach(it => AdjustStats(it, mood: 10));
     newState.party.heroes
-      .Where(it => it.location == HeroLocation.Fire)
+      .Where(it => it.location == Camp.zoneFire)
       .ToList()
       .ForEach(it => AdjustStats(it, hiddenMood: 5));
 

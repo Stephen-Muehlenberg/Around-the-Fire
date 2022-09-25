@@ -2,8 +2,10 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 
+/// <summary>
+/// Logic for the Travel scene.
+/// </summary>
 public class TravelScene : MonoBehaviour, Portrait.EventsCallback
 {
   /// <summary>All the scene-relevant info for a single hero, bundled together.</summary>
@@ -15,14 +17,17 @@ public class TravelScene : MonoBehaviour, Portrait.EventsCallback
     public HeroAction action;
   }
 
+  /// <summary>Note: State.NONE corresponds to the initial state which only exists for
+  /// a fraction of a second while stuff is being initialised. Most things should
+  /// not be interactive during this time.</summary>
+  public enum TravelState { NONE, TRAVELLING, RESTING, PAUSED, ARRIVED }
+
   private const float BASE_KM_PER_HOUR = 4;
   private const float REAL_SECONDS_PER_GAME_HOUR = 2f;
 
-  public TMPro.TMP_Text journeyLengthText;
-  public Slider progressSlider;
-  public GameObject HaltButton, ContinueButton, RestButton, CampButton;
+  public TravelUi ui;
   public Transform portraitParent;
-  public GameObject portraitPrefab2;
+  public GameObject portraitPrefab;
 
   [SerializeField] private HeroStatsPanel heroStatsPanel;
   [SerializeField] private TravelBackground background;
@@ -31,17 +36,15 @@ public class TravelScene : MonoBehaviour, Portrait.EventsCallback
   private Dictionary<Hero, HeroTravelInfo> heroInfo;
   private Portrait selectedPortrait;
 
-  private bool travelling;
+  private TravelState travelState = TravelState.NONE;
 
   // Cached to avoid frequent reallocation.
-  private float hoursTravelledThisFrame;
+  private float hoursPassedThisFrame;
   private int previousHour;
   private float kilometersTravelledThisFrame;
 
   public void Start()
   {
-    ActionManager.Initialise(); // Temp; should be initialised elsewhere.
-
     heroInfo = new Dictionary<Hero, HeroTravelInfo>(Game.heroes.Count);
 
     Game.heroes.ForEach(hero =>
@@ -54,7 +57,7 @@ public class TravelScene : MonoBehaviour, Portrait.EventsCallback
       info.action = autoSelectedAction;
 
       // Display heroes as bouncing portraits.
-      var heroUiObject = Instantiate(portraitPrefab2, portraitParent);
+      var heroUiObject = Instantiate(portraitPrefab, portraitParent);
       info.portrait = heroUiObject.GetComponent<Portrait>();
       info.bounceMovement = heroUiObject.AddComponent<BounceMovement>();
 
@@ -77,9 +80,53 @@ public class TravelScene : MonoBehaviour, Portrait.EventsCallback
       });
     });
 
+    ui.Initialise(
+      day: Game.journey.dayOfTravel,
+      timeOfDay: Game.time.timeOfDayDescription,
+      destination: Game.journey.destination.name,
+      estimatedJourneyLengthDays: Game.journey.estimatedDurationDays);
     timeOfDay.SetTime(Game.time.hourOfDay);
 
-    this.DoAfterDelay(0.3f, () => StartJourney(Game.party.journey));
+    travelState = TravelState.PAUSED;
+    this.DoAfterDelay(0.3f, () => SetState(TravelState.TRAVELLING));
+  }
+
+  private void Update()
+  {
+    if (travelState != TravelState.TRAVELLING && travelState != TravelState.RESTING) return;
+
+    // Update time of day and scene lighting.
+    hoursPassedThisFrame = Time.deltaTime / REAL_SECONDS_PER_GAME_HOUR;
+    if (travelState == TravelState.RESTING)
+      hoursPassedThisFrame *= 2;
+    previousHour = (int) Game.time.hourOfDay;
+    Game.time.Advance(hoursPassedThisFrame);
+    ui.SetTime(
+      day: Game.journey.dayOfTravel,
+      timeOfDay: Game.time.timeOfDayDescription);
+    timeOfDay.SetTime(Game.time.hourOfDay);
+
+    // Calculate distance travelled.
+    float speedFraction = travelState == TravelState.TRAVELLING
+      ? GetSpeedFraction()
+      : 0;
+    kilometersTravelledThisFrame = BASE_KM_PER_HOUR * speedFraction * hoursPassedThisFrame;
+    Game.journey.kilometresTravelled += kilometersTravelledThisFrame;
+
+    // Update UI and parallax background.
+    if (travelState == TravelState.TRAVELLING)
+      ShowSpeedText(speedFraction);
+    background.TravelDistance(kilometersTravelledThisFrame);
+
+    // Update party stats on the hour mark.
+    // TODO invoke hero actions on each update, instead of on the hour mark.
+    if (previousHour != (int) Game.time.hourOfDay)
+    {
+      Game.heroes.ForEach(it => it.UpdateStatsAtEndOfHour());
+    }
+
+    if (Game.journey.fractionComplete >= 1)
+      SetState(TravelState.ARRIVED);
   }
 
   /// <summary>
@@ -117,39 +164,6 @@ public class TravelScene : MonoBehaviour, Portrait.EventsCallback
     return Mathf.Max(speedPercent, 0) / 100f;
   }
 
-  private void Update()
-  {
-    if (!travelling) return;
-
-    // Update time of day and scene lighting.
-    hoursTravelledThisFrame = Time.deltaTime / REAL_SECONDS_PER_GAME_HOUR;
-    Game.party.journey.hoursTravelled += hoursTravelledThisFrame;
-    previousHour = (int) Game.time.hourOfDay;
-    Game.time.Advance(hoursTravelledThisFrame);
-    timeOfDay.SetTime(Game.time.hourOfDay);
-
-    // Calculate distance travelled.
-    float speedFraction = GetSpeedFraction();
-    kilometersTravelledThisFrame = BASE_KM_PER_HOUR * speedFraction * hoursTravelledThisFrame;
-    Game.party.journey.kilometresTravelled += kilometersTravelledThisFrame;
-
-    // Update UI and parallax background.
-    ShowSpeedText(speedFraction);
-    progressSlider.value = Game.party.journey.fractionComplete;
-    background.TravelDistance(kilometersTravelledThisFrame);
-
-    // Update party stats on the hour mark.
-    if (previousHour != (int) Game.time.hourOfDay)
-    {
-      Game.heroes.ForEach(it => it.UpdateStatsAtEndOfHour());
-    }
-
-    // TODO invoke hero actions on each update
-
-    if (Game.party.journey.fractionComplete >= 1)
-      ReachDestination();
-  }
-
   private void ShowSpeedText(float speedFraction)
   {
     string speedDescription = speedFraction switch
@@ -159,77 +173,41 @@ public class TravelScene : MonoBehaviour, Portrait.EventsCallback
       > 0.6f and <= 0.8f => "Slowly",
       _ => "Very Slowly"
     };
-    journeyLengthText.text = Mathf.CeilToInt(Game.party.journey.estimatedDurationDays) + " day journey"
-      + "\nTravelling " + speedDescription;
+    ui.SetSpeed(speedDescription);
   }
 
-  public void StartJourney(Journey journey)
+  private void SetState(TravelState state)
   {
-    journeyLengthText.text = Mathf.CeilToInt(journey.estimatedDurationDays) + " day journey";
-    Continue();
+    this.travelState = state;
+    ui.SetState(state);
+    SetPortraitsBouncing(state == TravelState.TRAVELLING);
   }
 
-  private void ReachDestination()
+  /// <summary>Tells portraits to stop bouncing next time they hit the ground.</summary>
+  public void SetPortraitsBouncing(bool bouncing)
   {
-    Halt();
-    return;
-
-    // TODO Replace this super placeholder logic.
-    if (Game.party.journey.townIsDestination)
-    {
-      Game.party.journey = null;
-      SceneManager.LoadScene("Town");
-    }
-    else
-    {
-      Game.party.quest.complete = true;
-      Game.party.journey = new Journey()
-      {
-        townIsDestination = true,
-        distanceKm = 10
-      };
-      SceneManager.LoadScene("Travel");
-    }
-  }
-
-  public void Halt()
-  {
-    HaltButton.SetActive(false);
-    ContinueButton.SetActive(true);
-    RestButton.SetActive(true);
-    CampButton.SetActive(true);
     foreach (KeyValuePair<Hero, HeroTravelInfo> it in heroInfo)
-      it.Value.bounceMovement.StopBouncing();
-
-    travelling = false;
+    {
+      if (bouncing)
+        it.Value.bounceMovement.StartBouncing();
+      else
+        it.Value.bounceMovement.StopBouncing();
+    }
   }
 
-  public void Continue()
-  {
-//    HaltButton.SetActive(true);
-//    ContinueButton.SetActive(false);
-//    RestButton.SetActive(false);
-//    CampButton.SetActive(false);
-//    heroBouncePortraits.ForEach(it => it.StartBouncing());
-    travelling = true;
-  }
-
-  public void Rest()
-  {
-
-  }
+  public void Rest() => SetState(TravelState.RESTING);
 
   public void Camp()
   {
-    UnityEngine.SceneManagement.SceneManager.LoadSceneAsync("Camp");
+    SceneManager.LoadSceneAsync("Camp");
   }
 
-  public void OnPortraitPointerEnter(Portrait portrait)
+  public void OnPointerEnterPortrait(Portrait portrait)
   {
     heroStatsPanel.ShowStatsFor(portrait.character as Hero);
   }
 
-  public void OnPortraitPointerExit(Portrait portrait)
+  public void OnPointerExitPortrait(Portrait portrait)
   {
     if (selectedPortrait == null)
       heroStatsPanel.ShowStatsFor(null);
@@ -270,5 +248,37 @@ public class TravelScene : MonoBehaviour, Portrait.EventsCallback
     if (selectedPortrait != null)
       selectedPortrait.SetSelected(false);
     taskButtons.Dismiss();
+  }
+
+  public void OnHaltResumeClick()
+  {
+    if (travelState == TravelState.PAUSED)
+      SetState(TravelState.TRAVELLING);
+    else
+      SetState(TravelState.PAUSED);
+  }
+
+  public void LoadDestinationScene()
+  {
+    // TODO Replace this super placeholder logic.
+    if (Game.journey.destination.isTown)
+    {
+      Game.state.journey = null;
+      SceneManager.LoadScene("Town");
+    } else
+    {
+      Game.party.quest.complete = true;
+      Game.state.journey = new Journey()
+      {
+        destination = new Location()
+        {
+          name = "Nice Town",
+          isTown = true
+        },
+        distanceKm = 10,
+        startTime = Game.time.Copy(),
+      };
+      SceneManager.LoadScene("Travel");
+    }
   }
 }

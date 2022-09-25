@@ -15,7 +15,7 @@ public class HeroPortrait : MonoBehaviour,
   private static Color COLOR_SELECTED = new Color(0.2293994f, 1, 0, 0.2784314f);
 
   public Hero hero { get; private set; }
-  public HeroLocation location { get => hero.location; set { hero.location = value; } }
+//  public HeroZoneUi location { get => hero.location; set { hero.location = value; } }
   public EventsCallback callback;
 
   [SerializeField] private Image portrait;
@@ -23,28 +23,28 @@ public class HeroPortrait : MonoBehaviour,
   [SerializeField] private TMPro.TMP_Text nameText;
   [SerializeField] private TMPro.TMP_Text actionText;
   [SerializeField] private Button cancelButton;
-
-  public void Initialise(Hero hero, HeroLocation location, EventsCallback eventCallback)
+  /*
+  public void Initialise(Hero hero, ZoneUi location, EventsCallback eventCallback)
   {
     callback = eventCallback;
     this.hero = hero;
     nameText.text = hero.name;
     portrait.sprite = hero.icon;
-    this.location = location;
-    if (location != null)
-      location.zones[0].Add(hero: this, showActions: false);
+//    this.location = location;
+  //  if (location != null)
+  //    location.subZones[0].Add(portrait: this, showActions: false);
     ShowSelectedAction(null);
   }
-
+  */
   public void Highlight()
   {
     highlight.enabled = true;
-    highlight.color = (hero == CampScene.selectedHero) ? COLOR_SELECTED : COLOR_HIGHLIGHTED;
+//    highlight.color = (hero == CampScene.selectedHero) ? COLOR_SELECTED : COLOR_HIGHLIGHTED;
   }
 
   public void Unhighlight()
   {
-    highlight.enabled = (hero == CampScene.selectedHero);
+//    highlight.enabled = (hero == CampScene.selectedHero);
   }
 
   public void Select()
@@ -67,22 +67,22 @@ public class HeroPortrait : MonoBehaviour,
     highlight.raycastTarget = enabled;
     nameText.raycastTarget = enabled;
   }
-
-  public void MoveTo(LocationZone newZone, bool showActions = true)
+  /*
+  public void MoveTo(SubzoneUi newZone, bool showActions = true)
   {
-    if (location != null) location.Remove(this);
-    newZone.Add(this, showActions);
-    location = newZone.location;
-  }
-
-  public IEnumerator AnimateMoveTo(HeroLocation location)
+//    if (location != null) location.Remove(this);
+  //  newZone.Add(this, showActions);
+ //   location = newZone.location;
+  }*/
+  /*
+  public IEnumerator AnimateMoveTo(ZoneUi location)
   {
-    var zone = location.zones
+    var zone = location.subZones
       .First(it => it.heroes.Count < it.maxHeroes);
     MoveTo(newZone: zone, showActions: false);
     // TODO animate.
     yield return new WaitForSeconds(0.2f);
-  }
+  }*/
 
   public void ShowSelectedAction(HeroAction action)
   {

@@ -60,7 +60,7 @@ public class Hero : Character
 
   public HeroAction action;
   public HeroPortrait portrait;
-  public HeroLocation location;
+  public PortraitZone location;
 
   public enum Stat
   {
@@ -78,6 +78,6 @@ public class Hero : Character
   {
     this.action = action;
     portrait.ShowSelectedAction(action);
-    CampScene.OnActionSelected(this, assignedBySelf);
+  //  CampScene.OnActionSelected(this, assignedBySelf);
   }
 }

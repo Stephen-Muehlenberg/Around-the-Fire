@@ -7,7 +7,7 @@ public class ACA_Rest : HeroAction
   public override string title => "Rest";
   public override string titlePresentProgressive => "Resting";
   public override string description => "Take a load off and unwind.";
-  public override HeroLocation location => HeroLocation.Around;
+  public override PortraitZone location => Camp.zoneAround;
 
   public override float GetAutoAssignWeight(Hero hero, GameState context)
     => StandardAutoAssignWeight(hero, rest: 15, mood: 5);
