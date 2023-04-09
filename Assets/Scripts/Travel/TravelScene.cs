@@ -20,7 +20,7 @@ public class TravelScene : MonoBehaviour, Portrait.EventsCallback
   /// <summary>Note: State.NONE corresponds to the initial state which only exists for
   /// a fraction of a second while stuff is being initialised. Most things should
   /// not be interactive during this time.</summary>
-  public enum TravelState { NONE, TRAVELLING, RESTING, PAUSED, ARRIVED }
+  public enum TravelState { NONE, TRAVELLING, RESTING, ENCOUNTER, PAUSED, ARRIVED }
 
   private const float BASE_KM_PER_HOUR = 4;
   private const float REAL_SECONDS_PER_GAME_HOUR = 2f;
@@ -38,6 +38,8 @@ public class TravelScene : MonoBehaviour, Portrait.EventsCallback
   private Portrait selectedPortrait;
 
   private TravelState travelState = TravelState.NONE;
+
+  private float timeTillNextEncounter = 5f;
 
   // Cached to avoid frequent reallocation.
   private float hoursPassedThisFrame;
@@ -126,9 +128,18 @@ public class TravelScene : MonoBehaviour, Portrait.EventsCallback
       Game.heroes.ForEach(it => it.UpdateStatsAtEndOfHour());
     }
 
-
     // Update UI to reflect party and journey state.
     DisplaySpeedModifiers();
+
+    if (travelState == TravelState.TRAVELLING)
+    {
+      timeTillNextEncounter -= hoursPassedThisFrame;
+      if (timeTillNextEncounter <= 0)
+      {
+        timeTillNextEncounter += 5;
+        StartEncounter();
+      }
+    }
 
     if (Game.journey.fractionComplete >= 1 && travelState == TravelState.TRAVELLING)
       SetState(TravelState.ARRIVED);
@@ -429,5 +440,19 @@ public class TravelScene : MonoBehaviour, Portrait.EventsCallback
       lowestTierAndCount.Item2 = 1;
     } else if (statTier == lowestTierAndCount.Item1)
       lowestTierAndCount.Item2++;
+  }
+
+
+  private void StartEncounter()
+  {
+    travelState = TravelState.ENCOUNTER;
+    new EncounterManager()
+      .RandomTravelEncounter(Game.state, encounterPanel, EndEncounter);
+  }
+
+  private void EndEncounter()
+  {
+    encounterPanel.Dismiss();
+    travelState = TravelState.TRAVELLING;
   }
 }

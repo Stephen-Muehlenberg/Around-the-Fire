@@ -32,7 +32,7 @@ public class EncounterPanel : MonoBehaviour
   {
     gameObject.SetActive(true);
     encounterMainMessage.text = message;
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < /*6*/3; i++)
       InitialiseOptionButton(i, options.Length > i ? options[i] : null);
   }
 
@@ -45,7 +45,7 @@ public class EncounterPanel : MonoBehaviour
     encounterMainMessage.text = message;
     defaultContinueOption.onSelectedCallback = onContinueClicked;
     InitialiseOptionButton(0, defaultContinueOption);
-    for (int i = 1; i < 6; i++)
+    for (int i = 1; i < /*6*/3; i++)
       InitialiseOptionButton(i, null);
   }
 
