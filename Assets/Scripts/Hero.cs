@@ -4,6 +4,12 @@ using UnityEngine;
 [Serializable]
 public class Hero : Character
 {
+  public enum Gender { Male, Female }
+  public Gender gender;
+  public string heShe => gender == Gender.Male ? "he" : "she";
+  public string himHer => gender == Gender.Male ? "him" : "her";
+  public string hisHer => gender == Gender.Male ? "his" : "her";
+
   /// <summary>0 - 100 inclusive.</summary>
   public float health {
     get => _health;
