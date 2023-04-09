@@ -30,6 +30,7 @@ public class TravelScene : MonoBehaviour, Portrait.EventsCallback
   public GameObject portraitPrefab;
 
   [SerializeField] private HeroStatsPanel heroStatsPanel;
+  [SerializeField] private EncounterPanel encounterPanel;
   [SerializeField] private TravelBackground background;
   [SerializeField] private TimeOfDayController timeOfDay;
   [SerializeField] private SelectOptionUI taskButtons;

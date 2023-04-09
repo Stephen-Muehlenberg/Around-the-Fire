@@ -10,6 +10,8 @@ public class Hero : Character
   public string himHer => gender == Gender.Male ? "him" : "her";
   public string hisHer => gender == Gender.Male ? "his" : "her";
 
+  public float totalSkill => health + hunger + mood + rest;
+
   /// <summary>0 - 100 inclusive.</summary>
   public float health {
     get => _health;
