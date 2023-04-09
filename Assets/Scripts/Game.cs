@@ -63,8 +63,11 @@ public class Party
 public class Inventory
 {
   public int money;
-  public float supplies;
-  public float firewood;
+  public int suppliesFresh;
+  public int suppliesRations;
+  public int suppliesTotal => suppliesFresh + suppliesRations;
+  public float supplies; // TODO Remove this.
+  public float firewood; // TODO Make this an int.
 
   public float daysWorthOfSupplies(Party forParty)
     => supplies / 4 / forParty.heroes.Count;
