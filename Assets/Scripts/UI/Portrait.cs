@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -75,7 +77,25 @@ public class Portrait : MonoBehaviour,
 
   public void OnPointerClick(PointerEventData eventData)
   {
-    if (eventData.button != PointerEventData.InputButton.Left) return;
+    // If not a left click, try to invoke OnPointerClick on the first Zone below this.
+    if (eventData.button != PointerEventData.InputButton.Left)
+    {
+      List<RaycastResult> results = new();      
+      GetComponentInParent<GraphicRaycaster>().Raycast(eventData, results);
+      PortraitZoneUiArea zone;
+      for (int i = 0; i < results.Count; i++)
+      {
+        zone = results[i].gameObject.GetComponent<PortraitZoneUiArea>();
+        if (zone != null)
+        {
+          zone.OnPointerClick(eventData);
+          break;
+        }
+      }
+
+      return;
+    }
+
     if (interactions != Interactions.CLICKABLE) return;
     if (selectOnClick) SetSelected(true);
     callbacks?.OnPortraitLeftClick(this);

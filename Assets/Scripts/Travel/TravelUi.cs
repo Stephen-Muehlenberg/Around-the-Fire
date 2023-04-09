@@ -1,3 +1,5 @@
+using System.Text;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,6 +12,7 @@ public class TravelUi : MonoBehaviour
 {
   [SerializeField] private TMPro.TMP_Text dayTimeText;
   [SerializeField] private TMPro.TMP_Text speedText;
+  [SerializeField] private TMPro.TMP_Text speedModifiersText;
   [SerializeField] private Image haltResumeButton;
   [SerializeField] private GameObject restButton;
   [SerializeField] private GameObject campButton;
@@ -48,8 +51,8 @@ public class TravelUi : MonoBehaviour
       _ => stopSprite
     };
     haltResumeButton.gameObject.SetActive(state != State.ARRIVED && state != State.NONE);
-    restButton.SetActive(state == State.PAUSED);
-    campButton.SetActive(state == State.PAUSED);
+    restButton.SetActive(state == State.PAUSED || state == State.ARRIVED);
+    campButton.SetActive(state == State.PAUSED || state == State.ARRIVED);
 
     arriveButton.SetActive(state == State.ARRIVED);
 
@@ -71,5 +74,35 @@ public class TravelUi : MonoBehaviour
   {
     this.speed = speed;
     speedText.text = "Travelling <b>" + speed + "</b>";
+  }
+
+  private StringBuilder stringBuilder = new StringBuilder();
+  private SpeedModifier modifier;
+  public void SetSpeedModifiers(List<SpeedModifier> modifiers)
+  {
+    stringBuilder.Clear();
+    for (int i = 0; i < modifiers.Count; i++)
+    {
+      modifier = modifiers[i];
+      if (modifier.up)
+        stringBuilder.Append("<color=green>Å£</color> ");
+      else
+        stringBuilder.Append("<color=red>Å•</color> ");
+      stringBuilder.Append(modifier.descritption);
+      if (modifier.count.HasValue)
+        stringBuilder.Append(" (")
+          .Append(modifier.count.Value)
+          .Append(')');
+      if (i + 1 < modifiers.Count)
+        stringBuilder.Append('\n');
+    }
+    speedModifiersText.text = stringBuilder.ToString();
+  }
+
+  public class SpeedModifier
+  {
+    public string descritption;
+    public int? count;
+    public bool up;
   }
 }

@@ -125,7 +125,11 @@ public class TravelScene : MonoBehaviour, Portrait.EventsCallback
       Game.heroes.ForEach(it => it.UpdateStatsAtEndOfHour());
     }
 
-    if (Game.journey.fractionComplete >= 1)
+
+    // Update UI to reflect party and journey state.
+    DisplaySpeedModifiers();
+
+    if (Game.journey.fractionComplete >= 1 && travelState == TravelState.TRAVELLING)
       SetState(TravelState.ARRIVED);
   }
 
@@ -215,7 +219,7 @@ public class TravelScene : MonoBehaviour, Portrait.EventsCallback
       heroStatsPanel.ShowStatsFor(selectedPortrait.character as Hero);
   }
 
-  public void OnPortraitClick(Portrait portrait)
+  public void OnPortraitLeftClick(Portrait portrait)
   {
     // Change selected hero.
     if (selectedPortrait != null)
@@ -227,7 +231,7 @@ public class TravelScene : MonoBehaviour, Portrait.EventsCallback
     var actions = ActionManager.GetTravelActionsFor(portrait.character as Hero, Game.state);
     var options = actions.Select(it => it.ToOption()).ToList();
     taskButtons.Show(options, (option, index) => {
-      if (selectedPortrait == null) 
+      if (selectedPortrait == null)
         throw new System.Exception("Clicked on an action, but there's no hero selected!");
 
       var hero = selectedPortrait.character as Hero;
@@ -254,6 +258,10 @@ public class TravelScene : MonoBehaviour, Portrait.EventsCallback
   {
     if (travelState == TravelState.PAUSED)
       SetState(TravelState.TRAVELLING);
+    // If already arrived and just resting, return to Arrived state.
+    else if (travelState == TravelState.RESTING
+        && Game.journey.fractionComplete >= 1)
+      SetState(TravelState.ARRIVED);
     else
       SetState(TravelState.PAUSED);
   }
@@ -280,5 +288,145 @@ public class TravelScene : MonoBehaviour, Portrait.EventsCallback
       };
       SceneManager.LoadScene("Travel");
     }
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  /*
+   * Each frame, get each character's stats.
+   * Convert their stats into tiers.
+   * For each stat type, get the number of players on the lowest tier.
+   * If they all match last frame's counts, 
+   */
+
+  // Cached for re-use each frame.
+  private int i;
+  private (int, int)[] lowestStatsAndCount = new (int, int)[4];
+  private int statTier;
+  private List<TravelUi.SpeedModifier> modifierUiInfo = new List<TravelUi.SpeedModifier>(5); // TODO increase size if/when we get more possible modifiers.
+  private TravelUi.SpeedModifier[] statModifiers = new TravelUi.SpeedModifier[4]
+  {
+    new TravelUi.SpeedModifier(),
+    new TravelUi.SpeedModifier(),
+    new TravelUi.SpeedModifier(),
+    new TravelUi.SpeedModifier(),
+  };
+  private TravelUi.SpeedModifier statModifier;
+
+  /// <summary>
+  /// Calculate all the speed modifiers currently being applied, and display them.
+  /// </summary>
+  private void DisplaySpeedModifiers()
+  {
+    // Convert hero stats to to tiers. Find the lowest tier for each stat, and the count.
+    for (i = 0; i < 4; i++)
+      lowestStatsAndCount[i] = (int.MaxValue, 0);
+    for (i = Game.heroes.Count - 1; i >= 0; i--)
+    {
+      CompareStats(Game.heroes[i].health, ref lowestStatsAndCount[0]);
+      CompareStats(Game.heroes[i].rest, ref lowestStatsAndCount[1]);
+      CompareStats(Game.heroes[i].hunger, ref lowestStatsAndCount[2]);
+      CompareStats(Game.heroes[i].mood, ref lowestStatsAndCount[3]);
+    }
+
+    modifierUiInfo.Clear();
+    if (!Game.time.isDaytime)
+      modifierUiInfo.Add(new TravelUi.SpeedModifier() { descritption = "Night Time", up = false });
+    // TODO:
+    // Bad weather
+    // Difficult terrain
+
+    // Convert stat info into UI info.
+    for (i = 0; i < 4; i++)
+    {
+      var bb = lowestStatsAndCount[i];
+      if (bb.Item1 == 2) continue; // No modifiers if stat is at tier 2 (normal).
+      var aa = statModifiersByTier[i];
+      var cc = aa[bb.Item1];
+      statModifier = statModifiers[i];
+      statModifier.up = bb.Item1 > 2;
+      statModifier.descritption = cc.description;
+      statModifier.count = bb.Item2;
+      modifierUiInfo.Add(statModifier);
+    }
+
+    // Display stat info.
+    ui.SetSpeedModifiers(modifierUiInfo);
+  }
+
+  // TODO Move this elsewhere. It probably belongs in its own class? It's more closely
+  // associate with heroes and stats than travel in particular.
+  private readonly StatTier[][] statModifiersByTier = new StatTier[4][]
+  {
+    new StatTier[4]
+    {
+      new StatTier("Severe Injury", -35),
+      new StatTier("Injury", -15),
+      new StatTier("Fair Health", 0),
+      new StatTier("Excellent Health", 5),
+    },
+    new StatTier[4]
+    {
+      new StatTier("Exhausted", -25),
+      new StatTier("Tired", -10),
+      new StatTier("Adequately Rested", 0),
+      new StatTier("Well Rested", 10),
+    },
+    new StatTier[4]
+    {
+      new StatTier("Starving", -20),
+      new StatTier("Hungry", -5),
+      new StatTier("Sated", 0),
+      new StatTier("Well Fed", 5),
+    },
+    new StatTier[4]
+    {
+      new StatTier("Awful Morale", -20),
+      new StatTier("Poor Morale", -5),
+      new StatTier("Fair Mood", 0),
+      new StatTier("High Spirits", 5),
+    },
+  };
+
+  /// <summary>
+  /// Rules about a hero stat (health, hunger, stamina, morale) when at a given
+  /// tier (25% increments).
+  /// </summary>
+  private class StatTier {
+    public string description;
+    public int speedPercentModifier;
+
+    public StatTier(string description, int speedPercentModifier)
+    {
+      this.description = description;
+      this.speedPercentModifier = speedPercentModifier;
+    }
+  }
+
+  private void CompareStats(float stat, ref (int, int) lowestTierAndCount)
+  {
+    statTier = Mathf.Clamp(Mathf.FloorToInt(stat / 25), 0, 3);
+    if (statTier < lowestTierAndCount.Item1)
+    {
+      lowestTierAndCount.Item1 = statTier;
+      lowestTierAndCount.Item2 = 1;
+    } else if (statTier == lowestTierAndCount.Item1)
+      lowestTierAndCount.Item2++;
   }
 }

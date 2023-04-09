@@ -27,8 +27,7 @@ public class CampScene : MonoBehaviour, PortraitZoneUiGroup.Interactions, Portra
   [SerializeField] private List<PortraitZoneUiGroup> zones;
   [SerializeField] private TimeOfDayController timeOfDayController;
   [SerializeField] private GameObject portraitPrefab;
-  [SerializeField] private HeroStatsPanel heroStatsPanel;
-  [SerializeField] private SelectOptionUI options;
+  [SerializeField] private SelectOptionUI actionButtons;
   [SerializeField] private GameObject confirmActionsButton;
 
   private Dictionary<Hero, HeroCampInfo> heroInfo;
@@ -57,7 +56,7 @@ public class CampScene : MonoBehaviour, PortraitZoneUiGroup.Interactions, Portra
 
       var heroUiObject = Instantiate(portraitPrefab);
       info.portrait = heroUiObject.GetComponent<Portrait>();
-      defaultZone.Add(info.portrait);
+      MoveHeroTo(info, defaultZone);
       info.zone = defaultZone;
 
       info.action = defaultAction;
@@ -81,20 +80,33 @@ public class CampScene : MonoBehaviour, PortraitZoneUiGroup.Interactions, Portra
   //  this.StartAfterDelay(0.5f, NewHourSequence(Game.time.hourOfDay));
   }
 
-  private void SelectHero(Hero hero, bool showActions = true)
+  private void SelectHero(HeroCampInfo hero, bool showActions = true)
   {
     if (selectedHero != null)
       selectedHero.portrait.SetSelected(false);
-    selectedHero = heroInfo[hero];
+    selectedHero = hero;
     selectedHero.portrait.SetSelected(true);
-    heroStatsPanel.ShowStatsFor(hero);
-    if (hero.location != null)
-    {
-  //    if (hero.action == null && showActions)
-    //    hero.location.ShowActions(hero);
-    //  else
-      //  hero.location.ShowActions(null);
-    }
+    ui.ShowStatsFor(hero.hero);
+    if (showActions) ShowActionsFor(hero);
+  }
+
+  private void ShowActionsFor(HeroCampInfo hero)
+  {
+    var actions = ActionManager.GetCampActionsFor(hero.zone.zone);
+    var options = actions.Select(it => it.ToOption()).ToList();
+    options.ForEach(it => UnityEngine.Debug.Log(it.title));
+    var heroCopy = hero;
+
+    actionButtons.Show(options, (option, index) => {
+      var selectedAction = option.reference as HeroAction;
+      heroCopy.portrait.SetAction(selectedAction.titlePresentProgressive);
+      heroCopy.action = selectedAction;
+
+      string message = selectedAction.GetAssignmentAnnouncement(heroCopy.hero, Game.state);
+      SpeechBubble.Show(heroCopy.portrait.transform, message, null);
+
+      actionButtons.Dismiss();
+    });
   }
 
   private void DeselectHero(HeroCampInfo hero)
@@ -142,8 +154,8 @@ public class CampScene : MonoBehaviour, PortraitZoneUiGroup.Interactions, Portra
       // Assign task to self.
  //     yield return hero.portrait.AnimateMoveTo(action.location);
       hero.SelectAction(action, assignedBySelf: true);
-      SelectHero(hero);
-      yield return SpeechBubble.Show(hero.portrait, "I feel like doing this.");
+      SelectHero(heroInfo[hero]);
+      yield return SpeechBubble.Show(heroInfo[hero].portrait, "I feel like doing this.");
     }
 
     if (selectedHero != null) DeselectHero(selectedHero);
@@ -155,7 +167,7 @@ public class CampScene : MonoBehaviour, PortraitZoneUiGroup.Interactions, Portra
     if (hero.action != null && !wasAssignedBySelf)
     {
       string message = hero.action.GetAssignmentAnnouncement(hero, Game.state);
-      SpeechBubble.Show(hero.portrait, message, null);
+      SpeechBubble.Show(heroInfo[hero].portrait, message, null);
     }
 
     bool allHeroesReady = Game.heroes.All(it => it.action != null);
@@ -277,10 +289,26 @@ public class CampScene : MonoBehaviour, PortraitZoneUiGroup.Interactions, Portra
     Game.heroes.ForEach(it => it.SelectAction(null));
 
     // Update UI.
-    heroStatsPanel.ShowStatsFor(null);
+    ui.ShowPartyStats();
     uiState = UIState.INTERACTIVE;
 
     StartCoroutine(NewHourSequence(Game.time.hourOfDay));
+  }
+
+  public void OnEmptyBackgroundClick()
+  {
+    DeselectHero();
+  }
+
+  private void DeselectHero()
+  {
+    if (selectedHero != null)
+    {
+      selectedHero.portrait.SetSelected(false);
+      selectedHero = null;
+    }
+    // TODO dismiss hero's UI, show party UI
+    actionButtons.Dismiss();
   }
 
   public void OnPointerEnterPortrait(Portrait portrait)
@@ -295,10 +323,7 @@ public class CampScene : MonoBehaviour, PortraitZoneUiGroup.Interactions, Portra
 
   public void OnPortraitLeftClick(Portrait portrait)
   {
-    if (selectedHero != null)
-      selectedHero.portrait.SetSelected(false);
-    selectedHero = heroInfo[portrait.character as Hero];
-    selectedHero.portrait.SetSelected(true);
+    SelectHero(heroInfo[portrait.character as Hero], showActions: true);
   }
 
   public void OnPointerEnterZone(PortraitZoneUiGroup zoneUi, PortraitZoneUiArea childEntered)
@@ -316,17 +341,42 @@ public class CampScene : MonoBehaviour, PortraitZoneUiGroup.Interactions, Portra
     zoneUi.SetAppearance(PortraitZoneUiGroup.Appearance.HIDDEN);
   }
 
-  public void OnRightClickZone(PortraitZoneUiGroup zoneUi, PortraitZoneUiArea childClicked)
+  public void OnClickZone(PortraitZoneUiGroup zoneUi, PortraitZoneUiArea childClicked, PointerEventData data)
   {
-    if (selectedHero == null) return;
-
-    if (zoneUi.CanAccept(selectedHero.portrait))
+    if (data.button == PointerEventData.InputButton.Left)
     {
-      selectedHero.zone.Remove(selectedHero.portrait);
-      zoneUi.Add(selectedHero.portrait);
       zoneUi.SetAppearance(PortraitZoneUiGroup.Appearance.HIDDEN);
-      // TODO show new location's actions
+      DeselectHero();
+    }
+    else if (data.button == PointerEventData.InputButton.Right)
+    {
+      zoneUi.SetAppearance(PortraitZoneUiGroup.Appearance.HIDDEN);
+      MoveHeroTo(
+        hero: selectedHero,
+        zone: zoneUi,
+        specificArea: childClicked,
+        animateMove: true,
+        showActions: true);
+    }
+  }
+
+  private void MoveHeroTo(
+    HeroCampInfo hero,
+    PortraitZoneUiGroup zone,
+    PortraitZoneUiArea specificArea = null,
+    bool animateMove = false,
+    bool showActions = false)
+  {
+    if (hero == null) return;
+
+    if (zone.CanAccept(hero.portrait))
+    {
+      if (hero.zone != null)
+        hero.zone.Remove(hero.portrait);
+      zone.Add(hero.portrait, specificArea);
+      hero.zone = zone;
       // TODO animate character moving/bouncing to location
+      if (showActions) ShowActionsFor(hero);
     }
   }
 }

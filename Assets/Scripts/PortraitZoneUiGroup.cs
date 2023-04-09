@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -15,7 +14,7 @@ public class PortraitZoneUiGroup : MonoBehaviour
   {
     public void OnPointerEnterZone(PortraitZoneUiGroup zoneUi, PortraitZoneUiArea childEntered);
     public void OnPointerExitZone(PortraitZoneUiGroup zoneUi, PortraitZoneUiArea childExited);
-    public void OnRightClickZone(PortraitZoneUiGroup zoneUi, PortraitZoneUiArea childClicked);
+    public void OnClickZone(PortraitZoneUiGroup zoneUi, PortraitZoneUiArea childClicked, PointerEventData data);
   }
 
   public enum Appearance { HIDDEN, VALID_TARGET, INVALID_TARGET }
@@ -50,14 +49,19 @@ public class PortraitZoneUiGroup : MonoBehaviour
   public bool CanAccept(Portrait portrait)
     => childAreas.Any(it => it.CanAccept(portrait));
 
-  public void Add(Portrait portrait)
+  public void Add(Portrait portrait, PortraitZoneUiArea specificArea = null)
   {
     if (!CanAccept(portrait))
       throw new System.Exception("Can't add portrait; not enough space!");
 
     portraits.Add(portrait);
-    childAreas.First(it => it.CanAccept(portrait))
-      .Add(portrait);
+    if (specificArea != null && specificArea.CanAccept(portrait))
+      specificArea.Add(portrait);
+    else
+      childAreas
+        .OrderBy(it => it.portraits.Count)
+        .First(it => it.CanAccept(portrait))
+        .Add(portrait);
   }
 
   public void Remove(Portrait portrait)
@@ -80,38 +84,7 @@ public class PortraitZoneUiGroup : MonoBehaviour
 
   public void OnPointerClick(PortraitZoneUiArea childArea, PointerEventData data)
   {
-    if (data.button != PointerEventData.InputButton.Right) return;
     if (callback != null)
-      callback.OnRightClickZone(this, childArea);
+      callback.OnClickZone(this, childArea, data);
   }
-
-  /*
-
-  public void ShowActions(Hero hero, ActionList actionList)
-  {
-    if (hero == null)
-    {
-      actionList.Hide();
-      return;
-    }
-
-    var actions = ActionManager.GetCampActionsFor(zone);
-    var actionButtons = actions
-      .Select(it => new ActionButton.Content() {
-        text = it.title,
-        hoverText = it.description,
-        state = (int) it.AvailableFor(hero, Game.state)
-      })
-      .ToList();
-    actionList.Show(actionButtons, (i) => OnActionSelected(actions[i]));
-  }
-
-  private void OnActionSelected(HeroAction action)
-  {
-//    if (CampScene.selectedHero == null)
-      throw new System.Exception("Cannot select an action when no heroes selected!");
-
-//    CampScene.selectedHero.SelectAction(action);
-  }
-   */
 }

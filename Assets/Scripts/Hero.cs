@@ -59,7 +59,6 @@ public class Hero : Character
   public float hoursAwake;
 
   public HeroAction action;
-  public HeroPortrait portrait;
   public PortraitZone location;
 
   public enum Stat
@@ -77,7 +76,7 @@ public class Hero : Character
   public void SelectAction(HeroAction action, bool assignedBySelf = false)
   {
     this.action = action;
-    portrait.ShowSelectedAction(action);
+  //  portrait.ShowSelectedAction(action);
   //  CampScene.OnActionSelected(this, assignedBySelf);
   }
 }

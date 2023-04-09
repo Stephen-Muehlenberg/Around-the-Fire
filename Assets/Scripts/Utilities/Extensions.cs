@@ -59,4 +59,22 @@ public static class Extensions
   {
     return array[UnityEngine.Random.Range(0, array.Length)];
   }
+
+  public static void ForEach<T>(this T[] array, Action<T> action)
+  {
+    for (int i = 0; i < array.Length; i++)
+      action(array[i]);
+  }
+
+  public static void ForEachIndexed<T>(this List<T> list, Action<T, int> action)
+  {
+    for (int i = 0; i < list.Count; i++)
+      action(list[i], i);
+  }
+
+  public static void ForEachIndexed<T>(this T[] array, Action<T, int> action)
+  {
+    for (int i = 0; i < array.Length; i++)
+      action(array[i], i);
+  }
 }

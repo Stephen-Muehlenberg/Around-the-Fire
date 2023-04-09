@@ -20,6 +20,11 @@ public class TownScene : MonoBehaviour
     SceneManager.LoadScene("Guild");
   }
 
+  public void OnClick_Market()
+  {
+
+  }
+
   public void OnClick_LeaveTown()
   {
     if (Game.party.quest == null || Game.party.quest.complete)

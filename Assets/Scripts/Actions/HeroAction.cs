@@ -127,25 +127,25 @@ public abstract class HeroAction
 
     if (health != null) {
       hero.health += health.Value;
-      StatPopup.Show(hero.portrait, Hero.Stat.HEALTH, health.Value, popupOffset++);
+    //  StatPopup.Show(hero.portrait, Hero.Stat.HEALTH, health.Value, popupOffset++);
     }
     if (hiddenHealth != null) hero.health += hiddenHealth.Value;
 
     if (hunger != null) {
       hero.hunger += hunger.Value;
-      StatPopup.Show(hero.portrait, Hero.Stat.HUNGER, hunger.Value, popupOffset++);
+    //  StatPopup.Show(hero.portrait, Hero.Stat.HUNGER, hunger.Value, popupOffset++);
     }
     if (hiddenHunger != null) hero.hunger += hiddenHunger.Value;
 
     if (mood != null) {
       hero.mood += mood.Value;
-      StatPopup.Show(hero.portrait, Hero.Stat.MORALE, mood.Value, popupOffset++);
+    //  StatPopup.Show(hero.portrait, Hero.Stat.MORALE, mood.Value, popupOffset++);
     }
     if (hiddenMood != null) hero.mood += hiddenMood.Value;
 
     if (rest != null) {
       hero.rest += rest.Value;
-      StatPopup.Show(hero.portrait, Hero.Stat.REST, rest.Value, popupOffset++);
+    //  StatPopup.Show(hero.portrait, Hero.Stat.REST, rest.Value, popupOffset++);
     }
     if (hiddenRest != null) hero.rest += hiddenRest.Value;
   }
