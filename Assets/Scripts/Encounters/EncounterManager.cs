@@ -29,10 +29,6 @@ public class EncounterManager
   // TODO Add events here manually.
   private void Initialise()
   {
-    travelEncounters = new()
-    {
-      typeof(TE_MushroomTest).AssemblyQualifiedName,
-      typeof(TE_StrangeBerry).AssemblyQualifiedName,
-    };
+    travelEncounters = TravelEncounters.AllQualifiedNames;
   }
 }

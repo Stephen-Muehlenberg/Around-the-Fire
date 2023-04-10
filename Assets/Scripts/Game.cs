@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.EventSystems;
 
 /// <summary>
 /// Provides public static references to game state info.
@@ -62,18 +64,48 @@ public class Party
 [Serializable]
 public class Inventory
 {
-  public int money;
-  public int suppliesFresh;
-  public int suppliesRations;
-  public int suppliesTotal => suppliesFresh + suppliesRations;
+  private int _money;
+  public int money {
+    get { return _money; } 
+    set {
+      _money = value;
+      onInventoryChanged.Invoke(this);
+    }
+  }
+
+  private int _foodFresh;
+  public int foodFresh
+  {
+    get { return _foodFresh; }
+    set
+    {
+      _foodFresh = value;
+      onInventoryChanged.Invoke(this);
+    }
+  }
+
+  private int _foodCured;
+  public int foodCured
+  {
+    get { return _foodCured; }
+    set
+    {
+      _foodCured = value;
+      onInventoryChanged.Invoke(this);
+    }
+  }
+
+  public int suppliesTotal => _foodFresh + _foodCured;
   public float supplies; // TODO Remove this.
   public float firewood; // TODO Make this an int.
 
   public float daysWorthOfSupplies(Party forParty)
-    => supplies / 4 / forParty.heroes.Count;
+    => suppliesTotal / 4f / forParty.heroes.Count;
 
   public float daysWorthOfFirewood(Party forParty)
     => firewood / 8 / forParty.heroes.Count;
+
+  public UnityAction<Inventory> onInventoryChanged;
 }
 
 /// <summary>
