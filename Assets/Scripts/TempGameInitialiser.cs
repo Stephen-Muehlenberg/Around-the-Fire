@@ -42,8 +42,9 @@ public class TempGameInitialiser : MonoBehaviour
         heroes = new List<Hero>(heroCount),
         inventory = new Inventory()
         {
-          firewood = Random.Range(0f, 20f),
-          supplies = Random.Range(0f, 20f),
+          firewood = Random.Range(0, 20),
+          foodFresh = Random.Range(0, 20),
+          foodCured = Random.Range(0, 20),
         },
         quest = hasDefaultQuest ? new Quest()
         {

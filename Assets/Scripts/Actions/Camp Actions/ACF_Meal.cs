@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class ACF_Meal : HeroAction
 {
-  private const float MEAL_SUPPLY_COST = 2;
+  private const int MEAL_SUPPLY_COST = 2;
 
   public override string title => "Cook a Meal";
   public override string titlePresentProgressive => "Cooking a meal";
@@ -41,7 +41,7 @@ public class ACF_Meal : HeroAction
       .ToList()
       .ForEach(it => AdjustStats(it, hunger: 45));
 
-    currentState.party.inventory.supplies -= MEAL_SUPPLY_COST * currentState.party.heroes.Count;
+    currentState.party.inventory.consumeFood(MEAL_SUPPLY_COST * currentState.party.heroes.Count);
 
     yield return new WaitForSeconds(1.5f);
     callback.Invoke();

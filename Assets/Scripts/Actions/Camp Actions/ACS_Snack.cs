@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ACS_Snack : HeroAction
 {
-  private const float SNACK_SUPPLY_COST = 7;
+  private const int SNACK_SUPPLY_COST = 7;
 
   public override string title => "Eat a Snack";
   public override string titlePresentProgressive => "Snacking";
@@ -13,7 +13,7 @@ public class ACS_Snack : HeroAction
 
   public override Availability AvailableFor(Hero hero, GameState context)
   {
-    if (context.party.inventory.supplies < SNACK_SUPPLY_COST)
+    if (context.party.inventory.food < SNACK_SUPPLY_COST)
       return Availability.NOT_ENOUGH_SUPPLIES;
     return Availability.AVAILABLE;
   }
@@ -35,7 +35,7 @@ public class ACS_Snack : HeroAction
   {
     AdjustStats(hero, hunger: 15, mood: 5);
 
-    currentState.party.inventory.supplies -= SNACK_SUPPLY_COST;
+    currentState.party.inventory.consumeFood(SNACK_SUPPLY_COST);
 
     yield return new WaitForSeconds(1.5f);
     callback.Invoke();

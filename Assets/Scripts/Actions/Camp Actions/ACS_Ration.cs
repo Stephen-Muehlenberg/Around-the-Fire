@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class ACS_Ration : HeroAction
 {
-  private const float RATION_SUPPLY_COST = 1;
+  private const int RATION_SUPPLY_COST = 1;
 
   public override string title => "Distribute Rations";
   public override string titlePresentProgressive => "Distributing rations";
@@ -14,7 +14,7 @@ public class ACS_Ration : HeroAction
 
   public override Availability AvailableFor(Hero hero, GameState context)
   {
-    if (context.party.inventory.supplies < RATION_SUPPLY_COST * context.party.heroes.Count)
+    if (context.party.inventory.food < RATION_SUPPLY_COST * context.party.heroes.Count)
       return Availability.NOT_ENOUGH_SUPPLIES;
     return Availability.AVAILABLE;
   }
@@ -36,7 +36,7 @@ public class ACS_Ration : HeroAction
     currentState.party.heroes
       .ForEach(it => AdjustStats(it, hunger: 30, mood: -10));
 
-    currentState.party.inventory.supplies -= RATION_SUPPLY_COST * currentState.party.heroes.Count;
+    currentState.party.inventory.consumeFood(RATION_SUPPLY_COST * currentState.party.heroes.Count);
 
     yield return new WaitForSeconds(1.5f);
     callback.Invoke();

@@ -66,44 +66,68 @@ public class Inventory
 {
   private int _money;
   public int money {
-    get { return _money; } 
+    get => _money; 
     set {
       _money = value;
-      onInventoryChanged.Invoke(this);
+      onInventoryChanged?.Invoke(this);
     }
   }
 
   private int _foodFresh;
   public int foodFresh
   {
-    get { return _foodFresh; }
+    get => _foodFresh;
     set
     {
       _foodFresh = value;
-      onInventoryChanged.Invoke(this);
+      onInventoryChanged?.Invoke(this);
     }
   }
 
   private int _foodCured;
   public int foodCured
   {
-    get { return _foodCured; }
+    get => _foodCured;
     set
     {
       _foodCured = value;
-      onInventoryChanged.Invoke(this);
+      onInventoryChanged?.Invoke(this);
     }
   }
 
-  public int suppliesTotal => _foodFresh + _foodCured;
-  public float supplies; // TODO Remove this.
-  public float firewood; // TODO Make this an int.
+  /// <summary>
+  /// Total amount of food (<see cref="foodFresh"/> + <see cref="foodCured"/>).
+  /// 
+  /// </summary>
+  public int food => _foodFresh + _foodCured;
+  public int firewood; // TODO Make this an int.
 
   public float daysWorthOfSupplies(Party forParty)
-    => suppliesTotal / 4f / forParty.heroes.Count;
+    => food / 4f / forParty.heroes.Count;
 
   public float daysWorthOfFirewood(Party forParty)
     => firewood / 8 / forParty.heroes.Count;
+
+  /// <summary>
+  /// Removes the specified <paramref name="amount"/> of food, starting from <see cref="foodFresh"/>,
+  /// then from <see cref="foodCured"/> if fresh runs out. Throws an exception if not enough
+  /// food.
+  /// </summary>
+  public void consumeFood(int amount)
+  {
+    if (amount > food)
+      throw new Exception("Tried to consume " + amount + " food but only have " + food + " total.");
+
+    if (amount <= _foodFresh)
+      _foodFresh -= amount;
+    else
+    {
+      amount -= _foodFresh;
+      _foodFresh = 0;
+      _foodCured -= amount;
+    }
+    onInventoryChanged?.Invoke(this);
+  }
 
   public UnityAction<Inventory> onInventoryChanged;
 }

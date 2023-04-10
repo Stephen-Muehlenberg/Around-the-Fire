@@ -18,10 +18,8 @@ public class PartyStatsPanel : MonoBehaviour
 
   public void Display(GameState state)
   {
-    float supplies = state.party.inventory.supplies;
-    float firewood = state.party.inventory.firewood;
     textField.text = "Time: " + Utils.GetDisplayTime(state.world.time.hourOfDay)
-      + "\nSupplies: " + Mathf.FloorToInt(supplies) + " (" + state.party.inventory.daysWorthOfSupplies(state.party) + " days)"
-      + "\nWood: " + Mathf.FloorToInt(firewood) + " (" + state.party.inventory.daysWorthOfFirewood(state.party) + " days)";
+      + "\nFood: " + state.party.inventory.food + " (" + state.party.inventory.daysWorthOfSupplies(state.party) + " days)"
+      + "\nFirewood: " + state.party.inventory.firewood + " (" + state.party.inventory.daysWorthOfFirewood(state.party) + " days)";
   }
 }

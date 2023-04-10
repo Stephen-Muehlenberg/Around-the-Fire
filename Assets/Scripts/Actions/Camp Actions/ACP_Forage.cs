@@ -45,9 +45,9 @@ public class ACP_Forage : HeroAction
   {
     AdjustStats(hero, rest: -13);
 
-    float foodFound = UnityEngine.Random.Range(0, 10f);
+    int foodFound = UnityEngine.Random.Range(0, 10);
     if (currentState.world.time.hourOfDay >= 20) foodFound /= 2;
-    currentState.party.inventory.supplies += foodFound;
+    currentState.party.inventory.foodFresh += foodFound;
 
     yield return new WaitForSeconds(1.5f);
     callback.Invoke();

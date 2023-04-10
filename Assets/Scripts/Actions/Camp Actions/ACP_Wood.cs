@@ -40,7 +40,7 @@ public class ACP_Wood : HeroAction
   {
     AdjustStats(hero, rest: -12);
 
-    float woodFound = UnityEngine.Random.Range(4, 12);
+    int woodFound = UnityEngine.Random.Range(4, 12);
     if (currentState.world.time.hourOfDay >= 20) woodFound -= 4;
     currentState.party.inventory.firewood += woodFound;
     

@@ -10,11 +10,10 @@ using Random = UnityEngine.Random;
 public static class TravelEncounters
 {
   public static List<string> AllQualifiedNames => new() {
-  //  typeof(MuddyRoads).AssemblyQualifiedName,
-  //  typeof(StrangeBerry).AssemblyQualifiedName,
-  //  typeof(StrangeMushroom).AssemblyQualifiedName,
-  //  typeof(OldCampsite).AssemblyQualifiedName,
-    typeof(TEMPLATE).AssemblyQualifiedName,
+    typeof(MuddyRoads).AssemblyQualifiedName,
+    typeof(StrangeBerry).AssemblyQualifiedName,
+    typeof(StrangeMushroom).AssemblyQualifiedName,
+    typeof(OldCampsite).AssemblyQualifiedName,
   };
 
   public class MuddyRoads : Encounter
@@ -124,9 +123,6 @@ public static class TravelEncounters
   {
     public override void Start()
     {
-      state.party.inventory.foodFresh += 3;
-      Message("You gain +3 fresh food!")
-        .Show();
     }
   }
 }
