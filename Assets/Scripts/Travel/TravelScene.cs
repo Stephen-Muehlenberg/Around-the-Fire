@@ -445,7 +445,7 @@ public class TravelScene : MonoBehaviour, Portrait.EventsCallback
 
   private void StartEncounter()
   {
-    travelState = TravelState.ENCOUNTER;
+    SetState(TravelState.ENCOUNTER);
     new EncounterManager()
       .RandomTravelEncounter(Game.state, encounterPanel, EndEncounter);
   }
@@ -453,6 +453,6 @@ public class TravelScene : MonoBehaviour, Portrait.EventsCallback
   private void EndEncounter()
   {
     encounterPanel.Dismiss();
-    travelState = TravelState.TRAVELLING;
+    SetState(TravelState.TRAVELLING);
   }
 }

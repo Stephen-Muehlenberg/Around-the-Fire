@@ -26,7 +26,6 @@ public class EncounterManager
     encounter.Start();
   }
 
-  // TODO Add events here manually.
   private void Initialise()
   {
     travelEncounters = TravelEncounters.AllQualifiedNames;

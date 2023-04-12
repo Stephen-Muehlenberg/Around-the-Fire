@@ -10,7 +10,16 @@ public class Hero : Character
   public string himHer => gender == Gender.Male ? "him" : "her";
   public string hisHer => gender == Gender.Male ? "his" : "her";
 
-  public float totalSkill => health + hunger + mood + rest;
+  /// <summary>Average value of the hero's health, hunger, mood, and rest. Ranges from 0 to 100.</summary>
+  public float totalSkill => (health + hunger + mood + rest) / 4f;
+
+  /// <summary>
+  /// Hero attempts a skill check, comparing their <see cref="totalSkill"/>
+  /// against a d100 roll. Returns true on a success.
+  /// </summary>
+  /// <param name="difficultyModifier">Optional modifier to influence the difficulty. E.g. 10 = 10% harder.</param>
+  public bool DoSkillCheck(int difficultyModifier = 0)
+    => UnityEngine.Random.Range(0f, 100f) < (totalSkill - difficultyModifier);
 
   /// <summary>0 - 100 inclusive.</summary>
   public float health {

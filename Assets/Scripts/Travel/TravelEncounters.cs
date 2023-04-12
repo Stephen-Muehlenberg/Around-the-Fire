@@ -14,6 +14,8 @@ public static class TravelEncounters
     typeof(StrangeBerry).AssemblyQualifiedName,
     typeof(StrangeMushroom).AssemblyQualifiedName,
     typeof(OldCampsite).AssemblyQualifiedName,
+    typeof(TravellingPerformers).AssemblyQualifiedName,
+    typeof(Argument).AssemblyQualifiedName,
   };
 
   public class MuddyRoads : Encounter
@@ -115,6 +117,83 @@ public static class TravelEncounters
         contentMessage = " You search the area, but find nothing of value.";
       }
       Message("You come across an abandoned campsite. " + contentMessage)
+        .Show();
+    }
+  }
+
+  public class TravellingPerformers : Encounter
+  {
+    public override void Start()
+    {
+      int randomMorale = Random.Range(2, 4);
+      Message("Pleasant music fills the air. Over the next hill, you find a troupe of travelling performers. You travel with them for a time, sharing stories and enjoying their company. Party morale +" + randomMorale)
+        .Show();
+      state.party.heroes.ForEach(hero => hero.mood += randomMorale);
+    }
+  }
+
+  public class Argument : Encounter
+  {
+    private Hero heroA, heroB;
+    private Hero mediator;
+
+    public override void Start()
+    {
+      heroA = state.party.heroes.Random();
+      heroB = state.party.heroes
+        .Where(hero => hero != heroA)
+        .ToList()
+        .Random();
+      mediator = state.party.heroes
+        .Where(hero => hero != heroA && hero != heroB)
+        .OrderBy(hero => hero.totalSkill)
+        .First();
+      Message(heroA.name + " and " + heroB.name + " have been bickering all day. Finally, it erupts into a full-blown shouting match. " + mediator.name + " looks like " + mediator.heShe + " wants to intervene.")
+        .Option("Let " + mediator.name + " try to mediate", Intervene)
+        .Option("Let them try to work it out themselves", LeaveAlone)
+        .Show();
+    }
+
+    private void Intervene(int _)
+    {
+      bool success = mediator.DoSkillCheck();
+      if (success)
+      {
+        int moraleAmount = Random.Range(1, 4);
+        state.party.heroes.ForEach(hero => hero.mood += moraleAmount);
+        Message("[LEADERSHIP SUCCESS!] " + mediator.name + " successfully defuses the argument before it gets out of hand. " + heroA.name + " and " + heroB.name + " apologize, the overall mood is improved. Party morale +" + moraleAmount)
+          .Show();
+      }
+      else
+      {
+        int partyMoodDrop = Random.Range(1, 5);
+        int arguersAdditionalDrop = Random.Range(2, 4);
+        state.party.heroes.ForEach(hero => hero.mood -= partyMoodDrop);
+        heroA.mood -= arguersAdditionalDrop;
+        heroB.mood -= arguersAdditionalDrop;
+        Message("[LEADERSHIP FAILED!] " + mediator.name + " tries to help, but only ends up making things worse. " + heroA.name + " and " + heroB.name + " are in a foul mood for the rest of the day.")
+          .Show();
+      }
+    }
+
+    private void LeaveAlone(int _)
+    {
+      bool totalSuccess = heroA.DoSkillCheck() && heroB.DoSkillCheck();
+      string resultMessage;
+      if (totalSuccess)
+      {
+        resultMessage = "[CHECK PASSED!] " + mediator.hisHer + " faith in them is quickly rewarded, as they reconcile their differences and apologise. Soon, they're back to being the best of friends, and the party's spirits are lifted.";
+        state.party.heroes.ForEach(hero => hero.mood += Random.Range(1, 4));
+        heroA.mood += 2;
+        heroB.mood += 2;
+      } else
+      {
+        resultMessage = "[CHECK FAILED!] Unfortunately, the argument keeps escalating. " + heroA.name + " and " + heroB.name + " eventually stop, but a foul mood hangs over the whole party.";
+        state.party.heroes.ForEach(hero => hero.mood += Random.Range(1, 3));
+        heroA.mood -= 3;
+        heroB.mood -= 3;
+      }
+      Message(mediator.name + " backs off, hoping " + heroA.name + " and " + heroB.name + " will settle their differences." + resultMessage)
         .Show();
     }
   }

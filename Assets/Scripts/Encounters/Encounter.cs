@@ -38,6 +38,8 @@ public abstract class Encounter
       return this;
     }
 
+    // TODO Allow encounters to add an optional function as an argument, which is called when a
+    // button is selected, e.g. after use presses "ok".
     public void Show()
     {
       if (options.Count == 0)

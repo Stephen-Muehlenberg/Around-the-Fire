@@ -100,7 +100,17 @@ public class Inventory
   /// 
   /// </summary>
   public int food => _foodFresh + _foodCured;
-  public int firewood; // TODO Make this an int.
+
+  private int _firewood;
+  public int firewood
+  {
+    get => _firewood;
+    set
+    {
+      _firewood = value;
+      onInventoryChanged?.Invoke(this);
+    }
+  }
 
   public float daysWorthOfSupplies(Party forParty)
     => food / 4f / forParty.heroes.Count;
