@@ -74,6 +74,13 @@ public class Hero : Character
   public event Action<Hero> statusChanges;
 
   public float hoursAwake;
+  /// <summary>
+  /// Hero starts suffering penalties to <see cref="rest"/> for every hour they're
+  /// awake while sleepy. Value is based on <see cref="hoursAwake"/> and the hero's
+  /// physical condition.
+  /// </summary>
+  // Ranges from 10 hours to 18 hours, depending on general health and fatigue.
+  public bool sleepy => hoursAwake >= 10 + ((_health + _rest) / 200);
 
   public HeroAction action;
   public PortraitZone location;
@@ -81,13 +88,6 @@ public class Hero : Character
   public enum Stat
   {
     HEALTH, HUNGER, REST, MORALE
-  }
-
-  // TODO how does the hour's activities affect this? combat? travel? sleep?
-  // rest? play?
-  public void UpdateStatsAtEndOfHour()
-  {
-    this.rest -= 6;
   }
 
   public void SelectAction(HeroAction action, bool assignedBySelf = false)

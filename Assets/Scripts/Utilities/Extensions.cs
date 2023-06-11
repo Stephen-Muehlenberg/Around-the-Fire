@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 /// <summary>
@@ -60,10 +61,20 @@ public static class Extensions
     return array[UnityEngine.Random.Range(0, array.Length)];
   }
 
+  public static IOrderedEnumerable<T> Shuffle<T>(this List<T> list) {
+    return list.OrderBy(_ => UnityEngine.Random.value);
+  }
+
   public static void ForEach<T>(this T[] array, Action<T> action)
   {
     for (int i = 0; i < array.Length; i++)
       action(array[i]);
+  }
+
+  public static void ForEachIndexed<T>(this IEnumerable<T> enumerable, Action<T, int> action)
+  {
+    for (int i = 0; i < enumerable.Count(); i++)
+      action(enumerable.ElementAt(i), i);
   }
 
   public static void ForEachIndexed<T>(this List<T> list, Action<T, int> action)

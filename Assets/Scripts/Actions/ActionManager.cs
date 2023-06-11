@@ -38,30 +38,33 @@ public class ActionManager : MonoBehaviour
 
     campActions = new List<HeroAction>()
     {
-      new ACA_Rest(),
-      new ACA_Talk(),
-      new ACA_Carouse(),
-      new ACA_Perform(),
-      new ACC_Exercise(),
-      new ACC_Train(),
-      new ACC_Spar(),
-      new ACC_Drill(),
-      new ACF_CookingFire(),
-      new ACF_Campfire(),
-      new ACF_Bonfire(),
-      new ACF_Meal(),
-      new ACF_Feast(),
-      new ACP_Wood(),
-      new ACP_Forage(),
-      new ACP_Explore(),
-      new ACP_Guard(),
-      new ACS_Snack(),
-      new ACS_Ration(),
-      new ACS_Repair(),
-      new ACS_Brew(),
-      new ACT_Heal(),
-      new ACT_ReceiveHealing(),
-      new ACT_Sleep(),
+      new AC2A_Relax(),
+      new AC2C_Train(),
+      new AC2F_BuildFire(),
+      new AC2F_HotMeal(),
+      new AC2P_GatherWood(),
+      new AC2S_ColdMeal(),
+      new AC2T_Sleep(),
+    //  new ACA_Talk(),
+    //  new ACA_Carouse(),
+    //  new ACA_Perform(),
+    //  new ACC_Exercise(),
+    //  new ACC_Spar(),
+    //  new ACC_Drill(),
+    //  new ACF_CookingFire(),
+    //  new ACF_Campfire(),
+    //  new ACF_Bonfire(),
+    //  new ACF_Meal(),
+    //  new ACF_Feast(),
+    //  new ACP_Forage(),
+    //  new ACP_Explore(),
+    //  new ACP_Guard(),
+    //  new ACS_Snack(),
+    //  new ACS_Ration(),
+    //  new ACS_Repair(),
+    //  new ACS_Brew(),
+    //  new ACT_Heal(),
+    //  new ACT_ReceiveHealing(),
     };
 
     campActionsByLocation = campActions
@@ -112,6 +115,6 @@ public class ActionManager : MonoBehaviour
 
   public static HeroAction GetDefaultCampAction()
   {
-    return singleton.campActions.First(it => it is ACA_Rest);
+    return singleton.campActions.First(it => it is AC2A_Relax);
   }
 }

@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-public class ACC_Train : HeroAction
+public class AC2C_Train : HeroAction
 {
   public override string title => "Train";
   public override string titlePresentProgressive => "Training";
@@ -25,7 +25,7 @@ public class ACC_Train : HeroAction
 
   public override IEnumerator Process(Hero hero, GameState previousContext, GameState context, Action callback)
   {
-    AdjustStats(hero, rest: -20, hiddenHunger: -10);
+    AdjustStats(hero, rest: -10, hunger: -5);
 
     yield return new WaitForSeconds(1.5f);
     callback.Invoke();

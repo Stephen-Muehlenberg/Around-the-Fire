@@ -9,7 +9,8 @@ public abstract class HeroAction
 {
   public enum Availability
   {
-    AVAILABLE, 
+    AVAILABLE,
+    UNAVAILABLE,
     NOT_ENOUGH_WOOD, 
     NOT_ENOUGH_SUPPLIES,
     NEEDS_A_FIRE,
@@ -150,13 +151,14 @@ public abstract class HeroAction
     if (hiddenRest != null) hero.rest += hiddenRest.Value;
   }
 
-  public Option ToOption()
+  public Option ToOption(Hero hero, GameState context)
   {
     return new Option()
     {
       title = this.title,
       // TODO icon = ???
       hoverDescription = this.description,
+      unavailable = AvailableFor(hero, context) != Availability.AVAILABLE,
       // TODO unavailable = ???
       // TODO text overlay = ???
       // TODO bottom text = ???

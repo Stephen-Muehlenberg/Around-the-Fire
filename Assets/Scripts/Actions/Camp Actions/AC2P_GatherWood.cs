@@ -2,10 +2,10 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-public class ACP_Wood : HeroAction
+public class AC2P_GatherWood : HeroAction
 {
-  public override string title => "Gather Wood";
-  public override string titlePresentProgressive => "Gathering wood";
+  public override string title => "Gather Firewood";
+  public override string titlePresentProgressive => "Gathering firewood";
   public override string description => "Find fuel for the fire.";
   public override PortraitZone location => Camp.zonePerimeter;
 
@@ -38,7 +38,9 @@ public class ACP_Wood : HeroAction
 
   public override IEnumerator Process(Hero hero, GameState previousState, GameState currentState, Action callback)
   {
-    AdjustStats(hero, rest: -12);
+    // TODO Have the amount of wood found dependant on a hero skill check. Maybe trigger
+    // various secondary negative effects on a failed skill check (get lost, etc).
+    AdjustStats(hero, rest: -10);
 
     int woodFound = UnityEngine.Random.Range(4, 12);
     if (currentState.world.time.hourOfDay >= 20) woodFound -= 4;

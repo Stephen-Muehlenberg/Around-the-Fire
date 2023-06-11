@@ -103,12 +103,14 @@ public class Portrait : MonoBehaviour,
 
   public void OnPointerEnter(PointerEventData eventData)
   {
+    if (interactions == Interactions.NONE) return;
     SetHighlighted(true);
     callbacks?.OnPointerEnterPortrait(this);
   }
 
   public void OnPointerExit(PointerEventData eventData)
   {
+    if (interactions == Interactions.NONE) return;
     SetHighlighted(false);
     callbacks?.OnPointerExitPortrait(this);
   }

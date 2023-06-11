@@ -1,16 +1,14 @@
 using System;
 using System.Collections;
+using System.Linq;
 using UnityEngine;
 
-public class ACA_Rest : HeroAction
+public class AC2A_Relax : HeroAction
 {
-  public override string title => "Rest";
-  public override string titlePresentProgressive => "Resting";
+  public override string title => "Relax";
+  public override string titlePresentProgressive => "Relaxing";
   public override string description => "Take a load off and unwind.";
   public override PortraitZone location => Camp.zoneAround;
-
-  public override float GetAutoAssignWeight(Hero hero, GameState context)
-    => StandardAutoAssignWeight(hero, rest: 15, mood: 5);
 
   public override string GetCompletionAnnouncement(Hero hero, GameState context)
   {
@@ -23,7 +21,13 @@ public class ACA_Rest : HeroAction
 
   public override IEnumerator Process(Hero hero, GameState previousState, GameState currentState, Action callback)
   {
-    AdjustStats(hero, rest: 15, hiddenMood: 5);
+    bool hasCompanion = previousState.party.heroes
+      .Where(h => h != hero)
+      .Any(h => h.action is AC2A_Relax);
+    if (hasCompanion)
+      AdjustStats(hero, rest: 10, mood: 15);
+    else
+      AdjustStats(hero, rest: 15, mood: 10);
 
     yield return new WaitForSeconds(1.5f);
     callback.Invoke();

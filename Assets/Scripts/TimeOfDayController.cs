@@ -7,7 +7,7 @@ using UnityEngine;
 /// </summary>
 public class TimeOfDayController : MonoBehaviour
 {
-  private static readonly float ADVANCE_SPEED_SECONDS_PER_HOUR = 2.5f;
+  private const float ADVANCE_SPEED_SECONDS_PER_HOUR = 2.5f;
 
   [SerializeField] private bool demoOnStart;
   [SerializeField] private Light sun;
@@ -46,50 +46,107 @@ public class TimeOfDayController : MonoBehaviour
     float startTime, int hours,
     Action<int> onHourEnd = null, Action<float, float> onFinished = null)
   {
-    if (hours <= 0) throw new Exception("Time must be between 1 and 24 but was " + hours + ".");
-    StartCoroutine(AdvanceTimeCoroutine(startTime, hours, onHourEnd, onFinished));
+    if (hours <= 0) throw new Exception("hours must be be at least 1 but was " + hours + ".");
+    StartCoroutine(AdvanceTimeCoroutine2(startTime, hours, onHourEnd, onFinished));
+  }
+
+  private IEnumerator AdvanceTimeCoroutine2(
+    float startTime, int hours,
+    Action<int> onHourEnd, Action<float, float> onFinish)
+  {
+    float elapsedTime = 0;
+    float totalAnimationDuration = hours * ADVANCE_SPEED_SECONDS_PER_HOUR;
+
+    float currentTime = startTime;
+    int currentHourIndex = Mathf.FloorToInt(startTime);
+
+    while (elapsedTime < totalAnimationDuration)
+    {
+      elapsedTime += Time.deltaTime;
+      currentTime += Time.deltaTime / ADVANCE_SPEED_SECONDS_PER_HOUR;
+
+      // Check if the previous hour has ended and we've started a new hour.
+      if (Mathf.FloorToInt(currentTime) > currentHourIndex)
+      {
+        if (currentTime >= 24)
+        {
+          currentTime -= 24;
+          currentHourIndex = 0;
+        } else currentHourIndex++;
+
+        onHourEnd?.Invoke(currentHourIndex);
+      }
+
+      SetTime(currentTime);
+
+      yield return null;
+    }
+
+    float endTime = Mathf.Repeat(startTime + hours, 24);
+    SetTime(endTime);
+    onFinish?.Invoke(hours, endTime);
   }
 
   private IEnumerator AdvanceTimeCoroutine(
     float startTime, int hours, 
     Action<int> onHourEnd, Action<float, float> onFinish)
   {
-    float endTime = startTime + hours;
-    if (endTime > 24) endTime -= 24;
-
-    float progress = 0; // Fraction of total progress, 0 = start, 1 = end.
-    float currentTime = startTime; // World time in decimal, e.g. 2.5 = 2:30am.
-    int currentHourIndex;
-    int previousHourIndex = (int) startTime;
+    float hoursPassed = 0;
+    float hoursPassedSmoothed;
+    float progressFraction = 0;
+    float currentTime = startTime; // Hour of day in decimal, e.g. 2.5 = 2:30am.
+    int currentHourIndex = (int) startTime;
+    int previousHourIndex = currentHourIndex;
 
     // Advance time and update lighting in a loop.
-    while (currentTime < endTime)
+    while (progressFraction < 1f)
     {
-      currentHourIndex = (int) currentTime;
+      // Advance progressFraction linearly.
+      hoursPassed += Time.deltaTime / ADVANCE_SPEED_SECONDS_PER_HOUR;
+      progressFraction = hoursPassed / hours;
 
-      // Invoke callback when we pass an hour mark.
-      if (onHourEnd != null && previousHourIndex < currentHourIndex)
-      {
-        previousHourIndex++;
-        onHourEnd.Invoke(currentHourIndex);
-      }
+      // Then map progress to time of day, using SmoothStep for a smoother animation.
+      hoursPassedSmoothed =
+//      Mathf.SmoothStep(0, hours, progressFraction);
+        hoursPassed;
+      currentTime = Mathf.Repeat(
+        startTime + hoursPassedSmoothed,
+        24);
+    //  Debug.Log((progressFraction * 100) + "%, hours " + hoursPassed + ", smoothed " + hoursPassedSmoothed + ", time " + currentTime);
 
       // Update visuals.
       SetTime(currentTime);
 
-      // Advance time, then smooth step it for the purposes of animation.
-      progress += Time.deltaTime / ADVANCE_SPEED_SECONDS_PER_HOUR / hours;
-      currentTime = startTime + (Mathf.SmoothStep(0, hours, progress) * hours);
+      // Check if we passed an hour mark.
+      currentHourIndex = Mathf.FloorToInt(currentTime);
+      if (currentHourIndex > previousHourIndex)
+      {
+        hoursPassed++;
+
+        // Wrap back around to 0 (midnight) if we hit 24 hours.
+        if (currentHourIndex == 24)
+        {
+          currentHourIndex = 0;
+          previousHourIndex = 0;
+        } else previousHourIndex++;
+
+        onHourEnd?.Invoke(currentHourIndex);
+      }
 
       yield return null;
     }
 
     // Snap to exactly the end time.
+    float endTime = Mathf.Repeat(startTime + hours, 24);
     SetTime(endTime);
 
     // Invoke final callback.
-    if (onFinish != null) onFinish.Invoke(hours, endTime);
+    onFinish?.Invoke(hours, endTime);
   }
+
+  // Cached to avoid re-allocation each frame.
+  private int indexOfCurrentTime;
+  private float fractionalProgressThroughIndex;
 
   /// <summary>
   /// Sets scene lighting to match the specified time of day.
@@ -99,24 +156,24 @@ public class TimeOfDayController : MonoBehaviour
   {
     if (time < 0 || time >= 24) throw new Exception("Time must be between 0 (inclusive) and 24 (exclusive), but was " + time + ".");
 
-    // Which quarter of the day (0-6, 6-12, 12-18, 18-24) are we in?
-    int dayQuarter = Mathf.FloorToInt(time / 6);
-    // How far through that quater are we?
-    float quarterFraction = (time - (dayQuarter * 6)) / 6f;
+    // Light and background colour.
+    indexOfCurrentTime = Mathf.FloorToInt(time / 6f);
+    fractionalProgressThroughIndex = (time - (indexOfCurrentTime * 6f)) / 6f;
 
-    // Set light and background colours.
-    sun.color = sunColor[dayQuarter].Evaluate(quarterFraction);
+    sun.color = sunColor[indexOfCurrentTime].Evaluate(fractionalProgressThroughIndex);
     sun.intensity = sun.color.a;
-    mainCamera.backgroundColor = skyColor[dayQuarter].Evaluate(quarterFraction);
+    mainCamera.backgroundColor = skyColor[indexOfCurrentTime].Evaluate(fractionalProgressThroughIndex);
 
-    // For all times except the final moment, Lerp between different sun angles.
-/*    if (currentHourIndex + 1 < sunDirectionByHour.Length)
+    // Directional light angle.
+    indexOfCurrentTime = Mathf.FloorToInt(time);
+    fractionalProgressThroughIndex = time - indexOfCurrentTime;
+    if (indexOfCurrentTime + 1 < sunDirectionByHour.Length)
       sun.transform.rotation = Quaternion.Euler(Vector3.Lerp(
-        a: sunDirectionByHour[currentHourIndex],
-        b: sunDirectionByHour[currentHourIndex + 1],
-        t: currentHourFraction));
+        a: sunDirectionByHour[indexOfCurrentTime],
+        b: sunDirectionByHour[indexOfCurrentTime + 1],
+        t: fractionalProgressThroughIndex));
     // For the very final moment (and end of the array), just use the last sun angle.
     else
-      sun.transform.rotation = Quaternion.Euler(sunDirectionByHour[currentHourIndex]);*/
+      sun.transform.rotation = Quaternion.Euler(sunDirectionByHour[indexOfCurrentTime]);
   }
 }

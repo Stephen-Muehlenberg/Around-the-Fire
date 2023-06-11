@@ -1,11 +1,23 @@
 using UnityEngine;
 
-public class TravelInventoryUi : MonoBehaviour
+public class InventoryUi : MonoBehaviour
 {
   [SerializeField] private TMPro.TMP_Text supppliesFresh;
   [SerializeField] private TMPro.TMP_Text supppliesRation;
   [SerializeField] private TMPro.TMP_Text firewood;
   [SerializeField] private TMPro.TMP_Text money;
+
+  private void OnEnable()
+  {
+    Game.party.inventory.onInventoryChanged += UpdateInventoryUi;
+    UpdateInventoryUi(Game.party.inventory);
+  }
+
+  private void OnDisable()
+  {
+    if (Game.party?.inventory != null)
+      Game.party.inventory.onInventoryChanged -= UpdateInventoryUi;
+  }
 
   public void UpdateInventoryUi(Inventory inventory)
   {

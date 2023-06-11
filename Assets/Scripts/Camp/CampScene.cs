@@ -2,7 +2,6 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
 /// <summary>
@@ -19,7 +18,7 @@ public class CampScene : MonoBehaviour, PortraitZoneUiGroup.Interactions, Portra
     public Portrait portrait;
     public PortraitZoneUiGroup zone;
     public BounceMovement bounceMovement;
-    public HeroAction action;
+//    public HeroAction action;
     public bool actionPending;
   }
 
@@ -47,7 +46,7 @@ public class CampScene : MonoBehaviour, PortraitZoneUiGroup.Interactions, Portra
     // Initialise hero portraits.
     heroInfo = new Dictionary<Hero, HeroCampInfo>(Game.heroes.Count);
     var defaultZone = zones.First(it => it.zone == Camp.zoneAround);
-    var defaultAction = ActionManager.GetDefaultCampAction();
+    HeroAction defaultAction = null;// ActionManager.GetDefaultCampAction();
 
     Game.heroes.ForEach(hero =>
     {
@@ -59,9 +58,11 @@ public class CampScene : MonoBehaviour, PortraitZoneUiGroup.Interactions, Portra
       MoveHeroTo(info, defaultZone);
       info.zone = defaultZone;
 
-      info.action = defaultAction;
+//      info.action = defaultAction;
+      info.hero.action = defaultAction;
       info.portrait.Initialise(hero, Portrait.Interactions.CLICKABLE, this);
-      info.portrait.SetAction(info.action.titlePresentProgressive);
+//      info.portrait.SetAction(info.action.titlePresentProgressive);
+      info.portrait.SetAction(info.hero.action?.titlePresentProgressive);
 
       info.bounceMovement = heroUiObject.AddComponent<BounceMovement>();
       info.bounceMovement.Initialise(bounceHeight: 480f,
@@ -93,19 +94,21 @@ public class CampScene : MonoBehaviour, PortraitZoneUiGroup.Interactions, Portra
   private void ShowActionsFor(HeroCampInfo hero)
   {
     var actions = ActionManager.GetCampActionsFor(hero.zone.zone);
-    var options = actions.Select(it => it.ToOption()).ToList();
+    var options = actions.Select(it => it.ToOption(hero.hero, Game.state)).ToList();
     options.ForEach(it => UnityEngine.Debug.Log(it.title));
     var heroCopy = hero;
 
     actionButtons.Show(options, (option, index) => {
       var selectedAction = option.reference as HeroAction;
       heroCopy.portrait.SetAction(selectedAction.titlePresentProgressive);
-      heroCopy.action = selectedAction;
+//      heroCopy.action = selectedAction;
+      heroCopy.hero.action = selectedAction;
 
       string message = selectedAction.GetAssignmentAnnouncement(heroCopy.hero, Game.state);
       SpeechBubble.Show(heroCopy.portrait.transform, message, null);
 
       actionButtons.Dismiss();
+      OnActionSelected(heroCopy.hero);
     });
   }
 
@@ -135,7 +138,7 @@ public class CampScene : MonoBehaviour, PortraitZoneUiGroup.Interactions, Portra
 
       // If time is midnight, all heroes automatically sleep.
       if (Game.time.hourOfDay == 0)
-        action = new ACT_Sleep();
+        action = new AC2T_Sleep();
       else
       {
         // Calculate the most desirable action for the hero.
@@ -179,16 +182,18 @@ public class CampScene : MonoBehaviour, PortraitZoneUiGroup.Interactions, Portra
     // Disable action UI.
     uiState = UIState.UNINTERACTIVE;
     confirmActionsButton.SetActive(false);
-    // ActionList.Hide();
-  //  Game.heroes.ForEach(it => {
-    //  it.portrait.AllowCancel(false);
-  //    DeselectHero(it);
-//    });
-    if (selectedHero != null)
-      DeselectHero(selectedHero);
+    foreach (var (hero, heroCampInfo) in heroInfo)
+    {
+      //      heroCampInfo.portrait.AllowCancel(false);
+      DeselectHero(heroCampInfo);
+    }
 
     // Animate time advancing.
-    timeOfDayController.AdvanceTime((int) Game.time.hourOfDay, 1, null, OnAdvanceTimeFinished);
+    timeOfDayController.AdvanceTime(
+      startTime: (int) Game.time.hourOfDay,
+      hours: 1,
+      onHourEnd: null,
+      onFinished: OnAdvanceTimeFinished);
   }
 
   private void OnAdvanceTimeFinished(float timePassed, float newTime)
@@ -204,43 +209,20 @@ public class CampScene : MonoBehaviour, PortraitZoneUiGroup.Interactions, Portra
     int hours = Game.heroes
       .Select(it => it.action.hours)
       .Min();
-    DegradeStatsOverTime(hours);
+    Game.party.AdjustHeroStatsOverTime(hoursPassed: hours);
+
+    foreach (var (a, b) in heroInfo)
+      b.actionPending = true;
 
     // Sort Heroes by their Action priority, then left-to-right, then top-to-bottom.
     heroInfo.Values.Where(it => it.actionPending)
       .OrderBy(it => it.portrait.transform.position.y)
       .OrderBy(it => it.portrait.transform.position.x)
-      .OrderBy(it => it.action.completionOrder)
+//      .OrderBy(it => it.action.completionOrder)
+      .OrderBy(it => it.hero.action.completionOrder)
       .ToList();
 
     ProcessNextAction();
-  }
-
-  private void DegradeStatsOverTime(int hours)
-  {
-    Game.heroes.ForEach(it => {
-      for (int i = 0; i < hours; i++)
-      {
-        it.hunger -= Random.Range(3.5f, 4.5f);
-        it.rest -= Random.Range(4.5f, 5.5f);
-
-        // Mood tends towards the average of the other three stats.
-        float statAverage = (it.health + it.hunger + it.rest) / 3f;
-        float moodOffset = statAverage - it.mood;
-        // Rough output: 0: 0,  5: 1.8,  20: 3.5,  50: 4.7,  100: 5.7
-        float moodDelta = Mathf.Log((Mathf.Abs(moodOffset) / 2) + 1, 2);
-        if (moodOffset < 0) moodDelta = -moodDelta;
-
-        // Other stats can only improve mood so much.
-        else if (moodOffset > 0)
-        {
-          if (it.mood + moodDelta > 65) moodDelta = 0;
-          if (it.mood + moodDelta > 55) moodDelta /= 2;
-        }
-
-        it.mood += moodDelta + Random.Range(-0.5f, 0.5f);
-      }
-    });
   }
 
   /// <summary>
@@ -249,9 +231,12 @@ public class CampScene : MonoBehaviour, PortraitZoneUiGroup.Interactions, Portra
   /// </summary>
   private void ProcessNextAction()
   {
- /*   Game.heroes.ForEach(it => it.portrait.Unhighlight());
-    heroStatsPanel.ShowStatsFor(selectedHero);
-    if (heroInfo.Any(it => it.Value.actionPending))
+    foreach (var (_, heroCampInfo) in heroInfo)
+      heroCampInfo.portrait.SetHighlighted(false);
+//    ui.ShowStatsFor(selectedHero.hero);
+
+    // If all actions have been completed, stop processing actions.
+    if (!(heroInfo.Any(hero => hero.Value.actionPending)))
     {
       FinishActions();
       return;
@@ -260,18 +245,18 @@ public class CampScene : MonoBehaviour, PortraitZoneUiGroup.Interactions, Portra
     var hero = heroInfo.Values.First(it => it.actionPending);
     hero.actionPending = false;
 
-    hero.portrait.Highlight();
-    heroStatsPanel.ShowStatsFor(hero.hero);
-    hero.portrait.ClearActionText();
-    string message = hero.action.GetCompletionAnnouncement(hero, Game.state);
+    hero.portrait.SetHighlighted(true);
+    ui.ShowStatsFor(hero.hero);
+    hero.portrait.SetAction(null);
+    string message = hero.hero.action.GetCompletionAnnouncement(hero.hero, Game.state);
     SpeechBubble.Show(hero.portrait, message, () => {
-      StartCoroutine(hero.action.Process(hero.hero, previousGameState, Game.state, ProcessNextAction));
-    });*/
+      StartCoroutine(hero.hero.action.Process(hero.hero, previousGameState, Game.state, ProcessNextAction));
+    });
   }
 
   private void FinishActions()
   {
-    if (Game.heroes.All(it => it.action is ACT_Sleep))
+    if (Game.heroes.All(it => it.action is AC2T_Sleep))
     {
       float timeUntil8 = Game.time.hourOfDay < 8
         ? 8 - Game.time.hourOfDay
@@ -285,8 +270,12 @@ public class CampScene : MonoBehaviour, PortraitZoneUiGroup.Interactions, Portra
       return;
     }
 
-    // Clear hero's actions.
-    Game.heroes.ForEach(it => it.SelectAction(null));
+    // Clear hero's actions, unless they're sleeping.
+    Game.heroes.ForEach(hero =>
+    {
+      if (hero.action is not AC2T_Sleep)
+        hero.SelectAction(null);
+    });
 
     // Update UI.
     ui.ShowPartyStats();

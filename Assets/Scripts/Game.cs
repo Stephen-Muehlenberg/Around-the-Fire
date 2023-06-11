@@ -45,9 +45,9 @@ public class GameState
 
   public GameState DeepCopy()
   {
-    // TODO
-    //    var a = JsonUtility.
-    return new GameState();
+    var json = JsonUtility.ToJson(this);
+    var copy = JsonUtility.FromJson<GameState>(json);
+    return copy;
   }
 }
 
@@ -59,6 +59,55 @@ public class Party
   // TODO Party current location.
   /// <summary>Details about the party's current quest, or null if no quest currently.</summary>
   public Quest quest;
+
+  /// <summary>
+  /// Adjusts hero stats over time.
+  /// </summary>
+  /// <param name="hoursPassed"></param>
+  public void AdjustHeroStatsOverTime(int hoursPassed)
+  {
+    heroes.ForEach(hero => {
+      for (int i = 0; i < hoursPassed; i++)
+      {
+        // HEALTH
+        // Doesn't improve over time, unless the hero is sleeping.
+        if (hero.action is AC2T_Sleep)
+          hero.health += 1f;
+
+        // HUNGER
+        // Goes down at a steady pace.
+        hero.hunger -= UnityEngine.Random.Range(3.5f, 4.5f);
+
+        // REST
+        // Doesn't normally go down; it's mostly strenuous physical activities
+        // which account for the exhaustion.
+        // But if the hero has been awake too long, or stays awake at night,
+        // they'll accumulate fatigue.
+        if (hero.sleepy) hero.rest -= UnityEngine.Random.Range(3.5f, 4.5f);
+        // Apply extra rest penalties between midnight and 7am.
+        // TODO Give characters some kind of Night Owl or Early Bird traits, which modify this.
+        if (Game.time.hourOfDay < 7)
+          hero.rest -= 1;
+
+        // MOOD
+        // Tends towards the average of the other three stats.
+        float statAverage = (hero.health + hero.hunger + hero.rest) / 3f;
+        float moodOffset = statAverage - hero.mood;
+        // Rough output: 0: 0,  5: 1.8,  20: 3.5,  50: 4.7,  100: 5.7
+        float moodDelta = Mathf.Log((Mathf.Abs(moodOffset) / 2) + 1, 2);
+        if (moodOffset < 0) moodDelta = -moodDelta;
+
+        // Other stats can only improve mood so much.
+        else if (moodOffset > 0)
+        {
+          if (hero.mood + moodDelta > 65) moodDelta = 0;
+          if (hero.mood + moodDelta > 55) moodDelta /= 2;
+        }
+
+        hero.mood += moodDelta + UnityEngine.Random.Range(-0.5f, 0.5f);
+      }
+    });
+  }
 }
 
 [Serializable]
@@ -95,10 +144,7 @@ public class Inventory
     }
   }
 
-  /// <summary>
-  /// Total amount of food (<see cref="foodFresh"/> + <see cref="foodCured"/>).
-  /// 
-  /// </summary>
+  /// <summary>Total amount of food (<see cref="foodFresh"/> + <see cref="foodCured"/>).</summary>
   public int food => _foodFresh + _foodCured;
 
   private int _firewood;
@@ -161,6 +207,9 @@ public class WorldTime
   /// <summary>Clamped between 0 and 23.999~. 0 = midnight, 12 = noon, etc.</summary>
   public float hourOfDay;
 
+  /// <summary>
+  /// True between 6am and 7pm (13 hours).
+  /// </summary>
   public bool isDaytime => hourOfDay >= 6 && hourOfDay < 19;
   public string timeOfDayDescription { get {
       if (hourOfDay < 5) return "Late Night";

@@ -125,7 +125,7 @@ public class TravelScene : MonoBehaviour, Portrait.EventsCallback
     // TODO invoke hero actions on each update, instead of on the hour mark.
     if (previousHour != (int) Game.time.hourOfDay)
     {
-      Game.heroes.ForEach(it => it.UpdateStatsAtEndOfHour());
+      Game.party.AdjustHeroStatsOverTime(hoursPassed: 1);
     }
 
     // Update UI to reflect party and journey state.
@@ -241,7 +241,9 @@ public class TravelScene : MonoBehaviour, Portrait.EventsCallback
 
     // Show available actions.
     var actions = ActionManager.GetTravelActionsFor(portrait.character as Hero, Game.state);
-    var options = actions.Select(it => it.ToOption()).ToList();
+    var options = actions
+      .Select(it => it.ToOption(portrait.character as Hero, Game.state))
+      .ToList();
     taskButtons.Show(options, (option, index) => {
       if (selectedPortrait == null)
         throw new System.Exception("Clicked on an action, but there's no hero selected!");

@@ -22,7 +22,6 @@ public class TravelUi : MonoBehaviour
   [SerializeField] private TMPro.TMP_Text destinationText;
   [SerializeField] private TMPro.TMP_Text journeyDurationText;
   [SerializeField] private GameObject arriveButton;
-  [SerializeField] private TravelInventoryUi inventoryUi;
 
   private string speed;
 
@@ -40,15 +39,6 @@ public class TravelUi : MonoBehaviour
 
     SetState(State.NONE);
     SetTime(day, timeOfDay);
-
-    Game.party.inventory.onInventoryChanged += inventoryUi.UpdateInventoryUi;
-    inventoryUi.UpdateInventoryUi(Game.party.inventory);
-  }
-
-  private void OnDisable()
-  {
-    if (Game.party?.inventory != null && inventoryUi != null)
-      Game.party.inventory.onInventoryChanged -= inventoryUi.UpdateInventoryUi;
   }
 
   public void SetState(State state)
