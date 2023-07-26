@@ -1,7 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
-public class CombatPortrait : MonoBehaviour
+public class CombatPortrait : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
   private static readonly Color defenseFillPositive = new Color(0.754717f, 0.6835152f, 0.5233179f);
   private static readonly Color defenseFillNegative = new Color(0.5754717f, 0.122152f, 0.122152f);
@@ -11,8 +12,13 @@ public class CombatPortrait : MonoBehaviour
   [SerializeField] private Image defenseModifierIcon;
   [SerializeField] private TMPro.TMP_Text defenseModifierText;
 
-  public void Initialise(float? health = null, float? condition = null, float? defenseModifier = null)
+  private Combatant combatant;
+  private Combat.PortraitCallbacks callbacks;
+
+  public void Initialise(Combatant combatant, Combat.PortraitCallbacks callbacks, float? health = null, float? condition = null, float? defenseModifier = null)
   {
+    this.combatant = combatant;
+
     if (health.HasValue)
       healthBar.value = health.Value;
     healthBar.gameObject.SetActive(health.HasValue);
@@ -24,6 +30,8 @@ public class CombatPortrait : MonoBehaviour
     if (defenseModifier.HasValue)
       SetDefenseModifier(defenseModifier.Value);
     this.defenseModifierIcon.gameObject.SetActive(defenseModifier.HasValue);
+
+    this.callbacks = callbacks;
   }
 
   public void ShowHealthBar(bool show) => healthBar.gameObject.SetActive(show);
@@ -49,4 +57,13 @@ public class CombatPortrait : MonoBehaviour
       defenseModifierIcon.gameObject.SetActive(false);
     }
   }
+
+  public void OnPointerClick(PointerEventData eventData)
+    => callbacks.OnClick(combatant);
+
+  public void OnPointerExit(PointerEventData eventData)
+    => callbacks.OnHoverExit(combatant);
+
+  public void OnPointerEnter(PointerEventData eventData)
+    => callbacks.OnHoverEnter(combatant);
 }

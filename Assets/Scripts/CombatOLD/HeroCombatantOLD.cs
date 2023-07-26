@@ -4,9 +4,9 @@ using UnityEngine;
 using StatusEffect = CombatOLD.StatusEffect;
 
 /// <summary>
-/// <see cref="Combatant"/>-specific logic for a <see cref="Hero"/>. See <see cref="EnemyCombatantOLD"/> for enemy counterpart.
+/// <see cref="CombatantOLD"/>-specific logic for a <see cref="Hero"/>. See <see cref="EnemyCombatantOLD"/> for enemy counterpart.
 /// </summary>
-public class HeroCombatant : Combatant
+public class HeroCombatantOLD : CombatantOLD
 {
   public Hero hero;
   public override bool isHero => true;
@@ -15,7 +15,7 @@ public class HeroCombatant : Combatant
   public override float attackBase => hero.totalSkill; // TODO Add attack skill.
   public override float defenseBase => hero.totalSkill; // TODO Add defense skill.
 
-  public HeroCombatant(Hero hero, int maxBlock = 100)
+  public HeroCombatantOLD(Hero hero, int maxBlock = 100)
   {
     this.hero = hero;
     healthBase = 100;
@@ -30,12 +30,12 @@ public class HeroCombatant : Combatant
     this.portrait = portrait;
     portrait.Initialise(hero, Portrait.Interactions.CLICKABLE);
     combatPortrait = portrait.GetComponent<CombatPortrait>();
-    combatPortrait.Initialise(
-      this,
-      callbacks,
-      health: hero.health / 100f,
-      condition: hero.totalSkill / 100f,
-      defenseModifier: null);
+  //  combatPortrait.Initialise(
+   //   this,
+   //   callbacks,
+   //   health: hero.health / 100f,
+   //   condition: hero.totalSkill / 100f,
+    //  defenseModifier: null);
   }
 
   public override void SetAction(CombatAction action)
@@ -44,23 +44,27 @@ public class HeroCombatant : Combatant
     portrait.SetAction(action.name);
   }
 
-  public override CombatAction ChooseAction(Combat state)
+  public override CombatantActionOLD ChooseAction(List<CombatantOLD> heroes, List<CombatantOLD> enemies)
+  {
+    return new CombatantActionOLD.Attack()
+    {
+      origin = this,
+      target = enemies.Random()
+    };
+  }
+
+  public override CombatAction GetAction(Combat state)
   {
     // TODO
     return new CombatAction.Attack()
     {
-      origin = this
+      //origin = this
     };
   }
 
   public List<CombatAction> GetActions()
   {
     // TODO
-    return new List<CombatAction>()
-    {
-      new CombatAction.Attack() { origin = this },
-      new CombatActionsKnight.Shieldbreaker() { origin = this },
-      new CombatAction.Attack() { origin = this },
-    };
+    return null;
   }
 }

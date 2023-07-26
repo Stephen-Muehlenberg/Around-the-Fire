@@ -7,7 +7,7 @@ using StatusEffect = CombatOLD.StatusEffect;
 /// Enemy <see cref="CombatantOLD"/>s. See <see cref="HeroCombatantOLD"/> for the player-controlled
 /// counterpart.
 /// </summary>
-public class EnemyCombatant : Combatant
+public class EnemyCombatantOLD : CombatantOLD
 {
   public EnemyArchetype archetype;
   public override bool isHero => false;
@@ -16,7 +16,7 @@ public class EnemyCombatant : Combatant
   public override float attackBase => archetype.attack;
   public override float defenseBase => archetype.defense;
 
-  public EnemyCombatant(EnemyArchetype archetype)
+  public EnemyCombatantOLD(EnemyArchetype archetype)
   {
     this.archetype = archetype;
     healthBase = archetype.health;
@@ -37,12 +37,12 @@ public class EnemyCombatant : Combatant
     };
     portrait.Initialise(enemyChar);
     combatPortrait = portrait.GetComponent<CombatPortrait>();
-    combatPortrait.Initialise(
-      this,
-      callbacks,
-      health: 1,
-      condition: 1,
-      defenseModifier: null);
+   // combatPortrait.Initialise(
+   //   this,
+   //   callbacks,
+   //   health: 1,
+   //   condition: 1,
+   //   defenseModifier: null);
   }
 
   public override void SetAction(CombatAction action)
@@ -50,12 +50,21 @@ public class EnemyCombatant : Combatant
     this.action = action;
   }
 
-  public override CombatAction ChooseAction(Combat state)
+  public override CombatantActionOLD ChooseAction(List<CombatantOLD> heroes, List<CombatantOLD> enemies)
+  {
+    return new CombatantActionOLD.Attack()
+    {
+      origin = this,
+      target = heroes.Random()
+    };
+  }
+
+  public override CombatAction GetAction(Combat state)
   {
     // TODO
     return new CombatAction.Attack()
     {
-      origin = this
+     // origin = this
     };
   }
 }

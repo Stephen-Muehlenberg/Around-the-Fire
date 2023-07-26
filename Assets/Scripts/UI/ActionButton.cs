@@ -20,11 +20,12 @@ public class ActionButton : MonoBehaviour
 
   public void Set(Content content)
   {
+    Debug.Log(name + ".ActionButton.Set() content ? " + (content != null));
     gameObject.SetActive(content != null);
     if (content == null) return;
 
     title.text = content.text;
-    hoverText.text = content.hoverText;
+  //  hoverText.text = content.hoverText;
   //  unavailableUI.SetActive(content.state > 0);
  //   unavailableReason.text = content.state switch
  //   {

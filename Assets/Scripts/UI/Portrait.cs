@@ -24,6 +24,7 @@ public class Portrait : MonoBehaviour,
   public bool selectOnClick;
   public bool highlighted { get; private set; }
   public bool selected { get; private set; }
+  public Sprite sprite => portrait.sprite;
 
   public void Initialise(Character character, Interactions interactions = Interactions.NONE, EventsCallback callbacks = null)
   {
@@ -35,6 +36,8 @@ public class Portrait : MonoBehaviour,
     SetHighlighted(false);
     SetSelected(false);
   }
+
+  public void ShowName(bool show) => nameText.gameObject.SetActive(show);
 
   public void SetAction(string action)
   {
@@ -48,6 +51,7 @@ public class Portrait : MonoBehaviour,
   {
     this.highlighted = highlighted;
     highlight.gameObject.SetActive(highlighted);
+    actionText.color = highlighted ? Color.yellow : Color.white;
   }
 
   public void SetSelected(bool selected)

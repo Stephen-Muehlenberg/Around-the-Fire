@@ -17,10 +17,46 @@ public class StatPopup : MonoBehaviour
 
   private int directionMultiplier;
 
+  /// <summary>
+  /// Shows a stat changed popup above <paramref name="origin"/>, indicating <paramref name="stat"/>
+  /// has changed by <paramref name="delta"/> amount.
+  /// </summary>
+  /// <param name="countOffset">Offsets the popup's position by one popup's worth of height. Use if need to show multiple popups at once without overlapping.</param>
   public static void Show(Portrait origin, Hero.Stat stat, int delta, int countOffset = 0)
   {
-    if (delta == 0) return;
+    if (origin == null) throw new System.Exception("Tried to show a StatPopup but the origin portrait was null.");
+    if (delta == 0) {
+      Debug.LogWarning("Tried to show a StatPopup with a value of 0. This request has been ignored.");
+      return;
+    }
+    Show(origin: origin,
+      text: DeltaToText(delta),
+      color: delta > 0 ? Color.green : Color.red,
+      spriteIndex: (int) stat,
+      countOffset: countOffset,
+      animateUp: true);
+  }
 
+  /// <summary>
+  /// Shows <paramref name="text"/> message popup above <paramref name="origin"/>.
+  /// </summary>
+  /// <param name="countOffset">Offsets the popup's position by one popup's worth of height. Use if need to show multiple popups at once without overlapping.</param>
+  /// <param name="animateUp">Determines the direction of the popup animation. True = up, false = down.</param>
+  public static void Show(Portrait origin, string text, Color? color = null, int countOffset = 0, bool animateUp = true)
+  {
+    if (origin == null) throw new System.Exception("Tried to show a StatPopup but the origin portrait was null.");
+    if (text == null || text.Length == 0)
+    {
+      Debug.LogWarning("Tried to show a StatPopup with null or empty text. This request has been ignored.");
+      return;
+    }
+    Show(origin, text, color, spriteIndex: null, countOffset, animateUp);
+  }
+
+  private static void Show(
+    Portrait origin, string text, Color? color,
+    int? spriteIndex, int countOffset, bool animateUp)
+  {
     // TODO Use object pooling.
     if (prefab == null)
       prefab = Resources.Load<GameObject>("Stat Popup");
@@ -29,12 +65,15 @@ public class StatPopup : MonoBehaviour
     instance.transform.position = origin.transform.position + (Vector3.up * (140 + (countOffset * 45)));
 
     var statPopup = instance.GetComponent<StatPopup>();
-    statPopup.image.sprite = statPopup.statSprites[(int) stat];
-    statPopup.text.text = DeltaToText(delta);
-    statPopup.text.color = delta > 0 ? Color.green : Color.red;
-    statPopup.directionMultiplier = delta > 0 ? 1 : -1;
+    statPopup.image.enabled = spriteIndex != null;
+    if (spriteIndex != null)
+      statPopup.image.sprite = statPopup.statSprites[(int) spriteIndex];
+    statPopup.text.text = text;
+    if (color.HasValue)
+      statPopup.text.color = color.Value;
+    statPopup.directionMultiplier = animateUp ? 1 : -1;
 
-    Destroy(instance.gameObject, TIME_TO_LIVE);
+    Destroy(instance, TIME_TO_LIVE);
   }
 
   private static string DeltaToText(int delta)

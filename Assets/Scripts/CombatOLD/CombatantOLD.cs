@@ -5,7 +5,7 @@ using UnityEngine;
 /// A participant in a <see cref="Combat"/>. Either a <see cref="HeroCombatant"/>
 /// or a <see cref="EnemyCombatantOLD"/>.
 /// </summary>
-public abstract class Combatant
+public abstract class CombatantOLD
 {
   abstract public bool isHero { get; }
   abstract public bool isEnemy { get; }
@@ -50,7 +50,7 @@ public abstract class Combatant
         block = 0;
         action = new CombatAction.Stagger()
         {
-          origin = this
+        //  origin = this
         };
       }
       combatPortrait.SetCondition(block / blockMax);
@@ -76,7 +76,8 @@ public abstract class Combatant
 
   abstract public void SetPortrait(Portrait portrait, Combat.PortraitCallbacks callbacks);
 
-  abstract public CombatAction ChooseAction(Combat state);
+  abstract public CombatantActionOLD ChooseAction(List<CombatantOLD> heroes, List<CombatantOLD> enemies);
+  abstract public CombatAction GetAction(Combat state);
 
   public void TakeHit(float attackSuccess)
   {

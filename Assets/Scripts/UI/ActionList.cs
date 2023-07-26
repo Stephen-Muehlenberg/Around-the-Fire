@@ -10,6 +10,7 @@ public class ActionList : MonoBehaviour
 
   public void Show(List<ActionButton.Content> content, Action<int> onClickCallback)
   {
+    Debug.Log("ActionList.Show(" + content.Count + ")");
     this.onClickCallback = onClickCallback;
 
     // Instantiate new buttons if we don't have enough.

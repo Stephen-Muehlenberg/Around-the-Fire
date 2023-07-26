@@ -21,7 +21,10 @@ public class SelectOptionUI : MonoBehaviour
       Dismiss();
   }
 
-  public void Show(List<Option> options, Action<Option, int> onOptionSelectedCallback, bool dismissOnSelection = true)
+  public void Show(
+    List<Option> options,
+    Action<Option, int> onOptionSelectedCallback,
+    bool dismissOnSelection = true)
   {
     if (options.Count > buttons.Length)
       throw new Exception("Not enough buttons in the UI! Required " + options.Count + " but have " + buttons.Length + ".");

@@ -2,36 +2,34 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Events;
-using UnityEngine.UI;
+using static UnityEngine.UI.Image;
 
 /// <summary>
 /// Manages combat logic.
 /// </summary>
-public class Combat : MonoBehaviour
+public class Combat : MonoBehaviour, Combat.PortraitCallbacks, Portrait.EventsCallback
 {
+  private const float actionPointsPerSecond = 0.333f;
+
   [SerializeField] private EncounterPanel messagePanel;
-  [SerializeField] private SelectOptionUI optionList;
-  [SerializeField] private CombatUI ui;
+  [SerializeField] private SelectOptionUI actionList;
+  [SerializeField] private CombatZonesUi portraitUi;
+  [SerializeField] private CombatInitiativeUi initiativeUi;
+  [SerializeField] private ActionPointUi actionPointUi;
   [SerializeField] private Transform heroPortraitParent;
   [SerializeField] private Transform enemyPortraitParent;
   [SerializeField] private GameObject portraitPrefab;
 
-  private List<Combatant> heroes;
-  private List<Combatant> enemies;
-  private List<Combatant> combatants;
-  private List<CombatantAction> upcomingActions;
+  public List<Combatant> combatants;
+  public List<Combatant> heroes;
+  public List<Combatant> enemies;
 
-  public class StatusEffect
-  {
-    public enum Expiration { Never, AfterTurn }
-
-    public string name;
-    public int amount;
-    public Expiration expiration;
-    public int expirationValue;
-  }
+  public Combatant currentCombatant;
+  public Combatant selectedCombatant;
+  public float actionPoints;
+  private Coroutine actionDelayCoroutine;
 
   private void Start()
   {
@@ -41,136 +39,46 @@ public class Combat : MonoBehaviour
       .ToList();
     enemies = GetEnemies();
 
-    // Randomize their physical position.
-    heroes.Shuffle().ForEachIndexed((hero, i) => hero.position = i);
-    enemies.Shuffle().ForEachIndexed((enemy, i) => enemy.position = i);
-
     // Add them all to the master combatant list.
     combatants = new List<Combatant>(heroes.Count + enemies.Count);
     combatants.AddRange(heroes);
     combatants.AddRange(enemies);
+    
+    // Random initiative order.
+    combatants = combatants.Shuffle().ToList();
+
+    // Random battlefield positions.
+    combatants.ForEach(it => it.position = Random.value > 0.5f ? 0 : 1);
+
+    // Set some starting action points.
+    actionPoints = 1.5f;
 
     // Create UI portraits for each combatant.
     combatants.ForEach(combatant => {
       var portrait = Instantiate(portraitPrefab, combatant.isHero ? heroPortraitParent : enemyPortraitParent);
-      combatant.SetPortrait(portrait.GetComponent<Portrait>());
+      combatant.SetPortrait(portrait.GetComponent<Portrait>(), null);
+      if (combatant.isHero)
+        combatant.portrait.Initialise((combatant as HeroCombatant).hero, Portrait.Interactions.CLICKABLE, this);
       combatant.portrait.SetAction(null);
+      combatant.portrait.ShowName(false);
     });
 
-    // Shuffle the list (temp random initiative).
-    combatants = combatants.Shuffle().ToList();
+    // Show combatant portraits.
+    portraitUi.Initialise(
+      heroes.Where(it => it.position == 0).Select(it => it.combatPortrait).ToList(),
+      heroes.Where(it => it.position == 1).Select(it => it.combatPortrait).ToList(),
+      enemies.Where(it => it.position == 1).Select(it => it.combatPortrait).ToList(),
+      enemies.Where(it => it.position == 0).Select(it => it.combatPortrait).ToList()
+    );
 
-    ui.Initialise();
+    // Set initial / default actions.
+    combatants.ForEach(it =>
+      it.SetAction(new CombatAction.Attack() { origin = it }
+    ));
 
     // Wait a moment. Bit of a hack: the layout groups will not initialise
     // in the first frame, so wait a frame before we start accessing their position.
     WaitThenStart();
-  }
-
-  private async void WaitThenStart()
-  {
-    await Task.Delay(100);
-    StartTurn();
-  }
-
-  private async void StartTurn()
-  {
-    // Get next 3 actions and show them to the player.
-    upcomingActions = new(3);
-    string message = "";
-    for (int i = 0; i < 3; i++)
-    {
-      // Get action.
-      upcomingActions.Add(combatants[i].GetAction(heroes, enemies));
-
-      // Show origin.
-      ui.ShowHighlight(i, upcomingActions[i].origin);
-      await Task.Delay(250);
-
-      // Show target.
-      ui.ShowTarget(i, upcomingActions[i].target);
-
-      string m = upcomingActions[i].origin.name + " targets " + upcomingActions[i].target.name + "!";
-      message += m;
-      if (i < 2) message += '\n';
-      Debug.Log(m);
-
-      await Task.Delay(600);
-    }
-
-    var options = new List<Option>()
-    {
-      new Option() { title = "Fight", hoverDescription = "+5 to all heroes' stats." },
-      new Option() { title = "Defend", hoverDescription = "+20 to defense, -20 to attack." },
-      new Option() { title = "Focus Attacks", hoverDescription = "All heroes focus on a single target. +10 to attack." },
-    };
-    optionList.Show(options, OnPlayerCommandSelected);
-  }
-
-  private void OnPlayerCommandSelected(Option option, int index)
-  {
-    switch (option.title) {
-      case "Encourage":
-
-        break;
-    };
-
-    ResolveActions(upcomingActions, OnActionsCompleted);
-  }
-
-  private async void ResolveActions(List<CombatantAction> actions, UnityAction onActionsComplete)
-  {
-    for (int i = 0; i < actions.Count; i++)
-    {
-      if (CombatCompleted()) break;
-      await ResolveAction(actions[0]);
-      await Task.Delay(500);
-      ui.HideHighlight(i);
-      ui.HideTarget(i);
-    }
-    onActionsComplete();
-  }
-
-  private async Task ResolveAction(CombatantAction action)
-  {
-    if (action.origin.health <= 0)
-    {
-      Debug.Log(action.origin.name + " is KO'd. Skipping turn...");
-    } else
-    {
-      if (action.target.health <= 0)
-      {
-        Debug.Log(action.origin.name + "'s target is already defeated. Skipping turn...");
-      } else
-      {
-        action.Resolve();
-
-        if (action.target.health <= 0)
-        {
-          Debug.Log(action.target.name + " defeated!");
-          combatants.Remove(action.target);
-        }
-      }
-    }
-
-    await Task.Delay(1000);
-  }
-
-  private bool CombatCompleted()
-  {
-    return !combatants.Any(it => it.isHero && it.health > 0)
-      || !combatants.Any(it => it.isEnemy && it.health > 0);
-  }
-
-  private void OnActionsCompleted()
-  {
-    // Move previous combatants' initiative to end of initiative order.
-    combatants.RemoveRange(0, 3);
-    for (int i = 0; i < 3; i++)
-      if (upcomingActions[i].origin.health > 0)
-        combatants.Add(upcomingActions[i].origin);
-
-    StartTurn();
   }
 
   private List<Combatant> GetEnemies()
@@ -179,26 +87,146 @@ public class Combat : MonoBehaviour
     var skeletonFighter = new EnemyArchetype()
     {
       name = "Skeleton Fighter",
+      health = 20,
+      block = 60,
       attack = 55,
       defense = 55,
-      health = 1,
       icon = "skeleton_halberd"
     };
     var skeletonArcher = new EnemyArchetype()
     {
       name = "Skeleton Archer",
+      health = 20,
+      block = 25,
       attack = 45,
       defense = 45,
-      health = 1,
       icon = "skeleton_crossbow"
     };
     return new List<Combatant>()
     {
       new EnemyCombatant(skeletonFighter),
       new EnemyCombatant(skeletonFighter),
+      new EnemyCombatant(skeletonFighter),
       new EnemyCombatant(skeletonArcher),
       new EnemyCombatant(skeletonArcher),
     };
+  }
+
+  private async void WaitThenStart()
+  {
+    await Task.Delay(100);
+    StartTurn();
+  }
+
+  private void StartTurn()
+  {
+    // Update initiative tracker.
+    var nextCombatantsPortraits = combatants
+      .Take(3)
+      .Select(it => it.portrait.sprite)
+      .ToList();
+    initiativeUi.Show(nextCombatantsPortraits);
+
+    // Show next combatant and action.
+    currentCombatant = combatants.First();
+    ShowNextAction(currentCombatant, currentCombatant.action);
+
+    actionDelayCoroutine = StartCoroutine(WaitThenPerformAction());
+  }
+
+  private void ShowNextAction(Combatant combatant, CombatAction action)
+  {
+    combatant.portrait.SetAction(action.name);
+    combatant.portrait.SetHighlighted(true);
+  }
+
+  private IEnumerator WaitThenPerformAction()
+  {
+    ShowActionName(currentCombatant.action.name);
+    HighlightOrigin(currentCombatant);
+    List<Combatant> targets = null; // TODO get targets from action
+    HighlightTargets(targets);
+
+    float countdownRemaining = 1.5f;
+    while (countdownRemaining > 0)
+    {
+      ShowCountdown(countdownRemaining);
+      countdownRemaining -= Time.deltaTime;
+      actionPoints += Time.deltaTime * actionPointsPerSecond;
+      if (actionPoints > 3) actionPoints = 3;
+      actionPointUi.ShowAP(actionPoints);
+      yield return null;
+    }
+
+    PerformAction();
+  }
+
+  private void ShowActionName(string name)
+  {
+    // TODO
+  }
+
+  private void HighlightOrigin(Combatant origin)
+  {
+    // TODO
+  }
+
+  private void HighlightTargets(List<Combatant> targets)
+  {
+    // TODO
+  }
+
+  private void ShowCountdown(float countdownRemaining)
+  {
+    // TODO
+  }
+
+  private async void PerformAction()
+  {
+    await currentCombatant.action.Resolve(this);
+
+    // Delete any defeated enemies
+    for (int i = enemies.Count - 1; i >= 0; i--)
+      if (enemies[i].health == 0)
+        enemies.RemoveAt(i);
+    for (int i = combatants.Count - 1; i >= 0; i--)
+      if (combatants[i].isEnemy && combatants[i].health == 0)
+      {
+        RemoveEnemy(combatants[i]);
+        combatants.RemoveAt(i);
+      }
+
+    if (CombatCompleted())
+      EndCombat();
+    else
+      EndTurn();
+  }
+
+  private void RemoveEnemy(Combatant enemy)
+  {
+    portraitUi.RemovePortrait(enemy.combatPortrait);
+  }
+
+  private void EndTurn()
+  {
+    if (currentCombatant.isEnemy)
+      currentCombatant.portrait.SetAction(null);
+    currentCombatant.portrait.SetHighlighted(false);
+
+    combatants.RemoveAt(0);
+    combatants.Add(currentCombatant);
+    StartTurn();
+  }
+
+  private void InteruptAction()
+  {
+
+  }
+
+  private bool CombatCompleted()
+  {
+    return !heroes.Any(it => it.health > 0)
+      || !enemies.Any(it => it.health > 0);
   }
 
   private void EndCombat()
@@ -222,5 +250,57 @@ public class Combat : MonoBehaviour
 
     messagePanel.Show(message, (_)
       => UnityEngine.SceneManagement.SceneManager.LoadScene("Travel"));
+  }
+
+  public void OnHoverEnter(Combatant combatant)
+  {
+  }
+
+  public void OnHoverExit(Combatant combatant)
+  {
+  }
+
+  private List<(CombatAction, ActionButton.Content)> currentActionsAndButtons;
+
+  public void OnClick(Combatant combatant)
+  {
+    if (combatant.isHero)
+    {
+      var actions = (combatant as HeroCombatant).GetActions();
+
+      List<Option> actionButtons = actions
+        .Select(action => new Option() {
+            title = action.name,
+            reference = action
+          })
+        .ToList();
+
+      actionList.Show(
+        options: actionButtons,
+        onOptionSelectedCallback: (Option o, int i) => {
+          var selectedAction = o.reference as CombatAction;
+          selectedAction.origin.SetAction(selectedAction);
+        },
+        dismissOnSelection: true);
+    }
+    else
+    {
+      actionList.Dismiss();
+    }
+  }
+
+  public interface PortraitCallbacks
+  {
+    public void OnHoverEnter(Combatant combatant);
+    public void OnHoverExit(Combatant combatant);
+    public void OnClick(Combatant combatant);
+  }
+
+  public List<Combatant> GetOpponantsWithinRangeOf(Combatant thisCombatant)
+  {
+    var opponents = thisCombatant.isHero ? enemies : heroes;
+    return opponents.Any(it => it.position == 1)
+      ? opponents.Where(it => it.position == 1).ToList()
+      : opponents;
   }
 }
