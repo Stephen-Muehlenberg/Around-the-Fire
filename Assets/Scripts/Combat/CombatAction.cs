@@ -6,14 +6,31 @@ using UnityEngine;
 
 public abstract class CombatAction
 {
+  public class Targets
+  {
+    public List<Combatant> enemyTargets = new();
+    public List<Combatant> allyTargets = new();
+
+    public Targets(params Combatant[] enemyTargets)
+    {
+      this.enemyTargets.AddRange(enemyTargets);
+    }
+  }
+
   abstract public string name { get; }
   public Combatant origin;
 
+  /// <summary>
+  /// Returns targets of the attack to be highlighted.
+  /// </summary>
+  public abstract Targets GetTargets(Combat state);
   public abstract Task Resolve(Combat state);
 
   public class Stagger : CombatAction
   {
     public override string name => "Stagger";
+
+    public override Targets GetTargets(Combat state) => new();
 
     public override async Task Resolve(Combat state)
     {
@@ -22,9 +39,6 @@ public abstract class CombatAction
       origin.action = origin.ChooseAction(state);
      
       StatPopup.Show(origin.portrait, "Recovered", color: Color.white);
-
-      // Pause for a moment
-      await Task.Delay(1200);
     }
   }
 
@@ -33,14 +47,14 @@ public abstract class CombatAction
     public override string name => "Attack";
     public Combatant target;
 
-    public override async Task Resolve(Combat state)
+    public override Targets GetTargets(Combat state)
     {
       // Get opponents in reach.
       var opponentsInReach = state.GetOpponantsWithinRangeOf(origin);
 
       // If there are no opponents in reach, pass turn.
       if (opponentsInReach.Count == 0)
-        return;
+        return new Targets();
 
       // If previously attacked, and previous target is still
       // in range, continue attacking that target.
@@ -52,6 +66,11 @@ public abstract class CombatAction
       } else
         target = opponentsInReach.Random();
 
+      return new Targets(target);
+    }
+
+    public override async Task Resolve(Combat state)
+    {
       // Hit effect info.
       int minDamage = 10; // Temp placeholder value
       int maxDamage = 20; // Temp placeholder value
@@ -74,9 +93,6 @@ public abstract class CombatAction
 
       // Inflict damage
       target.TakeDamage(Mathf.RoundToInt(damage), message);
-
-      // Pause for a moment
-      await Task.Delay(1200);
     }
   }
 }

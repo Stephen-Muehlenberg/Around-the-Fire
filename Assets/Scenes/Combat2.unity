@@ -6754,7 +6754,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1714627297
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7918,7 +7918,6 @@ MonoBehaviour:
   messagePanel: {fileID: 219045133}
   actionList: {fileID: 734113561}
   portraitUi: {fileID: 790881967}
-  initiativeUi: {fileID: 1714627297}
   actionPointUi: {fileID: 362599955}
   heroPortraitParent: {fileID: 0}
   enemyPortraitParent: {fileID: 0}

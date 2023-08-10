@@ -51,7 +51,11 @@ public class Portrait : MonoBehaviour,
   {
     this.highlighted = highlighted;
     highlight.gameObject.SetActive(highlighted);
-    actionText.color = highlighted ? Color.yellow : Color.white;
+  }
+
+  public void SetActionHighlighted(bool actionHighlighted)
+  {
+    actionText.color = actionHighlighted ? Color.yellow : Color.white;
   }
 
   public void SetSelected(bool selected)

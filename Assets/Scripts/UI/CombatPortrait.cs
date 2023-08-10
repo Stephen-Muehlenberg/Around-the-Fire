@@ -11,6 +11,7 @@ public class CombatPortrait : MonoBehaviour, IPointerEnterHandler, IPointerExitH
   [SerializeField] private Slider conditionBar;
   [SerializeField] private Image defenseModifierIcon;
   [SerializeField] private TMPro.TMP_Text defenseModifierText;
+  [SerializeField] private GameObject crosshairs;
 
   private Combatant combatant;
   private Combat.PortraitCallbacks callbacks;
@@ -57,6 +58,8 @@ public class CombatPortrait : MonoBehaviour, IPointerEnterHandler, IPointerExitH
       defenseModifierIcon.gameObject.SetActive(false);
     }
   }
+
+  public void ShowCrosshairs(bool show) => crosshairs.SetActive(show);
 
   public void OnPointerClick(PointerEventData eventData)
     => callbacks.OnClick(combatant);

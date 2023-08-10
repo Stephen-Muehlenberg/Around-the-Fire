@@ -2,9 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Unity.VisualScripting;
 using UnityEngine;
-using static UnityEngine.UI.Image;
 
 /// <summary>
 /// Manages combat logic.
@@ -16,7 +14,6 @@ public class Combat : MonoBehaviour, Combat.PortraitCallbacks, Portrait.EventsCa
   [SerializeField] private EncounterPanel messagePanel;
   [SerializeField] private SelectOptionUI actionList;
   [SerializeField] private CombatZonesUi portraitUi;
-  [SerializeField] private CombatInitiativeUi initiativeUi;
   [SerializeField] private ActionPointUi actionPointUi;
   [SerializeField] private Transform heroPortraitParent;
   [SerializeField] private Transform enemyPortraitParent;
@@ -125,32 +122,25 @@ public class Combat : MonoBehaviour, Combat.PortraitCallbacks, Portrait.EventsCa
       .Take(3)
       .Select(it => it.portrait.sprite)
       .ToList();
-    initiativeUi.Show(nextCombatantsPortraits);
 
     // Show next combatant and action.
     currentCombatant = combatants.First();
-    ShowNextAction(currentCombatant, currentCombatant.action);
+    currentCombatant.portrait.SetAction(currentCombatant.action.name);
+    currentCombatant.portrait.SetActionHighlighted(true);
+
+    // Action's target
+    var targets = currentCombatant.action.GetTargets(this);
+    foreach (Combatant enemy in targets.enemyTargets)
+      enemy.combatPortrait.ShowCrosshairs(true);
 
     actionDelayCoroutine = StartCoroutine(WaitThenPerformAction());
   }
 
-  private void ShowNextAction(Combatant combatant, CombatAction action)
-  {
-    combatant.portrait.SetAction(action.name);
-    combatant.portrait.SetHighlighted(true);
-  }
-
   private IEnumerator WaitThenPerformAction()
   {
-    ShowActionName(currentCombatant.action.name);
-    HighlightOrigin(currentCombatant);
-    List<Combatant> targets = null; // TODO get targets from action
-    HighlightTargets(targets);
-
     float countdownRemaining = 1.5f;
     while (countdownRemaining > 0)
     {
-      ShowCountdown(countdownRemaining);
       countdownRemaining -= Time.deltaTime;
       actionPoints += Time.deltaTime * actionPointsPerSecond;
       if (actionPoints > 3) actionPoints = 3;
@@ -159,30 +149,26 @@ public class Combat : MonoBehaviour, Combat.PortraitCallbacks, Portrait.EventsCa
     }
 
     PerformAction();
-  }
 
-  private void ShowActionName(string name)
-  {
-    // TODO
-  }
+    // Pause for a moment after completing the action.
+    yield return new WaitForSeconds(1.2f);
 
-  private void HighlightOrigin(Combatant origin)
-  {
-    // TODO
-  }
+    // Unhilight current combatant.
+    currentCombatant.portrait.SetActionHighlighted(false);
 
-  private void HighlightTargets(List<Combatant> targets)
-  {
-    // TODO
-  }
-
-  private void ShowCountdown(float countdownRemaining)
-  {
-    // TODO
+    if (CombatCompleted())
+      EndCombat();
+    else
+      EndTurn();
   }
 
   private async void PerformAction()
   {
+    // Hide any crosshairs.
+    foreach (Combatant combatant in combatants)
+      combatant.combatPortrait.ShowCrosshairs(false);
+
+    // Resovle the action.
     await currentCombatant.action.Resolve(this);
 
     // Delete any defeated enemies
@@ -195,11 +181,6 @@ public class Combat : MonoBehaviour, Combat.PortraitCallbacks, Portrait.EventsCa
         RemoveEnemy(combatants[i]);
         combatants.RemoveAt(i);
       }
-
-    if (CombatCompleted())
-      EndCombat();
-    else
-      EndTurn();
   }
 
   private void RemoveEnemy(Combatant enemy)
