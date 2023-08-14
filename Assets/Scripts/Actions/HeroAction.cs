@@ -150,14 +150,16 @@ public abstract class HeroAction
     if (hiddenRest != null) hero.rest += hiddenRest.Value;
   }
 
-  public Option ToOption(Hero hero, GameState context)
+  public Option ToOption(Hero hero, GameState context, Availability? availability = Availability.AVAILABLE)
   {
     return new Option()
     {
       title = this.title,
       // TODO icon = ???
       hoverDescription = this.description,
-      unavailable = AvailableFor(hero, context) != Availability.AVAILABLE,
+      unavailable = availability.HasValue ?
+        availability != Availability.AVAILABLE
+        : AvailableFor(hero, context) != Availability.AVAILABLE,
       // TODO unavailable = ???
       // TODO text overlay = ???
       // TODO bottom text = ???

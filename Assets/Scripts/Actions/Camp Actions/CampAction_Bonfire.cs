@@ -1,6 +1,11 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
+
+using HeroCampInfo = CampScene.HeroCampInfo;
 
 public class CampAction_Bonfire : CampAction
 {
@@ -10,12 +15,14 @@ public class CampAction_Bonfire : CampAction
   public override CampScene.Location location => CampScene.Location.Fire;
   public override int hours => 1;
 
-  public override Availability AvailableFor(Hero hero, GameState context)
+  public override Availability AvailableFor(HeroCampInfo hero, List<HeroCampInfo> party, GameState context)
   {
     if (context.camp.fire == Camp.FireState.LARGE)
       return Availability.HIDDEN;
     if (context.party.inventory.firewood < (3 - (int) context.camp.fire) * 4)
       return Availability.NOT_ENOUGH_WOOD;
+    if (party.Any(it => it.action is CampAction_Bonfire))
+      return Availability.UNAVAILABLE;
     return Availability.AVAILABLE;
   }
 

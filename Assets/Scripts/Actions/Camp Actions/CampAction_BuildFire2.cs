@@ -3,6 +3,9 @@ using System.Collections;
 using UnityEngine;
 using System.Linq;
 
+using HeroCampInfo = CampScene.HeroCampInfo;
+using System.Collections.Generic;
+
 public class CampAction_BuildFire2 : CampAction
 {
   public override string title => "Build a Campfire";
@@ -10,13 +13,13 @@ public class CampAction_BuildFire2 : CampAction
   public override string description => "Make a fire for cooking and relaxing.";
   public override CampScene.Location location => CampScene.Location.Fire;
 
-  public override Availability AvailableFor(Hero hero, GameState context)
+  public override Availability AvailableFor(HeroCampInfo hero, List<HeroCampInfo> party, GameState context)
   {
     if (context.camp.fire != Camp.FireState.NONE)
       return Availability.UNAVAILABLE;
     if (context.party.inventory.firewood < 4)
       return Availability.NOT_ENOUGH_WOOD;
-    if (context.party.heroes.Any(hero => hero.action is CampAction_BuildFire2))
+    if (party.Any(hero => hero.action is CampAction_BuildFire2))
       return Availability.UNAVAILABLE;
     return Availability.AVAILABLE;
   }

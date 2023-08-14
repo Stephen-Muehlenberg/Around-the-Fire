@@ -14,7 +14,7 @@ public class CampScene : MonoBehaviour, Portrait.EventsCallback
   public enum Location { Around, Fire, Tent, Supplies, Clearing, Forest }
 
   /// <summary>All the camp-scene-relevant info for a single hero, bundled together.</summary>
-  private class HeroCampInfo
+  public class HeroCampInfo
   {
     public Hero hero;
     public HeroPortrait portrait;
@@ -33,7 +33,7 @@ public class CampScene : MonoBehaviour, Portrait.EventsCallback
   [SerializeField] private SelectOptionUI actionButtons;
   [SerializeField] private GameObject confirmActionsButton;
 
-  private Dictionary<Hero, HeroCampInfo> heroInfo;
+  private List<HeroCampInfo> heroes;
   private HeroCampInfo selectedHero;
   private GameState previousGameState;
   private readonly CampActionManager actionManager = new();
@@ -47,7 +47,7 @@ public class CampScene : MonoBehaviour, Portrait.EventsCallback
     FireEffects.SetState(Game.camp.fire);
 
     // Initialise heroes.
-    heroInfo = new Dictionary<Hero, HeroCampInfo>(Game.heroes.Count);
+    heroes = new(Game.heroes.Count);
     Game.heroes.ForEach(hero =>
     {
       var portrait = Instantiate(portraitPrefab).GetComponent<HeroPortrait>();
@@ -63,7 +63,7 @@ public class CampScene : MonoBehaviour, Portrait.EventsCallback
         actionPending = false
       };
 
-      heroInfo.Add(hero, info);
+      heroes.Add(info);
       SetHeroLocation(info, Location.Around);
     });
 
@@ -97,11 +97,7 @@ public class CampScene : MonoBehaviour, Portrait.EventsCallback
 
   private IEnumerator OnHourAnimationFinished(float hour) {
     // Check if any of the heroes assign themselves a task.
-    List<HeroCampInfo> shuffledHeroes = heroInfo
-      .ToList()
-      .Shuffle()
-      .Select(it => it.Value)
-      .ToList();
+    List<HeroCampInfo> shuffledHeroes = heroes.Shuffle().ToList();
     foreach (HeroCampInfo hero in shuffledHeroes)
     {
       if (!hero.awake)
@@ -125,13 +121,13 @@ public class CampScene : MonoBehaviour, Portrait.EventsCallback
       else
       {
         // Get the hero's top 3 most desired actions.
-        var top3Actions = actionManager.GetTop3(hero.hero, Game.state);
+        var top3Actions = actionManager.GetTop3(hero, heroes, Game.state);
         // Choose one of them at random.
         CampAction newAction = top3Actions.Random().Item1;
         // Assign it.
         AssignAction(hero, newAction, selfAssigned: true);
         hero.portrait.SetBigStatus(Portrait.BigStatus.Plus);
-        SelectHero(heroInfo[hero.hero]);
+        SelectHero(hero);
         yield return SpeechBubble.Show(hero.portrait, "I feel like doing this.");
       }
     }
@@ -161,8 +157,9 @@ public class CampScene : MonoBehaviour, Portrait.EventsCallback
 
   private void ShowActionsFor(HeroCampInfo hero)
   {
-    var actions = actionManager.GetAllAvailable(hero.hero, Game.state);
-    var options = actions.Select(it => it.ToOption(hero.hero, Game.state)).ToList();
+    var actionsAndAvailabilities = actionManager.GetAllAvailable(hero, heroes, Game.state);
+    var options = actionsAndAvailabilities
+      .Select(it => it.Item1.ToOption(hero.hero, Game.state, it.Item2)).ToList();
     var heroCopy = hero;
 
     actionButtons.Show(options, (option, index) => {
@@ -202,7 +199,7 @@ public class CampScene : MonoBehaviour, Portrait.EventsCallback
       SetHeroLocation(hero, action.location);
 
     // Check if all actions have been assigned.
-    bool allHeroesReady = heroInfo.All(it => it.Value.action != null);
+    bool allHeroesReady = heroes.All(it => it.action != null);
     confirmActionsButton.SetActive(allHeroesReady);
   }
 
@@ -211,10 +208,10 @@ public class CampScene : MonoBehaviour, Portrait.EventsCallback
     // Disable action UI.
     uiState = UIState.UNINTERACTIVE;
     confirmActionsButton.SetActive(false);
-    foreach (var (hero, heroCampInfo) in heroInfo)
+    foreach (var hero in heroes)
     {
       //      heroCampInfo.portrait.AllowCancel(false);
-      DeselectHero(heroCampInfo);
+      DeselectHero(hero);
     }
 
     // Animate time advancing.
@@ -243,15 +240,15 @@ public class CampScene : MonoBehaviour, Portrait.EventsCallback
       .Min();*/
     Game.party.AdjustHeroStatsOverTime(hoursPassed: hours);
 
-    foreach (var (_, hero) in heroInfo)
+    foreach (var hero in heroes)
       hero.actionPending = true;
 
     // Sort Heroes by their Action priority, then left-to-right, then top-to-bottom.
-    heroInfo.Values.Where(it => it.actionPending)
-      .OrderBy(it => it.portrait.transform.position.y)
-      .OrderBy(it => it.portrait.transform.position.x)
-      .OrderBy(it => it.action.completionOrder)
-      .ToList();
+    //heroes.Where(it => it.actionPending)
+    //  .OrderBy(it => it.portrait.transform.position.y)
+    //  .OrderBy(it => it.portrait.transform.position.x)
+    //  .OrderBy(it => it.action.completionOrder)
+    //  .ToList();
 
     ProcessNextAction();
   }
@@ -262,18 +259,18 @@ public class CampScene : MonoBehaviour, Portrait.EventsCallback
   /// </summary>
   private void ProcessNextAction()
   {
-    foreach (var (_, heroCampInfo) in heroInfo)
-      heroCampInfo.portrait.SetHighlighted(false);
+    foreach (var h in heroes)
+      h.portrait.SetHighlighted(false);
 //    ui.ShowStatsFor(selectedHero.hero);
 
     // If all actions have been completed, stop processing actions.
-    if (!(heroInfo.Any(hero => hero.Value.actionPending)))
+    if (!(heroes.Any(hero => hero.actionPending)))
     {
       FinishProcessingActions();
       return;
     }
 
-    var hero = heroInfo.Values.First(it => it.actionPending);
+    var hero = heroes.First(it => it.actionPending);
     hero.actionPending = false;
 
     hero.portrait.SetHighlighted(true);
@@ -289,7 +286,7 @@ public class CampScene : MonoBehaviour, Portrait.EventsCallback
 
   private void FinishProcessingActions()
   {
-    if (heroInfo.All(it => it.Value.action is CampAction_Sleep2))
+    if (heroes.All(it => it.action is CampAction_Sleep2))
     {
       float timeUntil8 = Game.time.hourOfDay < 8
         ? 8 - Game.time.hourOfDay
@@ -304,7 +301,7 @@ public class CampScene : MonoBehaviour, Portrait.EventsCallback
     }
 
     // Clear hero's actions, unless they're sleeping.
-    foreach (var (_, hero) in heroInfo)
+    foreach (var hero in heroes)
     {
       if (hero.action is not CampAction_Sleep2)
         AssignAction(hero, null);
@@ -346,7 +343,8 @@ public class CampScene : MonoBehaviour, Portrait.EventsCallback
 
   public void OnPortraitLeftClick(Portrait portrait)
   {
-    SelectHero(heroInfo[portrait.character as Hero], showActions: true);
+    var heroInfo = heroes.First(it => it.portrait == portrait);
+    SelectHero(heroInfo, showActions: true);
   }
 
   private void SetHeroLocation(
