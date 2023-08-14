@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -11,12 +10,15 @@ public class Portrait : MonoBehaviour,
   IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
   public enum Interactions { NONE, HIGHLIGHTABLE, CLICKABLE }
+  public enum BigStatus { None, Plus, Minus }
 
   [SerializeField] private Image portrait;
   [SerializeField] private Image highlight;
   [SerializeField] private Image selection;
   [SerializeField] private TMPro.TMP_Text nameText;
   [SerializeField] private TMPro.TMP_Text actionText;
+  [SerializeField] private GameObject bigPlus;
+  [SerializeField] private GameObject bigMinus;
 
   public Character character { get; private set; }
   public Interactions interactions;
@@ -26,15 +28,21 @@ public class Portrait : MonoBehaviour,
   public bool selected { get; private set; }
   public Sprite sprite => portrait.sprite;
 
-  public void Initialise(Character character, Interactions interactions = Interactions.NONE, EventsCallback callbacks = null)
+  public void Initialise(
+    Character character,
+    Interactions interactions = Interactions.NONE,
+    EventsCallback callbacks = null,
+    BigStatus bigStatus = BigStatus.None)
   {
     this.character = character;
     nameText.text = character.name;
+    nameText.gameObject.SetActive(false);
     portrait.sprite = character.icon;
     this.interactions = interactions;
     this.callbacks = callbacks;
     SetHighlighted(false);
     SetSelected(false);
+    SetBigStatus(bigStatus);
   }
 
   public void ShowName(bool show) => nameText.gameObject.SetActive(show);
@@ -47,10 +55,17 @@ public class Portrait : MonoBehaviour,
       actionText.text = action;
   }
 
+  public void SetBigStatus(BigStatus bigStatus)
+  {
+    bigPlus.SetActive(bigStatus == BigStatus.Plus);
+    bigMinus.SetActive(bigStatus == BigStatus.Minus);
+  }
+
   public void SetHighlighted(bool highlighted)
   {
     this.highlighted = highlighted;
     highlight.gameObject.SetActive(highlighted);
+    nameText.gameObject.SetActive(highlighted);
   }
 
   public void SetActionHighlighted(bool actionHighlighted)

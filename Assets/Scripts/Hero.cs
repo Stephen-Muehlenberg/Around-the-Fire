@@ -90,7 +90,7 @@ public class Hero : Character
     HEALTH, HUNGER, REST, MORALE
   }
 
-  public void SelectAction(HeroAction action, bool assignedBySelf = false)
+  public void SetAction(HeroAction action, bool assignedBySelf = false)
   {
     this.action = action;
   //  portrait.ShowSelectedAction(action);

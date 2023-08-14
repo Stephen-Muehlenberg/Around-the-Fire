@@ -71,7 +71,7 @@ public class Party
       {
         // HEALTH
         // Doesn't improve over time, unless the hero is sleeping.
-        if (hero.action is AC2T_Sleep)
+        if (hero.action is CampAction_Sleep2)
           hero.health += 1f;
 
         // HUNGER
